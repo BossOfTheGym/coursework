@@ -1,0 +1,28 @@
+#version 430 core
+
+#define ID gl_InvocationID
+
+
+layout(vertices = 3) out;
+
+in vec3 vsPosition[];
+in vec3 vsColor[];
+
+out vec3 tcsPosition[];
+out vec3 tcsColor[];
+
+
+void main()
+{
+	tcsPosition[ID] = vsPosition[ID];
+	tcsColor[ID] = vsColor[ID];
+
+	if(ID == 0)
+	{
+		gl_TessLevelOuter[0] = 8.0;
+ 		gl_TessLevelOuter[1] = 8.0;
+ 		gl_TessLevelOuter[2] = 8.0;
+ 
+ 		gl_TessLevelInner[0] = 8.0;
+ 	}
+}

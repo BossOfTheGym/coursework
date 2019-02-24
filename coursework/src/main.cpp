@@ -4,12 +4,17 @@
 #include <string>
 #include <fstream>
 #include <thread>
+#include <filesystem>
+
+
+#include <FreeImage/FreeImage.h>
 
 
 #include <glew/glew.h>
 
 
 #include <SFML/Audio.hpp>
+#include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
@@ -20,14 +25,15 @@
 
 
 using namespace std::chrono_literals;
-
+namespace fs = std::filesystem;
 
 const int WIDTH  = 800;
-const int HEIGHT = 600;
+const int HEIGHT = 800;
 
-const double PI = acos(-1.0);
+const float PI   = acos(-1.0);
+const float PI_2 = 2 * PI;
 
-
+//xyz -> str
 void pushVertex(std::vector<float>& data, const glm::vec3& vertex, const glm::vec3& color, const glm::vec2& tex = glm::vec2())
 {
     data.push_back(vertex.x);
@@ -37,6 +43,9 @@ void pushVertex(std::vector<float>& data, const glm::vec3& vertex, const glm::ve
     data.push_back(color.x);
     data.push_back(color.y);
     data.push_back(color.z);
+
+    data.push_back(tex.s);
+    data.push_back(tex.t);
 }
 
 void genBuffers(GLuint& vao, GLuint& vbo, std::vector<float>& data)
@@ -51,42 +60,12 @@ void genBuffers(GLuint& vao, GLuint& vbo, std::vector<float>& data)
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-}
-
-
-std::vector<float> getPolygon(int verteces)
-{
-    const float delta = 2 * PI / verteces;
-
-    std::vector<float> polygon;
-
-    float angle;
-    for (int i = 0; i < verteces; i++)
-    {
-        //center
-        pushVertex(polygon, glm::vec3(0.0f), glm::vec3(1.0f));
-
-        //i vertex
-        angle = delta * i;
-        pushVertex(polygon, glm::vec3(cos(angle), sin(angle), 0.0f), glm::vec3(1.0f));
-
-        //i+1 vertex
-        angle = delta * (i + 1);
-        pushVertex(polygon, glm::vec3(cos(angle), sin(angle), 0.0f), glm::vec3(1.0f));
-    }
-
-    return polygon;
-}
-
-void createPolygon(GLuint& vao, GLuint& vbo, std::vector<float>& polygon, int vertices)
-{
-    polygon = getPolygon(vertices);
-
-    genBuffers(vao, vbo, polygon);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 }
 
 
@@ -101,9 +80,12 @@ std::vector<float> getIcosahedron()
     const float ICOSAHEDRON_SIDE = sqrt(4 * pow(SIN_HALF, 2) - 1.0f) / SIN_HALF;
     const float PYRAMID_HEIGHT   = pow(ICOSAHEDRON_SIDE, 2) / 2;
     const float RADIUS           = ICOSAHEDRON_SIDE / (2 * SIN_HALF);
+    const float HEIGHT_ANGLE = atan((1.0f - PYRAMID_HEIGHT) / RADIUS);
 
-    const float A = ICOSAHEDRON_SIDE;
-    const float H = PYRAMID_HEIGHT;
+    const float A   = ICOSAHEDRON_SIDE;
+    const float H   = PYRAMID_HEIGHT;
+    const float R   = RADIUS;
+    const float PHI = HEIGHT_ANGLE;
 
     const int N = PENTAGON_SIDES;
 
@@ -115,14 +97,24 @@ std::vector<float> getIcosahedron()
     glm::vec3    topRing[N];
     glm::vec3 bottomRing[N];
 
+    //tex coords
+    glm::vec2 topTex    = glm::vec2(0.5f, 1.0f);
+    glm::vec2 bottomTex = glm::vec2(0.5f, 0.0f);
+
+    glm::vec2 topRingTex[N];
+    glm::vec2 bottomRingTex[N];
+
+
     float angle;
     for (int i = 0; i < N; i++) 
     {
         angle = ANGLE * i;
-        topRing[i]    = glm::vec3(RADIUS * cos(angle), RADIUS * sin(angle), 1.0f - H);
+        topRing[i]    = glm::vec3(R * cos(angle), R * sin(angle), 1.0f - H);
+        topRingTex[i] = glm::vec2(angle / PI_2, 2 * PHI / PI + 0.5f);
 
         angle = ANGLE * i + HALF_ANGLE;
-        bottomRing[i] = glm::vec3(RADIUS * cos(angle), RADIUS * sin(angle), H - 1.0f);
+        bottomRing[i]    = glm::vec3(R * cos(angle), R * sin(angle), H - 1.0f);
+        bottomRingTex[i] = glm::vec2(angle / PI_2, -2 * PHI / PI + 0.5f);
     }
 
 
@@ -134,24 +126,24 @@ std::vector<float> getIcosahedron()
         int next = (curr + N + 1) % N;
 
         //top + topRing[i] + topRing[i + 1]
-        pushVertex(icosahedron, top          , glm::vec3(1.0f, 0.0f, 0.0f));
-        pushVertex(icosahedron, topRing[curr], glm::vec3(0.0f, 1.0f, 0.0f));
-        pushVertex(icosahedron, topRing[next], glm::vec3(0.0f, 1.0f, 0.0f));
+        pushVertex(icosahedron, top          , glm::vec3(1.0f, 0.0f, 0.0f), topTex);
+        pushVertex(icosahedron, topRing[curr], glm::vec3(0.0f, 1.0f, 0.0f), topRingTex[curr]);
+        pushVertex(icosahedron, topRing[next], glm::vec3(0.0f, 1.0f, 0.0f), topRingTex[next]);
 
         //bottom + bottomRing[i] + bottomRing[i + 1]
-        pushVertex(icosahedron, bottom          , glm::vec3(0.0f, 0.0f, 1.0f));
-        pushVertex(icosahedron, bottomRing[next], glm::vec3(0.0f, 1.0f, 0.0f));
-        pushVertex(icosahedron, bottomRing[curr], glm::vec3(0.0f, 1.0f, 0.0f));
+        pushVertex(icosahedron, bottom          , glm::vec3(0.0f, 0.0f, 1.0f), bottomTex);
+        pushVertex(icosahedron, bottomRing[next], glm::vec3(0.0f, 1.0f, 0.0f), bottomRingTex[next]);
+        pushVertex(icosahedron, bottomRing[curr], glm::vec3(0.0f, 1.0f, 0.0f), bottomRingTex[curr]);
 
         //bottomRing[i] + topRing[i] + topRing[i + 1]
-        pushVertex(icosahedron, bottomRing[curr], glm::vec3(1.0f, 0.0f, 0.0f));
-        pushVertex(icosahedron, topRing[next]   , glm::vec3(0.0f, 1.0f, 0.0f));
-        pushVertex(icosahedron, topRing[curr]   , glm::vec3(0.0f, 1.0f, 0.0f));
+        pushVertex(icosahedron, bottomRing[curr], glm::vec3(1.0f, 0.0f, 0.0f), bottomRingTex[curr]);
+        pushVertex(icosahedron, topRing[next]   , glm::vec3(0.0f, 1.0f, 0.0f), topRingTex[next]);
+        pushVertex(icosahedron, topRing[curr]   , glm::vec3(0.0f, 1.0f, 0.0f), topRingTex[curr]);
 
         //topRing[i] + bottomRing[i] + bottomRing[i - 1]
-        pushVertex(icosahedron, topRing[curr]   , glm::vec3(0.0f, 0.0f, 1.0f));
-        pushVertex(icosahedron, bottomRing[prev], glm::vec3(0.0f, 1.0f, 0.0f));
-        pushVertex(icosahedron, bottomRing[curr], glm::vec3(0.0f, 1.0f, 0.0f));
+        pushVertex(icosahedron, topRing[curr]   , glm::vec3(0.0f, 0.0f, 1.0f), topRingTex[curr]);
+        pushVertex(icosahedron, bottomRing[prev], glm::vec3(0.0f, 1.0f, 0.0f), bottomRingTex[prev]);
+        pushVertex(icosahedron, bottomRing[curr], glm::vec3(0.0f, 1.0f, 0.0f), bottomRingTex[curr]);
     }
 
     return icosahedron;
@@ -221,6 +213,64 @@ void testTesselation()
 
     auto err = glewInit();
 
+    //earth
+    GLuint earthTexture;
+    glGenTextures(1, &earthTexture);
+    glBindTexture(GL_TEXTURE_2D, earthTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    char earthLocation[] = "assets/textures/earth/earthmap1k.jpg";
+    FREE_IMAGE_FORMAT format = FreeImage_GetFileType(earthLocation, 0);
+    if (format == -1)
+    {
+        std::cout << "Could not find image" << " - Aborting." << std::endl;
+        return;
+    }
+    if (format == FIF_UNKNOWN)
+    {
+        std::cout << "Couldn't determine file format - attempting to get from file extension..." << std::endl;
+
+        format = FreeImage_GetFIFFromFilename(earthLocation);
+
+        if (!FreeImage_FIFSupportsReading(format))
+        {
+            std::cout << "Detected image format cannot be read!" << std::endl;
+            return;
+        }
+    }
+    
+    FIBITMAP* bitmap = FreeImage_Load(format, earthLocation);
+    int bitsPerPixel = FreeImage_GetBPP(bitmap);
+
+    FIBITMAP* bitmap32;
+    if (bitsPerPixel == 32)
+    {
+        std::cout << "Source image has " << bitsPerPixel << " bits per pixel. Skipping conversion." << std::endl;
+        bitmap32 = bitmap;
+    }
+    else
+    {
+        std::cout << "Source image has " << bitsPerPixel << " bits per pixel. Converting to 32-bit colour." << std::endl;
+        bitmap32 = FreeImage_ConvertTo32Bits(bitmap);
+    }
+
+    int imageWidth = FreeImage_GetWidth(bitmap32);
+    int imageHeight = FreeImage_GetHeight(bitmap32);
+
+    GLubyte* textureData = FreeImage_GetBits(bitmap32);
+    glTexImage2D(GL_TEXTURE_2D,    // Type of texture
+        0,                // Mipmap level (0 being the top level i.e. full size)
+        GL_RGBA,          // Internal format
+        imageWidth,       // Width of the texture
+        imageHeight,      // Height of the texture,
+        0,                // Border in pixels
+        GL_BGRA,          // Data format
+        GL_UNSIGNED_BYTE, // Type of texture data
+        textureData);     // The image data to use for this texture
+
 
     //shaders
     GLuint vertexShader;
@@ -280,13 +330,13 @@ void testTesselation()
 
 
     //loop params
-    glm::mat4 matProj  = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 1.0f, 15.0f);
-    glm::mat4 matView  = glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+    glm::mat4 matProj  = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 1.0f, 50.0f);
+    glm::mat4 matView  = glm::lookAt(glm::vec3(0.0f, 12.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
 
-    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 1.0f, 1.0f));
+    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-    glm::vec3 vecLightPos   = glm::vec3(12.0f, 8.0f, 0.0f);
+    glm::vec3 vecLightPos   = glm::vec3(-10.0f, 0.0f, 10.0f);
     glm::vec3 vecLightColor = glm::vec3(1.0f);
 
 
@@ -364,10 +414,14 @@ void testTesselation()
 
 
         //render
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, earthTexture);
+
         glBindVertexArray(vao);
 
         glPatchParameteri(GL_PATCH_VERTICES, 3);
         glDrawArrays(GL_PATCHES, 0, 60);
+
 
         //sleep
         time1 = tick.getElapsedTime().asMicroseconds();

@@ -7,15 +7,17 @@ layout(vertices = 3) out;
 
 in vec3 vsPosition[];
 in vec3 vsColor[];
+in vec2 vsTex[];
 
 out vec3 tcsPosition[];
 out vec3 tcsColor[];
-
+out vec2 tcsTex[];
 
 void main()
 {
 	tcsPosition[ID] = vsPosition[ID];
-	tcsColor[ID] = vsColor[ID];
+	tcsColor[ID]    = vsColor[ID];
+	tcsTex[ID]      = vsTex[ID];
 
 	if(ID == 0)
 	{

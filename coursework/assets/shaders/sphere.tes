@@ -5,8 +5,11 @@ layout(triangles, equal_spacing, ccw) in;
 
 in vec3 tcsPosition[];
 in vec3 tcsColor[];
+in vec2 tcsTex[];
 
+out vec4 tesModelPos;
 out vec4 tesWorldPos;
+out vec3 tesNormal;
 out vec3 tesColor;
 
 
@@ -15,22 +18,26 @@ uniform mat4 view;
 uniform mat4 projection;
 
 
+
 void main()
 {
-	vec3 p0 = gl_TessCoord.x * tcsPosition[0];
-	vec3 p1 = gl_TessCoord.y * tcsPosition[1];
-	vec3 p2 = gl_TessCoord.z * tcsPosition[2];
+	vec3 p0, p1, p2;
+	vec2 t0, t1, t2;
+	vec4 point;
 
-	vec4 point = vec4(normalize(p0 + p1 + p2), 1.0f);
+	p0 = gl_TessCoord.x * tcsPosition[0];
+	p1 = gl_TessCoord.y * tcsPosition[1];
+	p2 = gl_TessCoord.z * tcsPosition[2];
 	
-	tesWorldPos  = model * point;
-	gl_Position  = projection * view * tesWorldPos;
+	tesModelPos = vec4(normalize(p0 + p1 + p2), 1.0f);
+	tesWorldPos = model * tesModelPos;
+	tesNormal   = tesWorldPos.xyz;
+	gl_Position = projection * view * tesWorldPos;
 
-	tesColor  = point.xyz;
 
 	p0 = gl_TessCoord.x * tcsColor[0];
 	p1 = gl_TessCoord.y * tcsColor[1];
 	p2 = gl_TessCoord.z * tcsColor[2];
 
-	//tesColor = p0 + p1 + p2;	
+	tesColor = p0 + p1 + p2;
 }

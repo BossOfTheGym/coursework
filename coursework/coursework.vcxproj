@@ -71,19 +71,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\glew;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\glew;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\glew;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\glew;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -98,7 +98,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,7 +114,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,7 +134,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,7 +154,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

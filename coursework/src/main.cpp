@@ -1,16 +1,4 @@
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <string>
-#include <fstream>
-#include <thread>
-#include <filesystem>
-
-
 #include <FreeImage/FreeImage.h>
-
-
-#include <glew/glew.h>
 
 
 #include <SFML/Audio.hpp>
@@ -25,6 +13,8 @@
 
 
 #include "Camera/Camera.h"
+#include "Shader/Shader.h"
+#include "Shader/ShaderProgram.h"
 
 
 using namespace std::chrono_literals;
@@ -35,6 +25,7 @@ const int HEIGHT = 900;
 
 const float PI   = acos(-1.0);
 const float PI_2 = 2 * PI;
+
 
 //xyz -> str
 void pushVertex(std::vector<float>& data, const glm::vec3& vertex, const glm::vec3& color, const glm::vec2& tex = glm::vec2())
@@ -160,50 +151,7 @@ void createIcosahedron(GLuint& vao, GLuint& vbo, std::vector<float>& icosahedron
 }
 
 
-std::string getShaderString(const std::string& fileDist)
-{
-    std::ifstream file(fileDist);
-
-    std::string shader;
-    std::string line;
-
-    while (file.good())
-    {
-        std::getline(file, line);
-
-        shader += line;
-        shader += '\n';
-    }
-
-    return shader;
-}
-
-GLint createShader(GLuint& shader, GLenum type, const std::string& dest)
-{
-    const int BUFFER_SIZE = 1 << 12;
-
-    std::string shaderString = getShaderString(dest);
-    const char* source       = shaderString.c_str();
-
-    shader = glCreateShader(type);
-    glShaderSource(shader, 1, &source, NULL);
-    glCompileShader(shader);
-
-    // check for shader compile errors
-    GLint success;
-    static GLchar* infoLog = new GLchar[BUFFER_SIZE];
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(shader, BUFFER_SIZE, NULL, infoLog);
-        std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    return 0;
-}
-
-
-void testTesselation()
+void testTessRemastered()
 {
     //window
     sf::ContextSettings settings;
@@ -244,7 +192,7 @@ void testTesselation()
             return;
         }
     }
-    
+
     FIBITMAP* bitmap = FreeImage_Load(format, earthLocation);
     int bitsPerPixel = FreeImage_GetBPP(bitmap);
 
@@ -276,26 +224,30 @@ void testTesselation()
 
 
     //shaders
-    GLuint vertexShader;
-    GLuint fragmentShader;
-    GLuint tessControlShader;
-    GLuint tessEvaluationShader;
+    Shader vertex;
+    Shader tessControl;
+    Shader tessEvaluation;
+    Shader fragment;
 
-    createShader(vertexShader, GL_VERTEX_SHADER, "assets/shaders/sphere.vs");
-    createShader(tessControlShader, GL_TESS_CONTROL_SHADER, "assets/shaders/sphere.tcs");
-    createShader(tessEvaluationShader, GL_TESS_EVALUATION_SHADER, "assets/shaders/sphere.tes");
-    createShader(fragmentShader, GL_FRAGMENT_SHADER, "assets/shaders/sphere.fs");
-
+    vertex.loadFromLocation(Shader::Type::Vertex, "assets/shaders/sphere.vs");
+    tessControl.loadFromLocation(Shader::Type::TesselationControl, "assets/shaders/sphere.tcs");
+    tessEvaluation.loadFromLocation(Shader::Type::TesselationEvaluation, "assets/shaders/sphere.tes");
+    fragment.loadFromLocation(Shader::Type::Fragment, "assets/shaders/sphere.fs");
+    
 
     //program
-    GLuint shaderProgram = glCreateProgram();
+    ShaderProgram program;
+    program.attachShader(vertex);
+    program.attachShader(tessControl);
+    program.attachShader(tessEvaluation);
+    program.attachShader(fragment);
 
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, tessControlShader);
-    glAttachShader(shaderProgram, tessEvaluationShader);
-    glAttachShader(shaderProgram, fragmentShader);
 
-    glLinkProgram(shaderProgram);
+    program.link();
+    if (!program.linked())
+    {
+        std::cout << program.getInfoLog() << std::endl;
+    }
 
 
     //data
@@ -306,12 +258,12 @@ void testTesselation()
 
 
     //uniforms
-    GLint model = glGetUniformLocation(shaderProgram, "model");
-    GLint view  = glGetUniformLocation(shaderProgram, "view");
-    GLint projection  = glGetUniformLocation(shaderProgram, "projection");
+    GLint model = program.getUniformLocation("model");
+    GLint view =  program.getUniformLocation("view");
+    GLint projection = program.getUniformLocation("projection");
 
-    GLint lightPos = glGetUniformLocation(shaderProgram, "lightPos");
-    GLint lightColor = glGetUniformLocation(shaderProgram, "lightColor");
+    GLint lightPos = program.getUniformLocation("lightPos");
+    GLint lightColor = program.getUniformLocation("lightColor");
 
 
     //setups
@@ -323,30 +275,30 @@ void testTesselation()
 
     glViewport(0, 0, WIDTH, HEIGHT);
 
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.03f, 0.03f, 0.03f, 1.0f);
 
-    glUseProgram(shaderProgram);
+    program.use();
 
     window.setActive(true);
 
 
     //loop params
-    glm::mat4 matProj  = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 1.0f, 150.0f);
-    glm::mat4 matView  = glm::lookAt(glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+    glm::mat4 matProj = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 150.0f);
+    glm::mat4 matView = glm::lookAt(glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
 
     Camera camera(matView, Vec3(0.0f, 0.0f, 30.0f));
 
-    glm::mat4 second   = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
+    glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
 
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 0.0f, 1.0f));
 
-    glm::vec3 vecLightPos   = glm::vec3(100.0f, 100.0f, 0.0f);
+    glm::vec3 vecLightPos = glm::vec3(100.0f, 100.0f, 0.0f);
     glm::vec3 vecLightColor = glm::vec3(1.0f);
 
     //orbit
     glm::vec3 r(0.0f, 7.0f, 0.0f);
-    glm::vec3 v(23.0f, 0.0f, 0.0f);
+    glm::vec3 v(15.0f, 0.0f, 0.0f);
 
     const float GM = 2000.0;
 
@@ -385,6 +337,16 @@ void testTesselation()
 
                             break;
                         }
+                        case (sf::Keyboard::W):
+                        {
+                            camera.travelView(0.005);
+                            break;
+                        }
+                        case (sf::Keyboard::S):
+                        {
+                            camera.travelView(-0.005);
+                            break;
+                        }
                     }
 
                     break;
@@ -395,17 +357,18 @@ void testTesselation()
         //prepare
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        
-        glUniform3fv(lightPos, 1, &vecLightPos[0]);
-        glUniform3fv(lightColor, 1, &vecLightColor[0]);
 
-        glUniformMatrix4fv(projection, 1, GL_FALSE, &matProj[0][0]);
-        glUniformMatrix4fv(view, 1, GL_FALSE, &camera.mat()[0][0]);
+        program.setUniformVec3(lightPos, vecLightPos);
+        program.setUniformVec3(lightColor, vecLightColor);
+
+        program.setUniformMat4(projection, matProj);
+        program.setUniformMat4(view, camera.mat());
 
 
         //render
         //planet
-        glUniformMatrix4fv(model, 1, GL_FALSE, &matModel[0][0]);
+        program.setUniformMat4(model, matModel);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, earthTexture);
 
@@ -417,8 +380,8 @@ void testTesselation()
         //sat
         auto tr = glm::translate(glm::mat4(1.0f), r);
         auto m = tr * second;
-        
-        glUniformMatrix4fv(model, 1, GL_FALSE, &m[0][0]);
+
+        program.setUniformMat4(model, m);
 
         glPatchParameteri(GL_PATCH_VERTICES, 3);
         glDrawArrays(GL_PATCHES, 0, 60);
@@ -446,22 +409,13 @@ void testTesselation()
 
         //sleep
         if (delta < SLEEP)
-        { 
+        {
             std::this_thread::sleep_for(std::chrono::microseconds(SLEEP - delta));
         }
-
 
         //display frame
         window.display();
     }
-
-    //free
-    glDeleteShader(vertexShader);
-    glDeleteShader(tessControlShader);
-    glDeleteShader(tessEvaluationShader);
-    glDeleteShader(fragmentShader);
-
-    glDeleteProgram(shaderProgram);
 
     glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &vao);
@@ -470,7 +424,7 @@ void testTesselation()
 
 int main(int argc, char* argv[])
 {
-    testTesselation();
+    testTessRemastered();
 
     return EXIT_SUCCESS;
 }

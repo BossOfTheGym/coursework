@@ -24,11 +24,14 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
+#include "Camera/Camera.h"
+
+
 using namespace std::chrono_literals;
 namespace fs = std::filesystem;
 
-const int WIDTH  = 800;
-const int HEIGHT = 800;
+const int WIDTH  = 1200;
+const int HEIGHT = 900;
 
 const float PI   = acos(-1.0);
 const float PI_2 = 2 * PI;
@@ -309,8 +312,6 @@ void testTesselation()
 
     GLint lightPos = glGetUniformLocation(shaderProgram, "lightPos");
     GLint lightColor = glGetUniformLocation(shaderProgram, "lightColor");
-    GLint ambient = glGetUniformLocation(shaderProgram, "ambient");
-    GLint diffuse = glGetUniformLocation(shaderProgram, "diffuse");
 
 
     //setups
@@ -322,7 +323,7 @@ void testTesselation()
 
     glViewport(0, 0, WIDTH, HEIGHT);
 
-    glClearColor(0.3f, 0.3f, 0.3, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     glUseProgram(shaderProgram);
 
@@ -330,14 +331,24 @@ void testTesselation()
 
 
     //loop params
-    glm::mat4 matProj  = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 1.0f, 50.0f);
-    glm::mat4 matView  = glm::lookAt(glm::vec3(0.0f, 12.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
+    glm::mat4 matProj  = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 1.0f, 150.0f);
+    glm::mat4 matView  = glm::lookAt(glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
 
-    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 0.0f, 0.0f));
+    Camera camera(matView, Vec3(0.0f, 0.0f, 30.0f));
 
-    glm::vec3 vecLightPos   = glm::vec3(-10.0f, 0.0f, 10.0f);
+    glm::mat4 second   = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
+
+    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 0.0f, 1.0f));
+
+    glm::vec3 vecLightPos   = glm::vec3(100.0f, 100.0f, 0.0f);
     glm::vec3 vecLightColor = glm::vec3(1.0f);
+
+    //orbit
+    glm::vec3 r(0.0f, 7.0f, 0.0f);
+    glm::vec3 v(23.0f, 0.0f, 0.0f);
+
+    const float GM = 2000.0;
 
 
     sf::Clock tick;
@@ -349,11 +360,7 @@ void testTesselation()
 
     bool running = true;
     bool fill = false;
-    GLint ambientOn = true;
-    GLint diffuseOn = true;
 
-    glUniform1i(ambient, ambientOn);
-    glUniform1i(diffuse, diffuseOn);
     while (running)
     {
         sf::Event event;
@@ -378,21 +385,6 @@ void testTesselation()
 
                             break;
                         }
-
-                        case (sf::Keyboard::A):
-                        {
-                            ambientOn ^= true;
-                            glUniform1i(ambient, ambientOn);
-
-                            break;
-                        }
-
-                        case (sf::Keyboard::D):
-                        {
-                            diffuseOn ^= true;
-                            glUniform1i(diffuse, diffuseOn);
-                            break;
-                        }
                     }
 
                     break;
@@ -403,17 +395,17 @@ void testTesselation()
         //prepare
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        matModel = rotation * matModel;
-
+        
         glUniform3fv(lightPos, 1, &vecLightPos[0]);
         glUniform3fv(lightColor, 1, &vecLightColor[0]);
 
         glUniformMatrix4fv(projection, 1, GL_FALSE, &matProj[0][0]);
-        glUniformMatrix4fv(view, 1, GL_FALSE, &matView[0][0]);
-        glUniformMatrix4fv(model, 1, GL_FALSE, &matModel[0][0]);
+        glUniformMatrix4fv(view, 1, GL_FALSE, &camera.mat()[0][0]);
 
 
         //render
+        //planet
+        glUniformMatrix4fv(model, 1, GL_FALSE, &matModel[0][0]);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, earthTexture);
 
@@ -422,12 +414,37 @@ void testTesselation()
         glPatchParameteri(GL_PATCH_VERTICES, 3);
         glDrawArrays(GL_PATCHES, 0, 60);
 
+        //sat
+        auto tr = glm::translate(glm::mat4(1.0f), r);
+        auto m = tr * second;
+        
+        glUniformMatrix4fv(model, 1, GL_FALSE, &m[0][0]);
 
-        //sleep
+        glPatchParameteri(GL_PATCH_VERTICES, 3);
+        glDrawArrays(GL_PATCHES, 0, 60);
+
+
+        //update
+        matModel = rotation * matModel;
+        second = rotation * second;
+
+
+        //delta
         time1 = tick.getElapsedTime().asMicroseconds();
         delta = time1 - time0;
         time0 = time1;
 
+        auto vj = v;
+        auto rj = r;
+        auto dt = delta / (1e7f);
+        auto dot = glm::dot(r, r);
+        auto ur = glm::normalize(r);
+
+        v -= dt * GM / dot * ur;
+        r += dt * vj;
+
+
+        //sleep
         if (delta < SLEEP)
         { 
             std::this_thread::sleep_for(std::chrono::microseconds(SLEEP - delta));

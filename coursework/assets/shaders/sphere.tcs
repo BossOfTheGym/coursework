@@ -21,10 +21,10 @@ void main()
 
 	if(ID == 0)
 	{
-		gl_TessLevelOuter[0] = 8.0;
- 		gl_TessLevelOuter[1] = 8.0;
- 		gl_TessLevelOuter[2] = 8.0;
+		gl_TessLevelOuter[0] = 12.0;
+ 		gl_TessLevelOuter[1] = 12.0;
+ 		gl_TessLevelOuter[2] = 12.0;
  
- 		gl_TessLevelInner[0] = 8.0;
+ 		gl_TessLevelInner[0] = 12.0;
  	}
 }

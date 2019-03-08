@@ -1,28 +1,15 @@
-#include <FreeImage/FreeImage.h>
-
-
-#include <SFML/Audio.hpp>
-#include <SFML/System.hpp>
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-
 #include "Camera/Camera.h"
+
 #include "Shader/Shader.h"
 #include "Shader/ShaderProgram.h"
 #include "Texture/Texture2D.h"
+
 
 using namespace std::chrono_literals;
 namespace fs = std::filesystem;
 
 const int WIDTH  = 1200;
 const int HEIGHT = 900;
-
 
 
 
@@ -249,6 +236,7 @@ void testTessRemastered()
     glm::vec3 vecLightPos = glm::vec3(50.0f, 50.0f, 0.0f);
     glm::vec3 vecLightColor = glm::vec3(1.0f);
 
+
     //orbit
     glm::vec3 r(0.0f, 7.0f, 0.0f);
     glm::vec3 v(15.0f, 0.0f, 0.0f);
@@ -260,7 +248,6 @@ void testTessRemastered()
     sf::Int64 time1;
     sf::Int64 delta;
 
-    const sf::Int64 SLEEP = 10000;
 
     bool running = true;
     bool fill = false;
@@ -388,20 +375,20 @@ void testTessRemastered()
         program.setUniformMat4(view, camera.mat());
 
         //render
-        program.setUniformMat4(model, matModel);
-
-        glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, earth);
+        glActiveTexture(GL_TEXTURE0);       
         earth.bind();
-
         glBindVertexArray(vao);
+
+
+        program.setUniformMat4(model, matModel);
 
         glPatchParameteri(GL_PATCH_VERTICES, 3);
         glDrawArrays(GL_PATCHES, 0, 60);
         
+
         //sat
-        auto tr = glm::translate(glm::mat4(1.0f), r);
-        auto m = tr * second;
+        auto m = second;
+        m[3] = Vec4(r, 1.0f);
 
         program.setUniformMat4(model, m);
 
@@ -427,13 +414,6 @@ void testTessRemastered()
 
         v -= dt * GM / dot * ur;
         r += dt * vj;
-
-
-        //sleep
-        /*if (delta < SLEEP)
-        {
-            std::this_thread::sleep_for(std::chrono::microseconds(SLEEP - delta));
-        }*/
 
         //display frame
         window.display();

@@ -12,13 +12,19 @@
 #include <glew/glew.h>
 
 
+#include <SFML/Audio.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 
-const float PI   = acos(-1.0);
-const float PI_2 = 2 * PI;
+const float PI   = static_cast<float>(acos(-1.0));
+const float PI_2 = static_cast<float>(2 * PI);
 
 
 using Vec4 = glm::vec4;

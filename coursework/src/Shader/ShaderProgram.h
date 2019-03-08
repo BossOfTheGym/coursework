@@ -8,8 +8,10 @@ class ShaderProgram
 private:
     static thread_local String INFO_LOG;
 
+
 public:
-    static const int BAD_PROGRAM = 0;
+    static const GLuint EMPTY = 0;
+
 
 public:
     ShaderProgram();
@@ -47,6 +49,9 @@ public:
     void setUniformVec3(GLint location, const Vec3& vec);
 
 
+    void setUniform1f(GLint location, float value);
+
+
     GLint getUniformLocation(const String& name);
 
     GLint getAttributeLocation(const String& name);
@@ -64,8 +69,11 @@ public:
     
     const String& getInfoLog();
 
+
+private:
+    void resetProgram();
+
+
 private:
     GLuint m_id;
-
-    void resetProgram();
 };

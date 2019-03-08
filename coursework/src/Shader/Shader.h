@@ -10,17 +10,18 @@ private:
 
 
 public:
-    static const int ALL_SHADERS = 5;
-    static const int BAD_SHADER  = 0;
+    static const GLuint EMPTY  = 0;
 
-    enum class Type : int
+
+public:
+    enum Type : GLenum
     {
-          Vertex
-        , TesselationControl
-        , TesselationEvaluation
-        , Geometry
-        , Fragment
-        , Invalid
+          Vertex         = GL_VERTEX_SHADER
+        , TessControl    = GL_TESS_CONTROL_SHADER
+        , TessEvaluation = GL_TESS_EVALUATION_SHADER
+        , Geometry       = GL_GEOMETRY_SHADER
+        , Fragment       = GL_FRAGMENT_SHADER
+        , Invalid = 0
     };
 
 
@@ -63,11 +64,13 @@ public:
 
     const String& getInfoLog() const;
 
+
+private:
+    void resetShader();
+
+
 private:    
     GLuint m_id;
     Type m_type;
-
-
-    void resetShader();
 };
 

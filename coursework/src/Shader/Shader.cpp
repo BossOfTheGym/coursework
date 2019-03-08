@@ -6,7 +6,7 @@ thread_local String Shader::INFO_LOG;
 
 
 //constructors
-Shader::Shader() : m_id(BAD_SHADER), m_type(Type::Invalid)
+Shader::Shader() : m_id(EMPTY), m_type(Type::Invalid)
 {}
 
 Shader::Shader(Shader&& shader)
@@ -28,11 +28,6 @@ Shader::~Shader()
 //operators
 Shader& Shader::operator = (Shader&& shader)
 {
-    if (this == &shader)
-    {
-        return *this;
-    }
-
     deleteShader();
 
     m_id   = shader.m_id;
@@ -80,24 +75,15 @@ int Shader::loadFromStream(Type type, IStream& inputStream)
 
 int Shader::loadFromString(Type type, const String& source)
 {
-    static GLenum TYPES[] =
-    {
-          GL_VERTEX_SHADER
-        , GL_TESS_CONTROL_SHADER
-        , GL_TESS_EVALUATION_SHADER
-        , GL_GEOMETRY_SHADER
-        , GL_FRAGMENT_SHADER
-    };
-
     if (type == Type::Invalid)
     {
         return false;
     }
 
-    m_id   = glCreateShader(TYPES[static_cast<int>(type)]);
+    m_id   = glCreateShader(type);
     m_type = type;
 
-    if (m_id == BAD_SHADER)
+    if (m_id == EMPTY)
     {
         resetShader();
 
@@ -122,17 +108,14 @@ int Shader::loadFromString(Type type, const String& source)
 //delete & reset
 void Shader::deleteShader()
 {
-    if (valid())
-    {
-        glDeleteShader(m_id);
+    glDeleteShader(m_id);
 
-        resetShader();
-    }
+    resetShader();
 }
 
 void Shader::resetShader()
 {
-    m_id   = BAD_SHADER;
+    m_id   = EMPTY;
     m_type = Type::Invalid;
 }
 
@@ -140,7 +123,7 @@ void Shader::resetShader()
 //checks
 bool Shader::valid() const
 {
-    return m_id == BAD_SHADER;
+    return m_id == EMPTY;
 }
 
 bool Shader::compiled() const

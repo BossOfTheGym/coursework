@@ -11,7 +11,9 @@ out vec4 FragColor;
 uniform vec3 lightPos; 
 uniform vec3 lightColor;
 
-uniform sampler2D texture0;
+uniform sampler2D mapMain;
+uniform sampler2D specularMap;
+uniform sampler2D mapBump;
 
 const float PI = acos(-1.0f); 
 const float PI_2 = 2 * PI;
@@ -19,12 +21,12 @@ const float PI_2 = 2 * PI;
 void main()
 {
 	// ambient
-	vec3 ambientVec = vec3(0.0f);
+	vec3 ambientVec;
 	float ambientStrength = 0.08f;
 	ambientVec = ambientStrength * lightColor;			
 
     // diffuse 
-    vec3 diffuseVec = vec3(0.0f);
+    vec3 diffuseVec;
     vec3 lightDir = normalize(lightPos - tesWorldPos.xyz);
 
     float diff = max(dot(tesNormal, lightDir), 0.0f);
@@ -49,6 +51,6 @@ void main()
 	texCoord.t = clamp(1.0f - latitude / PI   , 0.0f, 1.0f);
 
 	//result
-    vec4 tex = texture(texture0, texCoord);
-    FragColor = vec4(light * tex.xyz, 1.0f);
+    vec4 tex = texture(mapMain, texCoord);
+    FragColor = vec4(clamp(light, vec3(0.0f), vec3(1.0f)) * tex.xyz, 1.0f);
 }

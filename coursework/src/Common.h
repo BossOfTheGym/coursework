@@ -17,6 +17,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
+const float PI   = acos(-1.0);
+const float PI_2 = 2 * PI;
+
+
 using Vec4 = glm::vec4;
 using Mat4 = glm::mat4;
 

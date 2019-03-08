@@ -15,7 +15,7 @@
 #include "Camera/Camera.h"
 #include "Shader/Shader.h"
 #include "Shader/ShaderProgram.h"
-
+#include "Texture/Texture2D.h"
 
 using namespace std::chrono_literals;
 namespace fs = std::filesystem;
@@ -23,8 +23,7 @@ namespace fs = std::filesystem;
 const int WIDTH  = 1200;
 const int HEIGHT = 900;
 
-const float PI   = acos(-1.0);
-const float PI_2 = 2 * PI;
+
 
 
 //xyz -> str
@@ -155,73 +154,26 @@ void testTessRemastered()
 {
     //window
     sf::ContextSettings settings;
-    settings.depthBits = 24;
+    settings.depthBits = 32;
     settings.majorVersion = 4;
-    settings.minorVersion = 4;
+    settings.minorVersion = 3;
     settings.stencilBits = 8;
-    sf::Window window(sf::VideoMode(WIDTH, HEIGHT), "OpenGL", sf::Style::Default, settings);
-    window.setVerticalSyncEnabled(true);
 
+    sf::Window window(sf::VideoMode(WIDTH, HEIGHT), "OpenGL", sf::Style::Default, settings);
+
+
+    //glew
     auto err = glewInit();
 
+
     //earth
-    GLuint earthTexture;
-    glGenTextures(1, &earthTexture);
-    glBindTexture(GL_TEXTURE_2D, earthTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    char earthLocation[] = "assets/textures/earth/earthmap1k.jpg";
-    FREE_IMAGE_FORMAT format = FreeImage_GetFileType(earthLocation, 0);
-    if (format == -1)
-    {
-        std::cout << "Could not find image" << " - Aborting." << std::endl;
-        return;
-    }
-    if (format == FIF_UNKNOWN)
-    {
-        std::cout << "Couldn't determine file format - attempting to get from file extension..." << std::endl;
-
-        format = FreeImage_GetFIFFromFilename(earthLocation);
-
-        if (!FreeImage_FIFSupportsReading(format))
-        {
-            std::cout << "Detected image format cannot be read!" << std::endl;
-            return;
-        }
-    }
-
-    FIBITMAP* bitmap = FreeImage_Load(format, earthLocation);
-    int bitsPerPixel = FreeImage_GetBPP(bitmap);
-
-    FIBITMAP* bitmap32;
-    if (bitsPerPixel == 32)
-    {
-        std::cout << "Source image has " << bitsPerPixel << " bits per pixel. Skipping conversion." << std::endl;
-        bitmap32 = bitmap;
-    }
-    else
-    {
-        std::cout << "Source image has " << bitsPerPixel << " bits per pixel. Converting to 32-bit colour." << std::endl;
-        bitmap32 = FreeImage_ConvertTo32Bits(bitmap);
-    }
-
-    int imageWidth = FreeImage_GetWidth(bitmap32);
-    int imageHeight = FreeImage_GetHeight(bitmap32);
-
-    GLubyte* textureData = FreeImage_GetBits(bitmap32);
-    glTexImage2D(GL_TEXTURE_2D,    // Type of texture
-        0,                // Mipmap level (0 being the top level i.e. full size)
-        GL_RGBA,          // Internal format
-        imageWidth,       // Width of the texture
-        imageHeight,      // Height of the texture,
-        0,                // Border in pixels
-        GL_BGRA,          // Data format
-        GL_UNSIGNED_BYTE, // Type of texture data
-        textureData);     // The image data to use for this texture
-
+    Texture2D earth("assets/textures/earth/earthmap1k.jpg");
+    earth.bind();
+    earth.texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP);
+    earth.texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP);
+    earth.texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    earth.texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
 
     //shaders
     Shader vertex;
@@ -229,10 +181,10 @@ void testTessRemastered()
     Shader tessEvaluation;
     Shader fragment;
 
-    vertex.loadFromLocation(Shader::Type::Vertex, "assets/shaders/sphere.vs");
-    tessControl.loadFromLocation(Shader::Type::TesselationControl, "assets/shaders/sphere.tcs");
-    tessEvaluation.loadFromLocation(Shader::Type::TesselationEvaluation, "assets/shaders/sphere.tes");
-    fragment.loadFromLocation(Shader::Type::Fragment, "assets/shaders/sphere.fs");
+    vertex.loadFromLocation(Shader::Vertex, "assets/shaders/sphere.vs");
+    tessControl.loadFromLocation(Shader::TessControl, "assets/shaders/sphere.tcs");
+    tessEvaluation.loadFromLocation(Shader::TessEvaluation, "assets/shaders/sphere.tes");
+    fragment.loadFromLocation(Shader::Fragment, "assets/shaders/sphere.fs");
     
 
     //program
@@ -241,7 +193,6 @@ void testTessRemastered()
     program.attachShader(tessControl);
     program.attachShader(tessEvaluation);
     program.attachShader(fragment);
-
 
     program.link();
     if (!program.linked())
@@ -258,12 +209,13 @@ void testTessRemastered()
 
 
     //uniforms
-    GLint model = program.getUniformLocation("model");
-    GLint view =  program.getUniformLocation("view");
+    GLint model      = program.getUniformLocation("model");
+    GLint view       = program.getUniformLocation("view");
     GLint projection = program.getUniformLocation("projection");
-
-    GLint lightPos = program.getUniformLocation("lightPos");
+    GLint lightPos   = program.getUniformLocation("lightPos");
     GLint lightColor = program.getUniformLocation("lightColor");
+    GLint inner      = program.getUniformLocation("inner");
+    GLint outer      = program.getUniformLocation("outer");
 
 
     //setups
@@ -279,13 +231,14 @@ void testTessRemastered()
 
     program.use();
 
+    window.setVerticalSyncEnabled(true);
     window.setActive(true);
 
 
     //loop params
     glm::mat4 matProj = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 150.0f);
     glm::mat4 matView = glm::lookAt(glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
+    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
 
     Camera camera(matView, Vec3(0.0f, 0.0f, 30.0f));
 
@@ -293,7 +246,7 @@ void testTessRemastered()
 
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 0.0f, 1.0f));
 
-    glm::vec3 vecLightPos = glm::vec3(100.0f, 100.0f, 0.0f);
+    glm::vec3 vecLightPos = glm::vec3(50.0f, 50.0f, 0.0f);
     glm::vec3 vecLightColor = glm::vec3(1.0f);
 
     //orbit
@@ -301,7 +254,6 @@ void testTessRemastered()
     glm::vec3 v(15.0f, 0.0f, 0.0f);
 
     const float GM = 2000.0;
-
 
     sf::Clock tick;
     sf::Int64 time0 = tick.getElapsedTime().asMicroseconds();
@@ -312,7 +264,14 @@ void testTessRemastered()
 
     bool running = true;
     bool fill = false;
+    float innerTess = 10.0f;
+    float outerTess = 10.0f;
+    float deltaTess = 0.2f;
+    int prevX = WIDTH / 2;
+    int prevY = HEIGHT / 2;
 
+    program.setUniform1f(inner, innerTess);
+    program.setUniform1f(outer, outerTess);
     while (running)
     {
         sf::Event event;
@@ -337,17 +296,81 @@ void testTessRemastered()
 
                             break;
                         }
+
                         case (sf::Keyboard::W):
                         {
-                            camera.travelView(0.005);
+                            camera.travelView(0.2f);
                             break;
                         }
                         case (sf::Keyboard::S):
                         {
-                            camera.travelView(-0.005);
+                            camera.travelView(-0.2f);
                             break;
                         }
+
+                        case (sf::Keyboard::Down):
+                        {
+                            innerTess -= deltaTess;
+                            innerTess = glm::clamp(innerTess, 1.0f, 16.0f);
+                            std::cout << "Inner: " << innerTess << std::endl;
+                            program.setUniform1f(inner, innerTess);
+
+                            break;
+                        }
+                        case (sf::Keyboard::Up):
+                        {
+                            innerTess += deltaTess;
+                            innerTess = glm::clamp(innerTess, 1.0f, 16.0f);
+                            std::cout << "Inner: " << innerTess << std::endl;
+                            program.setUniform1f(inner, innerTess);
+
+                            break;
+                        }
+
+                        case (sf::Keyboard::Left):
+                        {
+                            outerTess -= deltaTess;
+                            outerTess = glm::clamp(outerTess, 1.0f, 16.0f);
+                            std::cout << "Outer: " << outerTess << std::endl;
+                            program.setUniform1f(outer, outerTess);
+                            break;
+                        }
+                        case (sf::Keyboard::Right):
+                        {
+                            outerTess += deltaTess;
+                            outerTess = glm::clamp(outerTess, 1.0f, 16.0f);
+                            std::cout << "Outer: " << outerTess << std::endl;
+                            program.setUniform1f(outer, outerTess);
+                            break;
+                        }
+                        case (sf::Keyboard::R):
+                        {
+                           prevX = WIDTH / 2;
+                           prevY = HEIGHT / 2;
+                           sf::Mouse::setPosition({prevX, prevY}, window);
+
+                           break;
+                        }
                     }
+
+                    break;
+                }
+                case sf::Event::MouseMoved:
+                {
+                    if (prevX != -1 && prevY != -1)
+                    {
+                        camera.rotate(float(event.mouseMove.x - prevX), float(event.mouseMove.y - prevY));
+                    }
+                    prevX = event.mouseMove.x;
+                    prevY = event.mouseMove.y;
+
+                    break;
+                }
+                case sf::Event::MouseEntered:
+                {
+                    prevX = WIDTH / 2;
+                    prevY = HEIGHT / 2;
+                    sf::Mouse::setPosition({prevX, prevY}, window);
 
                     break;
                 }
@@ -364,19 +387,18 @@ void testTessRemastered()
         program.setUniformMat4(projection, matProj);
         program.setUniformMat4(view, camera.mat());
 
-
         //render
-        //planet
         program.setUniformMat4(model, matModel);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, earthTexture);
+        //glBindTexture(GL_TEXTURE_2D, earth);
+        earth.bind();
 
         glBindVertexArray(vao);
 
         glPatchParameteri(GL_PATCH_VERTICES, 3);
         glDrawArrays(GL_PATCHES, 0, 60);
-
+        
         //sat
         auto tr = glm::translate(glm::mat4(1.0f), r);
         auto m = tr * second;
@@ -408,10 +430,10 @@ void testTessRemastered()
 
 
         //sleep
-        if (delta < SLEEP)
+        /*if (delta < SLEEP)
         {
             std::this_thread::sleep_for(std::chrono::microseconds(SLEEP - delta));
-        }
+        }*/
 
         //display frame
         window.display();

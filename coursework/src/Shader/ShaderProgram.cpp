@@ -26,11 +26,6 @@ ShaderProgram::~ShaderProgram()
 //operators
 ShaderProgram& ShaderProgram::operator = (ShaderProgram&& shaderProgram)
 {
-    if (this == &shaderProgram)
-    {
-        return *this;
-    }
-
     m_id = shaderProgram.m_id;
 
     shaderProgram.resetProgram();
@@ -85,6 +80,12 @@ void ShaderProgram::setUniformVec3(GLint location, const Vec3& vec)
 }
 
 
+void ShaderProgram::setUniform1f(GLint location, float value)
+{
+    glUniform1f(location, value);
+}
+
+
 //locations
 GLint ShaderProgram::getUniformLocation(const String& name)
 {
@@ -100,24 +101,21 @@ GLint ShaderProgram::getAttributeLocation(const String& name)
 //delete & reset
 void ShaderProgram::deleteProgram()
 {
-    if (valid())
-    {
-        glDeleteProgram(m_id);
+    glDeleteProgram(m_id);
 
-        resetProgram();
-    }
+    resetProgram();
 }
 
 void ShaderProgram::resetProgram()
 {
-    m_id = BAD_PROGRAM;
+    m_id = EMPTY;
 }
 
 
 //checks
 bool ShaderProgram::valid()
 {
-    return m_id == BAD_PROGRAM;
+    return m_id == EMPTY;
 }
 
 bool ShaderProgram::linked()

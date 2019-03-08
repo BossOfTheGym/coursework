@@ -6,7 +6,7 @@
 class Camera
 {
 public:
-    static const int DEFAULT_SENSITIVITY = 1000;
+    static const int DEFAULT_SENSITIVITY = 200;
 
 
     Camera(const Camera& camera) = default;
@@ -26,7 +26,7 @@ public:
 
 
 
-    void rotate(float dx, float dy);
+    void rotate(float dHorisont, float dVertical);
 
     void travelView(float distance);
 
@@ -44,7 +44,6 @@ public:
 
 private:
     Mat4 m_mat;
-    Mat4 m_matTransposed;
 
     Vec3 m_pos;
 

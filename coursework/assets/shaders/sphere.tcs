@@ -13,6 +13,9 @@ out vec3 tcsPosition[];
 out vec3 tcsColor[];
 out vec2 tcsTex[];
 
+uniform float outer;
+uniform float inner;
+
 void main()
 {
 	tcsPosition[ID] = vsPosition[ID];
@@ -21,10 +24,10 @@ void main()
 
 	if(ID == 0)
 	{
-		gl_TessLevelOuter[0] = 12.0;
- 		gl_TessLevelOuter[1] = 12.0;
- 		gl_TessLevelOuter[2] = 12.0;
+		gl_TessLevelOuter[0] = outer;
+ 		gl_TessLevelOuter[1] = outer;
+ 		gl_TessLevelOuter[2] = outer;
  
- 		gl_TessLevelInner[0] = 12.0;
+ 		gl_TessLevelInner[0] = inner;
  	}
 }

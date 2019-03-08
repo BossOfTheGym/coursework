@@ -7,6 +7,11 @@ void Texture2D::active(GLenum texture)
     glActiveTexture(texture);
 }
 
+void Texture2D::unbind()
+{
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 
 //constructors & destructor
 Texture2D::Texture2D(const String& location)

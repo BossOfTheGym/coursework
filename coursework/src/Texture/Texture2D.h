@@ -14,6 +14,8 @@ public:
 
     static void active(GLenum texture);
 
+    static void unbind();
+
 
 public:
     Texture2D(const String& location = String(""));

@@ -6,8 +6,6 @@
 #include "Model/VertexArrayBuffer.h"
 
 
-using namespace std::chrono_literals;
-namespace fs = std::filesystem;
 
 const int WIDTH  = 1200;
 const int HEIGHT = 900;
@@ -140,7 +138,24 @@ void testTessRemastered()
     Shader tessControl(Shader::TessControl, "assets/shaders/sphere.tcs");
     Shader tessEvaluation(Shader::TessEvaluation, "assets/shaders/sphere.tes");
     Shader fragment(Shader::Fragment, "assets/shaders/sphere.fs");
-    
+    if (!vertex.compiled())
+    {
+        std::cout << vertex.getInfoLog();
+    }
+    if (!tessControl.compiled())
+    {
+        std::cout << tessControl.getInfoLog();
+    }
+    if (!tessEvaluation.compiled())
+    {
+        std::cout << tessEvaluation.getInfoLog();
+    }
+    if (!fragment.compiled())
+    {
+        std::cout << fragment.getInfoLog();
+    }
+
+
 
     //program
     ShaderProgram program;

@@ -5,4 +5,9 @@
 
 
 class Mesh
-{};
+{
+public:
+
+private:
+
+};

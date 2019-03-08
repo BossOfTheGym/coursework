@@ -26,7 +26,7 @@ public:
 
 
 public:
-    Shader();
+    Shader(Type type = Invalid, const String& location = "");
 
     Shader(const Shader& shader) = delete;
 
@@ -49,7 +49,9 @@ public:
     int loadFromString(Type type, const String& source);
 
 
+
     void deleteShader();
+
 
 
     GLuint getId() const;

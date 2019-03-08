@@ -31,6 +31,8 @@ Texture2D::~Texture2D()
 //operators
 Texture2D& Texture2D::operator = (Texture2D&& texture)
 {
+    deleteTexture();
+
     m_id = texture.m_id;
 
     texture.resetTexture();

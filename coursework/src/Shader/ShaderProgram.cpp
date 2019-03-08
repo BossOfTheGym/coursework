@@ -26,6 +26,8 @@ ShaderProgram::~ShaderProgram()
 //operators
 ShaderProgram& ShaderProgram::operator = (ShaderProgram&& shaderProgram)
 {
+    deleteProgram();
+
     m_id = shaderProgram.m_id;
 
     shaderProgram.resetProgram();

@@ -42,6 +42,9 @@
     <ClCompile Include="src\Objects\Satellite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Model\VertexArrayBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera\Camera.h">
@@ -69,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Objects\Satellite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Model\VertexArrayBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

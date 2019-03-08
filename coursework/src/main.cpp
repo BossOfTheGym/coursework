@@ -32,18 +32,16 @@ void genBuffers(GLuint& vao, GLuint& vbo, std::vector<float>& data)
 {
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
-
-
     glBindVertexArray(vao);
-
-
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 }
@@ -143,8 +141,8 @@ void testTessRemastered()
     sf::ContextSettings settings;
     settings.depthBits = 32;
     settings.majorVersion = 4;
-    settings.minorVersion = 3;
-    settings.stencilBits = 8;
+    settings.minorVersion = 5;
+    settings.stencilBits = 32;
 
     sf::Window window(sf::VideoMode(WIDTH, HEIGHT), "OpenGL", sf::Style::Default, settings);
 
@@ -163,15 +161,10 @@ void testTessRemastered()
     
 
     //shaders
-    Shader vertex;
-    Shader tessControl;
-    Shader tessEvaluation;
-    Shader fragment;
-
-    vertex.loadFromLocation(Shader::Vertex, "assets/shaders/sphere.vs");
-    tessControl.loadFromLocation(Shader::TessControl, "assets/shaders/sphere.tcs");
-    tessEvaluation.loadFromLocation(Shader::TessEvaluation, "assets/shaders/sphere.tes");
-    fragment.loadFromLocation(Shader::Fragment, "assets/shaders/sphere.fs");
+    Shader vertex(Shader::Vertex, "assets/shaders/sphere.vs");
+    Shader tessControl(Shader::TessControl, "assets/shaders/sphere.tcs");
+    Shader tessEvaluation(Shader::TessEvaluation, "assets/shaders/sphere.tes");
+    Shader fragment(Shader::Fragment, "assets/shaders/sphere.fs");
     
 
     //program

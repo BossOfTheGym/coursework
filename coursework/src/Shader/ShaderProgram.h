@@ -29,6 +29,7 @@ public:
     ShaderProgram& operator = (ShaderProgram&& shaderProgram);
 
 
+
     void attachShader(const Shader& shader);
 
     void detachShader(const Shader& shader);
@@ -37,6 +38,7 @@ public:
     void link();
 
     void use();
+
 
 
     void setUniformMat4(GLint location, const Mat4& mat);
@@ -57,12 +59,14 @@ public:
     GLint getAttributeLocation(const String& name);
 
 
+
     void deleteProgram();
 
 
     bool valid();
 
     bool linked();
+
 
 
     GLuint getId() const;

@@ -11,6 +11,11 @@ class Texture2D
 public:
     static const GLuint EMPTY = 0;
 
+
+    static void active(GLenum texture);
+
+
+public:
     Texture2D(const String& location = String(""));
 
     Texture2D(const Texture2D& tex) = delete;

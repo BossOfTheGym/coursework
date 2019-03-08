@@ -1,6 +1,13 @@
 #include "Texture2D.h"
 
 
+//statics
+void Texture2D::active(GLenum texture)
+{
+    glActiveTexture(texture);
+}
+
+
 //constructors & destructor
 Texture2D::Texture2D(const String& location)
 {

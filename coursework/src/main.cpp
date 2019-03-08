@@ -3,6 +3,7 @@
 #include "Shader/Shader.h"
 #include "Shader/ShaderProgram.h"
 #include "Texture/Texture2D.h"
+#include "Model/VertexArrayBuffer.h"
 
 
 using namespace std::chrono_literals;
@@ -27,25 +28,6 @@ void pushVertex(std::vector<float>& data, const glm::vec3& vertex, const glm::ve
     data.push_back(tex.s);
     data.push_back(tex.t);
 }
-
-void genBuffers(GLuint& vao, GLuint& vbo, std::vector<float>& data)
-{
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-}
-
 
 std::vector<float> getIcosahedron()
 {
@@ -127,13 +109,6 @@ std::vector<float> getIcosahedron()
     return icosahedron;
 }
 
-void createIcosahedron(GLuint& vao, GLuint& vbo, std::vector<float>& icosahedron)
-{
-    icosahedron = getIcosahedron();
-
-    genBuffers(vao, vbo, icosahedron);
-}
-
 
 void testTessRemastered()
 {
@@ -141,7 +116,7 @@ void testTessRemastered()
     sf::ContextSettings settings;
     settings.depthBits = 32;
     settings.majorVersion = 4;
-    settings.minorVersion = 5;
+    settings.minorVersion = 3;
     settings.stencilBits = 32;
 
     sf::Window window(sf::VideoMode(WIDTH, HEIGHT), "OpenGL", sf::Style::Default, settings);
@@ -182,10 +157,11 @@ void testTessRemastered()
 
 
     //data
-    std::vector<float> icosahedron;
-    GLuint vao;
-    GLuint vbo;
-    createIcosahedron(vao, vbo, icosahedron);
+    VertexArrayBuffer icosahedron(60, getIcosahedron());
+    icosahedron.bindArray();
+    icosahedron.setAttribPointer(0, 8 * sizeof(float), (void *)(0));
+    icosahedron.setAttribPointer(1, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+    icosahedron.setAttribPointer(2, 8 * sizeof(float), (void *)(6 * sizeof(float)));
 
 
     //uniforms
@@ -223,10 +199,9 @@ void testTessRemastered()
     Camera camera(matView, Vec3(0.0f, 0.0f, 30.0f));
 
     glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
-
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 0.0f, 1.0f));
 
-    glm::vec3 vecLightPos = glm::vec3(50.0f, 50.0f, 0.0f);
+    glm::vec3 vecLightPos   = glm::vec3(50.0f, 50.0f, 0.0f);
     glm::vec3 vecLightColor = glm::vec3(1.0f);
 
 
@@ -367,15 +342,15 @@ void testTessRemastered()
         program.setUniformMat4(projection, matProj);
         program.setUniformMat4(view, camera.mat());
 
+
         //render
-        glActiveTexture(GL_TEXTURE0);       
+        Texture2D::active(GL_TEXTURE0);
         earth.bind();
-        glBindVertexArray(vao);
+        icosahedron.bindArray();
 
 
+        //planet
         program.setUniformMat4(model, matModel);
-
-        glPatchParameteri(GL_PATCH_VERTICES, 3);
         glDrawArrays(GL_PATCHES, 0, 60);
         
 
@@ -384,14 +359,12 @@ void testTessRemastered()
         m[3] = Vec4(r, 1.0f);
 
         program.setUniformMat4(model, m);
-
-        glPatchParameteri(GL_PATCH_VERTICES, 3);
         glDrawArrays(GL_PATCHES, 0, 60);
 
 
         //update
         matModel = rotation * matModel;
-        second = rotation * second;
+        second   = rotation * second;
 
 
         //delta
@@ -411,9 +384,6 @@ void testTessRemastered()
         //display frame
         window.display();
     }
-
-    glDeleteBuffers(1, &vbo);
-    glDeleteVertexArrays(1, &vao);
 }
 
 

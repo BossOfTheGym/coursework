@@ -6,6 +6,10 @@
 #include "Model/VertexArrayBuffer.h"
 
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 
 const int WIDTH  = 1200;
 const int HEIGHT = 900;
@@ -27,7 +31,7 @@ void pushVertex(std::vector<float>& data, const glm::vec3& vertex, const glm::ve
     data.push_back(tex.t);
 }
 
-std::vector<float> getIcosahedron()
+std::vector<float> getIcosahedron(int split = 0)
 {
     const int PENTAGON_SIDES = 5;
 
@@ -167,7 +171,7 @@ void testTessRemastered()
     program.link();
     if (!program.linked())
     {
-        std::cout << program.getInfoLog() << std::endl;
+        std::cout << program.getInfoLog();
     }
 
 
@@ -402,9 +406,36 @@ void testTessRemastered()
 }
 
 
+bool importModel()
+{
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(
+        "assets/textures/Satellite/10477_Satellite_v1_L3.obj",
+        aiProcess_CalcTangentSpace |
+        aiProcess_Triangulate |
+        aiProcess_JoinIdenticalVertices |
+        aiProcess_SortByPType
+    );
+    
+    if (!scene)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void testAssimp()
+{
+    importModel();
+}
+
+
 int main(int argc, char* argv[])
 {
-    testTessRemastered();
+    //testTessRemastered();
+
+    testAssimp();
 
     return EXIT_SUCCESS;
 }

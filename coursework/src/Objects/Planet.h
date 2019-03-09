@@ -2,9 +2,9 @@
 
 
 #include "../Common.h"
+#include "../Entity/ITimeVarying.h"
 
-
-class Planet
+class Planet : public ITimeVarying
 {
 public:
 

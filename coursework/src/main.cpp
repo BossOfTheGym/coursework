@@ -431,11 +431,19 @@ void testAssimp()
 }
 
 
+void testSingleton()
+{
+
+}
+
+
 int main(int argc, char* argv[])
 {
     //testTessRemastered();
 
-    testAssimp();
+    //testAssimp();
+
+
 
     return EXIT_SUCCESS;
 }

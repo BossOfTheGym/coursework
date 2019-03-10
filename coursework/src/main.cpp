@@ -114,6 +114,29 @@ std::vector<float> getIcosahedron(int split = 0)
 }
 
 
+std::map<String, Shader> loadShaders()
+{    
+    std::map<String, Shader> shaders;
+
+    shaders.insert({"assets/shaders/sphere.vs", Shader(Shader::Vertex, "assets/shaders/sphere.vs")});
+    shaders.insert({"assets/shaders/sphere.tcs", Shader(Shader::TessControl, "assets/shaders/sphere.tcs")});
+    shaders.insert({"assets/shaders/sphere.tes", Shader(Shader::TessEvaluation, "assets/shaders/sphere.tes")});
+    shaders.insert({"assets/shaders/sphere.fs", Shader(Shader::Fragment, "assets/shaders/sphere.fs")});
+
+    shaders.insert({"assets/shaders/setellite.fs", Shader(Shader::Fragment, "assets/shaders/satellite.fs")});
+
+
+    for (const auto&[location, shader] : shaders)
+    {
+        if (!shader.compiled())
+        {
+            std::cerr << shader.getInfoLog();
+        }
+    }
+
+    return shaders;
+}
+
 void testTessRemastered()
 {
     //window
@@ -140,23 +163,34 @@ void testTessRemastered()
     
 
     //shaders
-    Shader vertex(Shader::Vertex, "assets/shaders/sphere.vs");
-    Shader tessControl(Shader::TessControl, "assets/shaders/sphere.tcs");
-    Shader tessEvaluation(Shader::TessEvaluation, "assets/shaders/sphere.tes");
-    Shader fragment(Shader::Fragment, "assets/shaders/sphere.fs");
+    auto shaders = loadShaders();
 
-    
+
     //program
-    ShaderProgram program;
-    program.attachShader(vertex);
-    program.attachShader(tessControl);
-    program.attachShader(tessEvaluation);
-    program.attachShader(fragment);
+    ShaderProgram planetProgram;
+    planetProgram.attachShader(shaders["assets/shaders/sphere.vs"]);
+    planetProgram.attachShader(shaders["assets/shaders/sphere.tcs"]);
+    planetProgram.attachShader(shaders["assets/shaders/sphere.tes"]);
+    planetProgram.attachShader(shaders["assets/shaders/sphere.fs"]);
 
-    program.link();
-    if (!program.linked())
+
+    ShaderProgram satelliteProgram;
+    planetProgram.attachShader(shaders["assets/shaders/sphere.vs"]);
+    planetProgram.attachShader(shaders["assets/shaders/sphere.tcs"]);
+    planetProgram.attachShader(shaders["assets/shaders/sphere.tes"]);
+    planetProgram.attachShader(shaders["assets/shaders/satellite.fs"]);
+
+
+    planetProgram.link();
+    if (!planetProgram.linked())
     {
-        std::cout << program.getInfoLog();
+        std::cerr << planetProgram.getInfoLog();
+    }
+
+    satelliteProgram.link();
+    if (!satelliteProgram.linked())
+    {
+        std::cerr << satelliteProgram.getInfoLog();
     }
 
 
@@ -169,14 +203,13 @@ void testTessRemastered()
 
 
     //uniforms
-    GLint model      = program.getUniformLocation("model");
-    GLint view       = program.getUniformLocation("view");
-    GLint projection = program.getUniformLocation("projection");
-    GLint lightPos   = program.getUniformLocation("lightPos");
-    GLint lightColor = program.getUniformLocation("lightColor");
-    GLint inner      = program.getUniformLocation("inner");
-    GLint outer      = program.getUniformLocation("outer");
-
+    GLint model      = planetProgram.getUniformLocation("model");
+    GLint view       = planetProgram.getUniformLocation("view");
+    GLint projection = planetProgram.getUniformLocation("projection");
+    GLint lightPos   = planetProgram.getUniformLocation("lightPos");
+    GLint lightColor = planetProgram.getUniformLocation("lightColor");
+    GLint inner      = planetProgram.getUniformLocation("inner");
+    GLint outer      = planetProgram.getUniformLocation("outer");
 
     //setups
     glEnable(GL_DEPTH_TEST);
@@ -189,7 +222,7 @@ void testTessRemastered()
 
     glClearColor(0.03f, 0.03f, 0.03f, 1.0f);
 
-    program.use();
+    planetProgram.use();
 
     window.setVerticalSyncEnabled(true);
     window.setActive(true);
@@ -229,8 +262,8 @@ void testTessRemastered()
     int prevX = WIDTH / 2;
     int prevY = HEIGHT / 2;
 
-    program.setUniform1f(inner, innerTess);
-    program.setUniform1f(outer, outerTess);
+    planetProgram.setUniform1f(inner, innerTess);
+    planetProgram.setUniform1f(outer, outerTess);
     while (running)
     {
         sf::Event event;
@@ -272,7 +305,7 @@ void testTessRemastered()
                             innerTess -= deltaTess;
                             innerTess = glm::clamp(innerTess, 1.0f, 16.0f);
                             std::cout << "Inner: " << innerTess << std::endl;
-                            program.setUniform1f(inner, innerTess);
+                            planetProgram.setUniform1f(inner, innerTess);
 
                             break;
                         }
@@ -281,7 +314,7 @@ void testTessRemastered()
                             innerTess += deltaTess;
                             innerTess = glm::clamp(innerTess, 1.0f, 16.0f);
                             std::cout << "Inner: " << innerTess << std::endl;
-                            program.setUniform1f(inner, innerTess);
+                            planetProgram.setUniform1f(inner, innerTess);
 
                             break;
                         }
@@ -291,7 +324,7 @@ void testTessRemastered()
                             outerTess -= deltaTess;
                             outerTess = glm::clamp(outerTess, 1.0f, 16.0f);
                             std::cout << "Outer: " << outerTess << std::endl;
-                            program.setUniform1f(outer, outerTess);
+                            planetProgram.setUniform1f(outer, outerTess);
                             break;
                         }
                         case (sf::Keyboard::Right):
@@ -299,7 +332,7 @@ void testTessRemastered()
                             outerTess += deltaTess;
                             outerTess = glm::clamp(outerTess, 1.0f, 16.0f);
                             std::cout << "Outer: " << outerTess << std::endl;
-                            program.setUniform1f(outer, outerTess);
+                            planetProgram.setUniform1f(outer, outerTess);
                             break;
                         }
                         case (sf::Keyboard::R):
@@ -340,11 +373,11 @@ void testTessRemastered()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-        program.setUniformVec3(lightPos, vecLightPos);
-        program.setUniformVec3(lightColor, vecLightColor);
+        planetProgram.setUniformVec3(lightPos, vecLightPos);
+        planetProgram.setUniformVec3(lightColor, vecLightColor);
 
-        program.setUniformMat4(projection, matProj);
-        program.setUniformMat4(view, camera.mat());
+        planetProgram.setUniformMat4(projection, matProj);
+        planetProgram.setUniformMat4(view, camera.mat());
 
 
         //render
@@ -354,7 +387,7 @@ void testTessRemastered()
 
 
         //planet
-        program.setUniformMat4(model, matModel);
+        planetProgram.setUniformMat4(model, matModel);
         glDrawArrays(GL_PATCHES, 0, 60);
         
 
@@ -362,7 +395,7 @@ void testTessRemastered()
         auto m = second;
         m[3] = Vec4(r, 1.0f);
 
-        program.setUniformMat4(model, m);
+        planetProgram.setUniformMat4(model, m);
         glDrawArrays(GL_PATCHES, 0, 60);
 
 

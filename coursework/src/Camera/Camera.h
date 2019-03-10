@@ -25,6 +25,9 @@ public:
     Camera& operator = (Camera&& camera) = default;
 
 
+    //TODO
+    void lookAt();
+
 
     void rotate(float dHorisont, float dVertical);
 

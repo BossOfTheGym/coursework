@@ -6,7 +6,7 @@
 
 #include "../Common.h"
 
-#include "Shader.h"
+#include "../Shader/Shader.h"
 
 
 class ShaderHolder
@@ -15,7 +15,8 @@ public:
     using Key   = String;
     using Value = Shader;
 
-    using Pointer = std::unique_ptr<ShaderHolder>;
+    using ShaderPointer = std::shared_ptr<Value>;
+    using HolderPointer = std::unique_ptr<ShaderHolder>;
 
 
 public:
@@ -25,18 +26,16 @@ public:
 
 
 public:
-    Shader& operator [] (const String& location);
-
-    const Shader operator [] (const String& location) const;
+    ShaderPointer operator [] (const String& location);
 
 
-    void loadShader(ShaderType::Type type, const String& location);
+    void loadShader(Shader::Type type, const String& location);
 
     void deleteShader(const String& location);
 
 
 private:
-    static Pointer instance;
+    static HolderPointer instance;
 
 
 private:
@@ -53,5 +52,5 @@ private:
 
 
 private:
-    std::map<Key, Value> m_shaders;
+    std::map<Key, ShaderPointer> m_shaders;
 };

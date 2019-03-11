@@ -41,9 +41,6 @@ public:
     void disableAttribPointer(GLuint index);
 
 
-    bool loadData(const std::vector<float>& data);
-
-
 
     GLuint getArrayId() const;
 
@@ -55,6 +52,8 @@ public:
 
 private:
     void resetArrayBuffer();
+
+    bool loadData(const std::vector<float>& data);
 
 
 private:

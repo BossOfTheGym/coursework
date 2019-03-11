@@ -41,15 +41,6 @@ public:
     Shader& operator = (Shader&& shader);
 
 
-
-    int loadFromLocation(Type type, const String& location);
-
-    int loadFromStream(Type type, IStream& inputStream);
-
-    int loadFromString(Type type, const String& source);
-
-
-
     void deleteShader();
 
 
@@ -69,6 +60,13 @@ public:
 
 private:
     void resetShader();
+
+
+    int loadFromLocation(Type type, const String& location);
+
+    int loadFromStream(Type type, IStream& inputStream);
+
+    int loadFromString(Type type, const String& source);
 
 
 private:    

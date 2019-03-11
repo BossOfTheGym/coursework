@@ -7,11 +7,14 @@ VertexArrayBuffer::VertexArrayBuffer(GLsizei elements, const std::vector<float>&
     , m_bufferId(EMPTY)
     , m_elements(elements)
 {
-    glGenVertexArrays(1, &m_arrayId);
-
-    if (m_arrayId != EMPTY)
+    if (!data.empty())
     {
-        loadData(data);
+        glGenVertexArrays(1, &m_arrayId);
+
+        if (m_arrayId != EMPTY)
+        {
+            loadData(data);
+        }
     }
 }
 

@@ -141,10 +141,10 @@ void testTessRemastered()
 {
     //window
     sf::ContextSettings settings;
-    settings.depthBits = 32;
+    settings.depthBits = 24;
     settings.majorVersion = 4;
     settings.minorVersion = 3;
-    settings.stencilBits = 32;
+    settings.stencilBits = 8;
 
     sf::Window window(sf::VideoMode(WIDTH, HEIGHT), "OpenGL", sf::Style::Default, settings);
 
@@ -244,7 +244,7 @@ void testTessRemastered()
 
     //orbit
     glm::vec3 r(0.0f, 7.0f, 0.0f);
-    glm::vec3 v(15.0f, 0.0f, 0.0f);
+    glm::vec3 v(20.0f, 0.0f, 0.0f);
 
     const float GM = 2000.0;
 
@@ -424,6 +424,84 @@ void testTessRemastered()
 }
 
 
+
+std::ostream& offset(int shift)
+{
+    for (int i = 0; i < shift; i++)
+    {
+        std::cout << "    ";
+    }
+
+    return std::cout;
+}
+
+void processMesh(int shift, const aiMesh* mesh)
+{
+    offset(shift) << "Name: " << mesh->mName.C_Str() << std::endl;
+    offset(shift) << "Color channels: " << mesh->GetNumColorChannels() << std::endl;
+    offset(shift) << "UV channels: " << mesh->GetNumUVChannels() << std::endl;
+    offset(shift) << "Has bones: " << mesh->HasBones() << std::endl;
+    offset(shift) << "Has faces: " << mesh->HasFaces() << std::endl;
+    offset(shift) << "Has normals: " << mesh->HasNormals() << std::endl;
+    offset(shift) << "Has positions: " << mesh->HasPositions() << std::endl;
+    offset(shift) << "Has tangents and bitangents: " << mesh->HasTangentsAndBitangents() << std::endl;
+}
+
+void processNode(int shift, const aiNode* node)
+{
+    offset(shift) << "Node: " << node->mName.C_Str() << std::endl;
+
+
+    offset(shift) << "Transformation: " << std::endl;
+    auto& transform = node->mTransformation;
+    offset(shift) << transform[0][0] << transform[0][1] << transform[0][2] << transform[0][3] << std::endl;
+    offset(shift) << transform[1][0] << transform[1][1] << transform[1][2] << transform[1][3] << std::endl;
+    offset(shift) << transform[2][0] << transform[2][1] << transform[2][2] << transform[2][3] << std::endl;
+    offset(shift) << transform[3][0] << transform[3][1] << transform[3][2] << transform[3][3] << std::endl;
+
+
+    offset(shift) << "Meshes: " << node->mNumMeshes << std::endl;
+    for(unsigned int i = 0; i < node->mNumMeshes; i++)
+    {
+        offset(shift) << "Mesh: " << node->mMeshes[i] << std::endl;
+    }
+
+
+    offset(shift) << "Children: " << node->mNumChildren << std::endl;
+    for (unsigned int i = 0; i < node->mNumChildren; i++)
+    {
+        processNode(shift + 1, node->mChildren[i]);
+    }
+}
+
+void processScene(const aiScene* scene)
+{
+    std::cout << "Has animations: " << scene->HasAnimations() << std::endl;
+    std::cout << "Has cameras: " << scene->HasCameras() << std::endl;
+    std::cout << "Has lights: " << scene->HasLights() << std::endl;
+    std::cout << "Has materials: " << scene->HasMaterials() << std::endl;
+    std::cout << "Has meshes: " << scene->HasMeshes() << std::endl;
+    std::cout << "Has textures: " << scene->HasTextures() << std::endl;
+
+    std::cout << "Animations: " << scene->mNumAnimations << std::endl;
+    std::cout << "Cameras: " << scene->mNumCameras << std::endl;
+    std::cout << "Lights: " << scene->mNumLights << std::endl;
+    std::cout << "Materials: " << scene->mNumMaterials << std::endl;
+    std::cout << "Meshes: " << scene->mNumMeshes << std::endl;
+    std::cout << "Textures: " << scene->mNumTextures << std::endl;
+
+
+    std::cout << "Meshes: " << std::endl;
+    for(unsigned int i = 0; i < scene->mNumMeshes; i++)
+    {
+        processMesh(0, scene->mMeshes[i]);
+    }
+
+
+    processNode(0, scene->mRootNode);
+}
+
+
 bool importModel()
 {
     Assimp::Importer importer;
@@ -439,6 +517,8 @@ bool importModel()
     {
         return false;
     }
+
+    processScene(scene);
 
     return true;
 }

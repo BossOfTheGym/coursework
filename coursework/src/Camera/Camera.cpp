@@ -19,7 +19,7 @@ void Camera::rotate(float dHorisont, float dVertical)
 
     if (abs(dHorisont) > 0.0001 || abs(dVertical) > 0.0001)
     {
-        m_mat = glm::rotate(Mat4(1.0f), (abs(dHorisont) + abs(dVertical)) / 2, Vec3(dVertical, 0.0f, dHorisont)) * m_mat;
+        m_mat = glm::rotate(Mat4(1.0f), (abs(dHorisont) + abs(dVertical)) / 2, Vec3(dVertical, dHorisont, 0.0f)) * m_mat;
 
         updateMat();
     }

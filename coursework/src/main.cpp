@@ -137,7 +137,7 @@ std::map<String, Shader> loadShaders()
     return shaders;
 }
 
-void testTessRemastered()
+void featureTest()
 {
     //window
     sf::ContextSettings settings;
@@ -531,7 +531,7 @@ void testAssimp()
 
 int main(int argc, char* argv[])
 {
-    testTessRemastered();
+    featureTest();
 
     //testAssimp();
 

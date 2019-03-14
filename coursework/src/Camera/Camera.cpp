@@ -19,7 +19,53 @@ void Camera::rotate(float dHorisont, float dVertical)
 
     if (abs(dHorisont) > 0.0001 || abs(dVertical) > 0.0001)
     {
-        m_mat = glm::rotate(Mat4(1.0f), (abs(dHorisont) + abs(dVertical)) / 2, Vec3(dVertical, dHorisont, 0.0f)) * m_mat;
+        //rot(alpha) * vec
+        //[1, 0] & [0, 1]
+        //[cos(a) -sin(a)]
+        //[sin(a)  cos(a)]
+        float cosAlpha;
+        float sinAlpha;
+        Vec3 newX;
+        Vec3 newY;
+        Vec3 newZ;
+
+        //x, z
+        cosAlpha = cos(dHorisont);
+        sinAlpha = sin(dHorisont);
+        newX[0] = +cosAlpha * m_mat[0][0] + sinAlpha * m_mat[0][2];
+        newX[1] = +cosAlpha * m_mat[1][0] + sinAlpha * m_mat[1][2]; 
+        newX[2] = +cosAlpha * m_mat[2][0] + sinAlpha * m_mat[2][2];
+
+        newZ[0] = -sinAlpha * m_mat[0][0] + cosAlpha * m_mat[0][2];
+        newZ[1] = -sinAlpha * m_mat[1][0] + cosAlpha * m_mat[1][2];
+        newZ[2] = -sinAlpha * m_mat[2][0] + cosAlpha * m_mat[2][2];
+
+        m_mat[0][0] = newX[0];
+        m_mat[1][0] = newX[1];
+        m_mat[2][0] = newX[2];
+
+        m_mat[0][2] = newZ[0];
+        m_mat[1][2] = newZ[1];
+        m_mat[2][2] = newZ[2];
+        
+        //y, z
+        cosAlpha = cos(-dVertical);
+        sinAlpha = sin(-dVertical);
+        newY[0] = +cosAlpha * m_mat[0][1] + sinAlpha * m_mat[0][2];
+        newY[1] = +cosAlpha * m_mat[1][1] + sinAlpha * m_mat[1][2];
+        newY[2] = +cosAlpha * m_mat[2][1] + sinAlpha * m_mat[2][2];
+
+        newZ[0] = -sinAlpha * m_mat[0][1] + cosAlpha * m_mat[0][2];
+        newZ[1] = -sinAlpha * m_mat[1][1] + cosAlpha * m_mat[1][2];
+        newZ[2] = -sinAlpha * m_mat[2][1] + cosAlpha * m_mat[2][2];
+
+        m_mat[0][1] = newY[0];
+        m_mat[1][1] = newY[1];
+        m_mat[2][1] = newY[2];
+
+        m_mat[0][2] = newZ[0];
+        m_mat[1][2] = newZ[1];
+        m_mat[2][2] = newZ[2];
 
         updateMat();
     }

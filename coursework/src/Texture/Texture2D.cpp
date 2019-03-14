@@ -166,6 +166,8 @@ int Texture2D::loadFromData(int width, int height, const GLubyte* data)
         GL_UNSIGNED_BYTE,
         data
     );
+
+    return true;
 }
 
 

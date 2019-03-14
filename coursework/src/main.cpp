@@ -6,12 +6,18 @@
 #include "Model/VertexArrayBuffer.h"
 
 
+#include <ImGui/imgui.h>
+#include <ImGui/imgui-SFML.h>
+
+#include <GLFW/glfw3.h>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 
 #include <map>
+
 
 const int WIDTH  = 1200;
 const int HEIGHT = 900;
@@ -113,7 +119,6 @@ std::vector<float> getIcosahedron(int split = 0)
     return icosahedron;
 }
 
-
 std::map<String, Shader> loadShaders()
 {    
     std::map<String, Shader> shaders;
@@ -146,7 +151,7 @@ void featureTest()
     settings.minorVersion = 3;
     settings.stencilBits = 8;
 
-    sf::Window window(sf::VideoMode(WIDTH, HEIGHT), "OpenGL", sf::Style::Default, settings);
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "OpenGL", sf::Style::Default, settings);
 
 
     //glew
@@ -211,6 +216,7 @@ void featureTest()
     GLint inner      = planetProgram.getUniformLocation("inner");
     GLint outer      = planetProgram.getUniformLocation("outer");
 
+
     //setups
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -264,8 +270,10 @@ void featureTest()
 
     planetProgram.setUniform1f(inner, innerTess);
     planetProgram.setUniform1f(outer, outerTess);
+
     while (running)
     {
+        
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -425,6 +433,10 @@ void featureTest()
 
 
 
+
+
+
+
 std::ostream& offset(int shift)
 {
     for (int i = 0; i < shift; i++)
@@ -459,7 +471,7 @@ void processNode(int shift, const aiNode* node)
     offset(shift) << transform[2][0] << transform[2][1] << transform[2][2] << transform[2][3] << std::endl;
     offset(shift) << transform[3][0] << transform[3][1] << transform[3][2] << transform[3][3] << std::endl;
 
-
+    
     offset(shift) << "Meshes: " << node->mNumMeshes << std::endl;
     for(unsigned int i = 0; i < node->mNumMeshes; i++)
     {
@@ -527,6 +539,9 @@ void testAssimp()
 {
     importModel();
 }
+
+
+
 
 
 int main(int argc, char* argv[])

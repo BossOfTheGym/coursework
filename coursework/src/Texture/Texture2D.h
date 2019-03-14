@@ -20,6 +20,10 @@ public:
 public:
     Texture2D(const String& location = String(""));
 
+    Texture2D(int width, int height, const std::vector<GLubyte>& data);
+
+    Texture2D(int width, int height, const GLubyte* data);
+
     Texture2D(const Texture2D& tex) = delete;
 
     Texture2D(Texture2D&& tex);
@@ -46,6 +50,9 @@ public:
 
 private:
     int loadFromLocation(const String& location);
+
+    int loadFromData(int width, int height, const GLubyte* data);
+
 
     void resetTexture();
 

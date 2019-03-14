@@ -114,6 +114,13 @@ void ShaderProgram::resetProgram()
 }
 
 
+
+//fake virtual
+void ShaderProgram::fake()
+{
+
+}
+
 //checks
 bool ShaderProgram::valid()
 {

@@ -9,6 +9,9 @@
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+dll/
+inc/
+lib/
 
 # Build results
 [Dd]ebug/

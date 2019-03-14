@@ -20,6 +20,7 @@ Texture2D::Texture2D(const String& location)
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTexture);
 
     glGenTextures(1, &m_id);
+    glBindTexture(GL_TEXTURE_2D, m_id);
     if (m_id == EMPTY || !loadFromLocation(location))
     {
         deleteTexture();
@@ -27,6 +28,23 @@ Texture2D::Texture2D(const String& location)
    
     glBindTexture(GL_TEXTURE_2D, prevTexture);
 }
+
+Texture2D::Texture2D(int width, int height, const GLubyte* data)
+{
+    GLint prevTexture;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTexture);
+
+    glGenTextures(1, &m_id);
+    glBindTexture(GL_TEXTURE_2D, m_id);
+    if (m_id == EMPTY || !loadFromData(width, height, data))
+    {
+        deleteTexture();
+    }
+
+    glBindTexture(GL_TEXTURE_2D, prevTexture);
+}
+
+
 
 Texture2D::Texture2D(Texture2D&& texture) : m_id(texture.m_id)
 {
@@ -85,8 +103,6 @@ void Texture2D::deleteTexture()
 //private
 int Texture2D::loadFromLocation(const String& location)
 {
-    glBindTexture(GL_TEXTURE_2D, m_id);
-
     FREE_IMAGE_FORMAT format = FreeImage_GetFileType(location.c_str(), 0);
     if (format == -1)
     {
@@ -125,17 +141,7 @@ int Texture2D::loadFromLocation(const String& location)
     int imageHeight = FreeImage_GetHeight(bitmap32);
 
     GLubyte* textureData = FreeImage_GetBits(bitmap32);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA,
-        imageWidth,
-        imageHeight,
-        0,
-        GL_BGRA,
-        GL_UNSIGNED_BYTE,
-        textureData
-    );
+    loadFromData(imageWidth, imageHeight, textureData);
 
     FreeImage_Unload(bitmap32);
 
@@ -145,6 +151,21 @@ int Texture2D::loadFromLocation(const String& location)
     }
 
     return true;
+}
+
+int Texture2D::loadFromData(int width, int height, const GLubyte* data)
+{
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA,
+        width,
+        height,
+        0,
+        GL_BGRA,
+        GL_UNSIGNED_BYTE,
+        data
+    );
 }
 
 

@@ -74,6 +74,8 @@ public:
     const String& getInfoLog();
 
 
+    virtual void fake();
+
 private:
     void resetProgram();
 

@@ -244,7 +244,7 @@ void featureTest()
 
     //orbit
     glm::vec3 r(0.0f, 7.0f, 0.0f);
-    glm::vec3 v(20.0f, 0.0f, 0.0f);
+    glm::vec3 v(16.0f, 0.0f, 0.0f);
 
     const float GM = 2000.0;
 
@@ -411,7 +411,7 @@ void featureTest()
 
         auto vj = v;
         auto rj = r;
-        auto dt = delta / (1e7f);
+        auto dt = delta / (2 * 1e6f);
         auto dot = glm::dot(r, r);
         auto ur = glm::normalize(r);
 

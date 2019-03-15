@@ -165,6 +165,8 @@
     <ClCompile Include="libs\inc\ImGui\imgui.cpp" />
     <ClCompile Include="libs\inc\ImGui\imgui_demo.cpp" />
     <ClCompile Include="libs\inc\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="libs\inc\ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="libs\inc\ImGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="libs\inc\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="src\Camera\Camera.cpp" />
     <ClCompile Include="src\Holder\ShaderHolder.cpp" />

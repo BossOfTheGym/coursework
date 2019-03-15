@@ -1,20 +1,24 @@
-#include "Common.h"
+#include <Common.h>
 
-#include "Camera/Camera.h"
+#include <Camera/Camera.h>
 
-#include "Shader/Shader.h"
-#include "Shader/ShaderProgram.h"
-#include "Texture/Texture2D.h"
-#include "Model/VertexArrayBuffer.h"
+#include <Shader/Shader.h>
+#include <Shader/ShaderProgram.h>
 
+#include <Texture/Texture2D.h>
+
+#include <Model/VertexArrayBuffer.h>
+
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include <GLFW/glfw3.h>
-
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
 
 #include <map>
 
@@ -404,7 +408,6 @@ void featureTest()
     double t0;
     double t1;
     double delta;
-   
 
     t0 = glfwGetTime();
     glfwSetCursorPos(window, prevX, prevY);
@@ -412,6 +415,15 @@ void featureTest()
     {
         //prepare
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        planetProgram.use();
+        planetProgram.setUniform1f(inner, innerTess);
+        planetProgram.setUniform1f(outer, outerTess);
+        planetProgram.setUniformVec3(lightPos, vecLightPos);
+        planetProgram.setUniformVec3(lightColor, vecLightColor);
+        planetProgram.setUniformMat4(projection, matProj);
+        planetProgram.setUniformMat4(view, camera.mat());
+
 
         //render
         Texture2D::active(GL_TEXTURE0);
@@ -452,6 +464,7 @@ void featureTest()
         v -= dt * GM / dot * ur;
         r += dt * vj;
 
+        //swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -537,6 +550,11 @@ void processScene(const aiScene* scene)
 
 
     processNode(0, scene->mRootNode);
+}
+
+Model buildModel(const aiScene* scene)
+{
+
 }
 
 

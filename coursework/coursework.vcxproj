@@ -70,20 +70,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)/src/ImGui;$(ProjectDir)/src;D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\GL;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)/src/ImGui;$(ProjectDir)/src;D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\GL;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)/src/ImGui;$(ProjectDir)/src;D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\GL;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)/src/ImGui;$(ProjectDir)/src;D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\GL;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -162,14 +162,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="libs\inc\ImGui\imgui.cpp" />
-    <ClCompile Include="libs\inc\ImGui\imgui_demo.cpp" />
-    <ClCompile Include="libs\inc\ImGui\imgui_draw.cpp" />
-    <ClCompile Include="libs\inc\ImGui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="libs\inc\ImGui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="libs\inc\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="src\Camera\Camera.cpp" />
     <ClCompile Include="src\Holder\ShaderHolder.cpp" />
+    <ClCompile Include="src\ImGui\imgui.cpp" />
+    <ClCompile Include="src\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="src\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="src\ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Model\Mesh.cpp" />
     <ClCompile Include="src\Model\Model.cpp" />

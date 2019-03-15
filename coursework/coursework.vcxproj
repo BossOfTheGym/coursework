@@ -71,19 +71,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>D:\курсовая\coursework\coursework\libs\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\SFML;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\курсовая\coursework\coursework\libs\lib\GLFW;D:\курсовая\coursework\coursework\libs\lib\FreeImage;D:\курсовая\coursework\coursework\libs\lib\glm;D:\курсовая\coursework\coursework\libs\lib\assimp;D:\курсовая\coursework\coursework\libs\lib\glew;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -99,7 +99,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;FreeImage.lib;assimp-vc140-mt.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;FreeImage.lib;assimp-vc140-mt.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -116,7 +116,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;FreeImage.lib;assimp-vc140-mt.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;FreeImage.lib;assimp-vc140-mt.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -137,7 +137,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;FreeImage.lib;assimp-vc140-mt.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;FreeImage.lib;assimp-vc140-mt.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -158,11 +158,10 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;FreeImage.lib;assimp-vc140-mt.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;FreeImage.lib;assimp-vc140-mt.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="libs\inc\ImGui\imgui-SFML.cpp" />
     <ClCompile Include="libs\inc\ImGui\imgui.cpp" />
     <ClCompile Include="libs\inc\ImGui\imgui_demo.cpp" />
     <ClCompile Include="libs\inc\ImGui\imgui_draw.cpp" />

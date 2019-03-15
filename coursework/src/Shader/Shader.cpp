@@ -127,7 +127,7 @@ void Shader::resetShader()
 //checks
 bool Shader::valid() const
 {
-    return m_id == EMPTY;
+    return m_id != EMPTY;
 }
 
 bool Shader::compiled() const

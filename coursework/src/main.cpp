@@ -7,7 +7,6 @@
 
 
 #include <ImGui/imgui.h>
-#include <ImGui/imgui-SFML.h>
 
 #include <GLFW/glfw3.h>
 
@@ -21,10 +20,43 @@
 
 const int WIDTH  = 1200;
 const int HEIGHT = 900;
+ 
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+//
+void posCallback(GLFWwindow* window, double xPos, double yPos);
+//
+void errorCallback(int error, const char* description);
+
+GLFWwindow* createWindow()
+{
+    auto glfwErr = glfwInit();
+
+    GLFWwindow* win;
+
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glfwWindowHint(GLFW_STENCIL_BITS, 8);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+    win = glfwCreateWindow(WIDTH, HEIGHT, "PINGAS PROD", nullptr, nullptr);
+
+    glfwSetKeyCallback(win, keyCallback);
+    glfwSetCursorPosCallback(win, posCallback);
+    glfwSetErrorCallback(errorCallback);
+
+    glfwMakeContextCurrent(win);
+
+    auto glewErr = glewInit();
+
+    return win;
+}
 
 
 
-//xyz -> str
 void pushVertex(std::vector<float>& data, const glm::vec3& vertex, const glm::vec3& color, const glm::vec2& tex = glm::vec2())
 {
     data.push_back(vertex.x);
@@ -119,6 +151,20 @@ std::vector<float> getIcosahedron(int split = 0)
     return icosahedron;
 }
 
+VertexArrayBuffer createIcosahedron()
+{
+    VertexArrayBuffer ico(60, getIcosahedron());
+
+    ico.bindArray();
+    ico.setAttribPointer(0, 8 * sizeof(float), (void *)(0));
+    ico.setAttribPointer(1, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+    ico.setAttribPointer(2, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+    
+    return ico;
+}
+
+
+
 std::map<String, Shader> loadShaders()
 {    
     std::map<String, Shader> shaders;
@@ -142,81 +188,189 @@ std::map<String, Shader> loadShaders()
     return shaders;
 }
 
+
+
+Texture2D loadEarth()
+{
+    Texture2D earthTex("assets/textures/earth/earthmap1k.jpg");
+    earthTex.bind();
+    earthTex.texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP);
+    earthTex.texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP);
+    earthTex.texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    earthTex.texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    return earthTex;
+}
+
+
+
+ShaderProgram createPlanetProgram(std::map<String, Shader>& shadersHolder)
+{
+    ShaderProgram program;
+    program.attachShader(shadersHolder["assets/shaders/sphere.vs"]);
+    program.attachShader(shadersHolder["assets/shaders/sphere.tcs"]);
+    program.attachShader(shadersHolder["assets/shaders/sphere.tes"]);
+    program.attachShader(shadersHolder["assets/shaders/sphere.fs"]);
+
+    program.link();
+    if (!program.linked())
+    {
+        std::cerr << program.getInfoLog();
+    }
+
+    return program;
+}
+
+ShaderProgram createSatelliteProgram(std::map<String, Shader>& shadersHolder)
+{
+    ShaderProgram program;
+    program.attachShader(shadersHolder["assets/shaders/sphere.vs"]);
+    program.attachShader(shadersHolder["assets/shaders/sphere.tcs"]);
+    program.attachShader(shadersHolder["assets/shaders/sphere.tes"]);
+    program.attachShader(shadersHolder["assets/shaders/satellite.fs"]);
+
+    program.link();
+    if (!program.linked())
+    {
+        std::cerr << program.getInfoLog();
+    }
+
+    return program;
+}
+
+
+
+//globals
+GLFWwindow* window = createWindow();
+
+std::map<String, Shader> shaders = loadShaders();
+
+Texture2D earth = loadEarth();
+
+ShaderProgram planetProgram = createPlanetProgram(shaders);
+ShaderProgram satelliteProgram = createSatelliteProgram(shaders);
+
+GLint model = planetProgram.getUniformLocation("model");
+GLint view = planetProgram.getUniformLocation("view");
+GLint projection = planetProgram.getUniformLocation("projection");
+GLint lightPos = planetProgram.getUniformLocation("lightPos");
+GLint lightColor = planetProgram.getUniformLocation("lightColor");
+GLint inner = planetProgram.getUniformLocation("inner");
+GLint outer = planetProgram.getUniformLocation("outer");
+
+VertexArrayBuffer icosahedron = createIcosahedron();
+
+Camera camera(glm::lookAt(glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)), Vec3(0.0f, 0.0f, 30.0f));
+
+bool fill = false;
+
+float innerTess = 10.0f;
+float outerTess = 10.0f;
+float deltaTess = 0.2f;
+
+double prevX = WIDTH / 2;
+double prevY = HEIGHT / 2;
+
+
+
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    std::cout << "Key callback" << std::endl;
+
+    switch (key)
+    {
+        case (GLFW_KEY_C):
+        {
+            fill ^= true;
+            glPolygonMode(GL_FRONT_AND_BACK, (fill ? GL_FILL : GL_LINE));
+
+            break;
+        }
+
+        case (GLFW_KEY_W):
+        {
+            std::cout << camera.pos()[0] << " " << camera.pos()[1] << " " << camera.pos()[2] << " " << std::endl;
+            camera.travelView(0.2f);
+            break;
+        }
+        case (GLFW_KEY_S):
+        {
+            std::cout << camera.pos()[0] << " " << camera.pos()[1] << " " << camera.pos()[2] << " " << std::endl;
+            camera.travelView(-0.2f);
+            break;
+        }
+
+        case (GLFW_KEY_DOWN):
+        {
+            innerTess -= deltaTess;
+            innerTess = glm::clamp(innerTess, 1.0f, 16.0f);
+            std::cout << "Inner: " << innerTess << std::endl;
+
+            planetProgram.setUniform1f(inner, innerTess);
+
+            break;
+        }
+        case (GLFW_KEY_UP):
+        {
+            innerTess += deltaTess;
+            innerTess = glm::clamp(innerTess, 1.0f, 16.0f);
+            std::cout << "Inner: " << innerTess << std::endl;
+            planetProgram.setUniform1f(inner, innerTess);
+
+            break;
+        }
+
+        case (GLFW_KEY_LEFT):
+        {
+            outerTess -= deltaTess;
+            outerTess = glm::clamp(outerTess, 1.0f, 16.0f);
+            std::cout << "Outer: " << outerTess << std::endl;
+            planetProgram.setUniform1f(outer, outerTess);
+            break;
+        }
+        case (GLFW_KEY_RIGHT):
+        {
+            outerTess += deltaTess;
+            outerTess = glm::clamp(outerTess, 1.0f, 16.0f);
+            std::cout << "Outer: " << outerTess << std::endl;
+            planetProgram.setUniform1f(outer, outerTess);
+
+            break;
+        }
+        case (GLFW_KEY_R):
+        {
+            prevX = WIDTH / 2;
+            prevY = HEIGHT / 2;
+            glfwSetCursorPos(window, prevX, prevY);
+
+            break;
+        }
+    }
+}
+
+void posCallback(GLFWwindow* window, double xPos, double yPos)
+{
+    std::cout << "Pos callback" << std::endl;
+
+    if (prevX != -1 && prevY != -1)
+    {
+        camera.rotate(float(xPos - prevX), float(yPos - prevY));
+    }
+    prevX = xPos;
+    prevY = yPos;
+}
+
+void errorCallback(int error, const char* msg)
+{
+    std::cout << "Error callback" << std::endl;
+
+    std::cout << "ERROR: " << error << std::endl;
+    std::cout << "MSG: " << msg << std::endl;
+}
+
+
 void featureTest()
 {
-    //window
-    sf::ContextSettings settings;
-    settings.depthBits = 24;
-    settings.majorVersion = 4;
-    settings.minorVersion = 3;
-    settings.stencilBits = 8;
-
-    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "OpenGL", sf::Style::Default, settings);
-
-
-    //glew
-    auto err = glewInit();
-
-
-    //earth
-    Texture2D earth("assets/textures/earth/earthmap1k.jpg");
-    earth.bind();
-    earth.texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP);
-    earth.texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP);
-    earth.texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    earth.texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-
-    //shaders
-    auto shaders = loadShaders();
-
-
-    //program
-    ShaderProgram planetProgram;
-    planetProgram.attachShader(shaders["assets/shaders/sphere.vs"]);
-    planetProgram.attachShader(shaders["assets/shaders/sphere.tcs"]);
-    planetProgram.attachShader(shaders["assets/shaders/sphere.tes"]);
-    planetProgram.attachShader(shaders["assets/shaders/sphere.fs"]);
-
-
-    ShaderProgram satelliteProgram;
-    planetProgram.attachShader(shaders["assets/shaders/sphere.vs"]);
-    planetProgram.attachShader(shaders["assets/shaders/sphere.tcs"]);
-    planetProgram.attachShader(shaders["assets/shaders/sphere.tes"]);
-    planetProgram.attachShader(shaders["assets/shaders/satellite.fs"]);
-
-
-    planetProgram.link();
-    if (!planetProgram.linked())
-    {
-        std::cerr << planetProgram.getInfoLog();
-    }
-
-    satelliteProgram.link();
-    if (!satelliteProgram.linked())
-    {
-        std::cerr << satelliteProgram.getInfoLog();
-    }
-
-
-    //data
-    VertexArrayBuffer icosahedron(60, getIcosahedron());
-    icosahedron.bindArray();
-    icosahedron.setAttribPointer(0, 8 * sizeof(float), (void *)(0));
-    icosahedron.setAttribPointer(1, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-    icosahedron.setAttribPointer(2, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-
-
-    //uniforms
-    GLint model      = planetProgram.getUniformLocation("model");
-    GLint view       = planetProgram.getUniformLocation("view");
-    GLint projection = planetProgram.getUniformLocation("projection");
-    GLint lightPos   = planetProgram.getUniformLocation("lightPos");
-    GLint lightColor = planetProgram.getUniformLocation("lightColor");
-    GLint inner      = planetProgram.getUniformLocation("inner");
-    GLint outer      = planetProgram.getUniformLocation("outer");
-
-
     //setups
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -226,20 +380,12 @@ void featureTest()
 
     glViewport(0, 0, WIDTH, HEIGHT);
 
-    glClearColor(0.03f, 0.03f, 0.03f, 1.0f);
-
-    planetProgram.use();
-
-    window.setVerticalSyncEnabled(true);
-    window.setActive(true);
+    glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 
 
     //loop params
     glm::mat4 matProj = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 150.0f);
-    glm::mat4 matView = glm::lookAt(glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
-
-    Camera camera(matView, Vec3(0.0f, 0.0f, 30.0f));
 
     glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 0.0f, 1.0f));
@@ -254,132 +400,20 @@ void featureTest()
 
     const float GM = 2000.0;
 
-    sf::Clock tick;
-    sf::Int64 time0 = tick.getElapsedTime().asMicroseconds();
-    sf::Int64 time1;
-    sf::Int64 delta;
+    double t0;
+    double t1;
+    double delta;
 
-
-    bool running = true;
-    bool fill = false;
-    float innerTess = 10.0f;
-    float outerTess = 10.0f;
-    float deltaTess = 0.2f;
-    int prevX = WIDTH / 2;
-    int prevY = HEIGHT / 2;
-
-    planetProgram.setUniform1f(inner, innerTess);
-    planetProgram.setUniform1f(outer, outerTess);
-
-    while (running)
+    t0 = glfwGetTime();
+    glfwSetCursorPos(window, prevX, prevY);
+    while (!glfwWindowShouldClose(window))
     {
-        
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            switch (event.type)
-            {
-                case sf::Event::Closed:
-                {
-                    running = false;
-
-                    break;
-                }
-                case sf::Event::KeyPressed:
-                {
-                    switch (event.key.code)
-                    {
-                        case (sf::Keyboard::C):
-                        {
-                            fill ^= true;
-                            glPolygonMode(GL_FRONT_AND_BACK, (fill ? GL_FILL : GL_LINE));
-
-                            break;
-                        }
-
-                        case (sf::Keyboard::W):
-                        {
-                            camera.travelView(0.2f);
-                            break;
-                        }
-                        case (sf::Keyboard::S):
-                        {
-                            camera.travelView(-0.2f);
-                            break;
-                        }
-
-                        case (sf::Keyboard::Down):
-                        {
-                            innerTess -= deltaTess;
-                            innerTess = glm::clamp(innerTess, 1.0f, 16.0f);
-                            std::cout << "Inner: " << innerTess << std::endl;
-                            planetProgram.setUniform1f(inner, innerTess);
-
-                            break;
-                        }
-                        case (sf::Keyboard::Up):
-                        {
-                            innerTess += deltaTess;
-                            innerTess = glm::clamp(innerTess, 1.0f, 16.0f);
-                            std::cout << "Inner: " << innerTess << std::endl;
-                            planetProgram.setUniform1f(inner, innerTess);
-
-                            break;
-                        }
-
-                        case (sf::Keyboard::Left):
-                        {
-                            outerTess -= deltaTess;
-                            outerTess = glm::clamp(outerTess, 1.0f, 16.0f);
-                            std::cout << "Outer: " << outerTess << std::endl;
-                            planetProgram.setUniform1f(outer, outerTess);
-                            break;
-                        }
-                        case (sf::Keyboard::Right):
-                        {
-                            outerTess += deltaTess;
-                            outerTess = glm::clamp(outerTess, 1.0f, 16.0f);
-                            std::cout << "Outer: " << outerTess << std::endl;
-                            planetProgram.setUniform1f(outer, outerTess);
-                            break;
-                        }
-                        case (sf::Keyboard::R):
-                        {
-                           prevX = WIDTH / 2;
-                           prevY = HEIGHT / 2;
-                           sf::Mouse::setPosition({prevX, prevY}, window);
-
-                           break;
-                        }
-                    }
-
-                    break;
-                }
-                case sf::Event::MouseMoved:
-                {
-                    if (prevX != -1 && prevY != -1)
-                    {
-                        camera.rotate(float(event.mouseMove.x - prevX), float(event.mouseMove.y - prevY));
-                    }
-                    prevX = event.mouseMove.x;
-                    prevY = event.mouseMove.y;
-
-                    break;
-                }
-                case sf::Event::MouseEntered:
-                {
-                    prevX = WIDTH / 2;
-                    prevY = HEIGHT / 2;
-                    sf::Mouse::setPosition({prevX, prevY}, window);
-
-                    break;
-                }
-            }
-        }
-
         //prepare
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        planetProgram.use();
+        planetProgram.setUniform1f(inner, innerTess);
+        planetProgram.setUniform1f(outer, outerTess);
 
         planetProgram.setUniformVec3(lightPos, vecLightPos);
         planetProgram.setUniformVec3(lightColor, vecLightColor);
@@ -413,26 +447,27 @@ void featureTest()
 
 
         //delta
-        time1 = tick.getElapsedTime().asMicroseconds();
-        delta = time1 - time0;
-        time0 = time1;
+        t1 = glfwGetTime();
+        delta = (t1 - t0);
+        t0 = t1;
 
         auto vj = v;
         auto rj = r;
-        auto dt = delta / (2 * 1e6f);
         auto dot = glm::dot(r, r);
         auto ur = glm::normalize(r);
+
+        float dt = delta;
 
         v -= dt * GM / dot * ur;
         r += dt * vj;
 
-        //display frame
-        window.display();
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
-
-
-
 
 
 

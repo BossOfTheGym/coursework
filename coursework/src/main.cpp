@@ -8,6 +8,8 @@
 #include <Texture/Texture2D.h>
 
 #include <Model/VertexArrayBuffer.h>
+#include <Model/Mesh.h>
+#include <Model/Model.h>
 
 
 #include <imgui.h>
@@ -583,7 +585,6 @@ void testAssimp()
 {
     importModel();
 }
-
 
 
 

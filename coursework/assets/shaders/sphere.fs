@@ -1,9 +1,10 @@
 #version 430 core
 
-in vec4 tesModelPos;
-in vec4 tesWorldPos;
-in vec3 tesColor;
-in vec3 tesNormal;
+in vec4 geoModelPos;
+in vec4 geoWorldPos;
+in vec3 geoColor;
+in vec3 geoNormal;
+in vec3 geoGomo;
 
 out vec4 FragColor;
 
@@ -15,28 +16,30 @@ uniform sampler2D mapMain;
 uniform sampler2D specularMap;
 uniform sampler2D mapBump;
 
+
 const float PI = acos(-1.0f); 
 const float PI_2 = 2 * PI;
+
 
 void main()
 {
 	// ambient
 	vec3 ambientVec;
-	float ambientStrength = 0.08f;
+	float ambientStrength = 0.1f;
 	ambientVec = ambientStrength * lightColor;			
 
     // diffuse 
     vec3 diffuseVec;
-    vec3 lightDir = normalize(lightPos - tesWorldPos.xyz);
+    vec3 lightDir = normalize(lightPos - geoWorldPos.xyz);
 
-    float diff = max(dot(tesNormal, lightDir), 0.0f);
+    float diff = max(dot(geoNormal, lightDir), 0.0f);
     diffuseVec = diff * lightColor;	
 
     //resulting light
     vec3 light = ambientVec + diffuseVec;
 
     //texel obtainment
-    vec3 spherePos = normalize(tesModelPos.xyz);
+    vec3 spherePos = normalize(geoModelPos.xyz);
     vec2 circlePos = normalize(spherePos.xy);
 
     float latitude  = acos(spherePos.z);
@@ -49,8 +52,15 @@ void main()
     vec2 texCoord;
     texCoord.s = clamp(longitude / PI_2, 0.0f, 1.0f);
 	texCoord.t = clamp(1.0f - latitude / PI   , 0.0f, 1.0f);
+    vec4 tex = texture(mapMain, texCoord);
+
+
+	//edge
+	if(abs(geoGomo[0]) < 0.03f || abs(geoGomo[1]) < 0.03f || abs(geoGomo[2]) < 0.03f)
+	{
+		tex = vec4(0.0);
+	}
 
 	//result
-    vec4 tex = texture(mapMain, texCoord);
-    FragColor = vec4(clamp(light, vec3(0.0f), vec3(1.0f)) * tex.xyz, 1.0f);
+    FragColor = vec4(light * tex.xyz, 1.0f);
 }

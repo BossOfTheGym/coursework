@@ -8,7 +8,6 @@
 #include <Texture/Texture2D.h>
 
 #include <Model/VertexArrayBuffer.h>
-#include <Model/Mesh.h>
 #include <Model/Model.h>
 
 
@@ -28,6 +27,9 @@
 const int WIDTH  = 1200;
 const int HEIGHT = 900;
  
+
+using namespace std::chrono;
+
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 //
@@ -179,6 +181,7 @@ std::map<String, Shader> loadShaders()
     shaders.insert({"assets/shaders/sphere.vs", Shader(Shader::Vertex, "assets/shaders/sphere.vs")});
     shaders.insert({"assets/shaders/sphere.tcs", Shader(Shader::TessControl, "assets/shaders/sphere.tcs")});
     shaders.insert({"assets/shaders/sphere.tes", Shader(Shader::TessEvaluation, "assets/shaders/sphere.tes")});
+    shaders.insert({"assets/shaders/sphere.gs", Shader(Shader::Geometry, "assets/shaders/sphere.gs")});
     shaders.insert({"assets/shaders/sphere.fs", Shader(Shader::Fragment, "assets/shaders/sphere.fs")});
 
     shaders.insert({"assets/shaders/setellite.fs", Shader(Shader::Fragment, "assets/shaders/satellite.fs")});
@@ -188,6 +191,7 @@ std::map<String, Shader> loadShaders()
     {
         if (!shader.compiled())
         {
+            std::cerr << "FAILED TO COMPILE SHADER: " << location << std::endl;
             std::cerr << shader.getInfoLog();
         }
     }
@@ -216,6 +220,7 @@ ShaderProgram createPlanetProgram(std::map<String, Shader>& shadersHolder)
     program.attachShader(shadersHolder["assets/shaders/sphere.vs"]);
     program.attachShader(shadersHolder["assets/shaders/sphere.tcs"]);
     program.attachShader(shadersHolder["assets/shaders/sphere.tes"]);
+    program.attachShader(shadersHolder["assets/shaders/sphere.gs"]);
     program.attachShader(shadersHolder["assets/shaders/sphere.fs"]);
 
     program.link();
@@ -282,65 +287,28 @@ double prevY = HEIGHT / 2;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    std::cout << "Key callback" << std::endl;
-
     switch (key)
     {
         case (GLFW_KEY_C):
         {
-            fill ^= true;
-            glPolygonMode(GL_FRONT_AND_BACK, (fill ? GL_FILL : GL_LINE));
+            if (action == GLFW_PRESS)
+            {
+                fill ^= true;
+                glPolygonMode(GL_FRONT_AND_BACK, (fill ? GL_FILL : GL_LINE));
+            }
 
             break;
         }
 
         case (GLFW_KEY_W):
         {
-            std::cout << camera.pos()[0] << " " << camera.pos()[1] << " " << camera.pos()[2] << " " << std::endl;
-            camera.travelView(0.2f);
+            camera.travelView(0.5f);
+
             break;
         }
         case (GLFW_KEY_S):
         {
-            std::cout << camera.pos()[0] << " " << camera.pos()[1] << " " << camera.pos()[2] << " " << std::endl;
-            camera.travelView(-0.2f);
-            break;
-        }
-
-        case (GLFW_KEY_DOWN):
-        {
-            innerTess -= deltaTess;
-            innerTess = glm::clamp(innerTess, 1.0f, 16.0f);
-            std::cout << "Inner: " << innerTess << std::endl;
-
-            planetProgram.setUniform1f(inner, innerTess);
-
-            break;
-        }
-        case (GLFW_KEY_UP):
-        {
-            innerTess += deltaTess;
-            innerTess = glm::clamp(innerTess, 1.0f, 16.0f);
-            std::cout << "Inner: " << innerTess << std::endl;
-            planetProgram.setUniform1f(inner, innerTess);
-
-            break;
-        }
-
-        case (GLFW_KEY_LEFT):
-        {
-            outerTess -= deltaTess;
-            outerTess = glm::clamp(outerTess, 1.0f, 16.0f);
-            std::cout << "Outer: " << outerTess << std::endl;
-            planetProgram.setUniform1f(outer, outerTess);
-            break;
-        }
-        case (GLFW_KEY_RIGHT):
-        {
-            outerTess += deltaTess;
-            outerTess = glm::clamp(outerTess, 1.0f, 16.0f);
-            std::cout << "Outer: " << outerTess << std::endl;
-            planetProgram.setUniform1f(outer, outerTess);
+            camera.travelView(-0.5f);
 
             break;
         }
@@ -357,8 +325,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void posCallback(GLFWwindow* window, double xPos, double yPos)
 {
-    std::cout << "Pos callback" << std::endl;
-
     if (prevX != -1 && prevY != -1)
     {
         camera.rotate(float(xPos - prevX), float(yPos - prevY));
@@ -466,6 +432,8 @@ void featureTest()
         v -= dt * GM / dot * ur;
         r += dt * vj;
 
+        std::this_thread::sleep_for(10ms);
+
         //swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -554,10 +522,6 @@ void processScene(const aiScene* scene)
     processNode(0, scene->mRootNode);
 }
 
-Model buildModel(const aiScene* scene)
-{
-
-}
 
 
 bool importModel()

@@ -314,16 +314,29 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
         case (GLFW_KEY_W):
         {
-            camera.travelView(0.5f);
+
+            camera.travelView(0.3f, Camera::Z);
 
             break;
         }
         case (GLFW_KEY_S):
         {
-            camera.travelView(-0.5f);
+            camera.travelView(-0.3f, Camera::Z);
 
             break;
         }
+		case (GLFW_KEY_A):
+		{
+			camera.travelView(0.3f, Camera::X);
+
+			break;
+		}
+		case (GLFW_KEY_D):
+		{
+			camera.travelView(-0.3, Camera::X);
+
+			break;
+		}
         case (GLFW_KEY_R):
         {
             prevX = WIDTH / 2;
@@ -339,7 +352,21 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
 {
     if (prevX != -1 && prevY != -1)
     {
-        camera.rotate(float(xPos - prevX), float(yPos - prevY));
+		Camera::Axis axis1;
+		Camera::Axis axis2;
+
+		if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		{
+			axis1 = Camera::Z;
+			axis2 = Camera::X;
+		}
+		else
+		{
+			axis1 = Camera::Y;
+			axis2 = Camera::X;
+		}
+		camera.rotate(xPos - prevX, axis1);
+		camera.rotate(yPos - prevY, axis2);
     }
     prevX = xPos;
     prevY = yPos;
@@ -372,7 +399,7 @@ void featureTest()
     glm::mat4 matProj = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 300.0f);
     glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
 
-    glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
+    glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(0.3f));
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 0.0f, 1.0f));
 
     glm::vec3 vecLightPos   = glm::vec3(50.0f, 50.0f, 0.0f);
@@ -622,9 +649,9 @@ void testAssimp()
 
 int main(int argc, char* argv[])
 {
-    //featureTest();
+    featureTest();
 
-	testGui();
+	//testGui();
 
     //testAssimp();
 

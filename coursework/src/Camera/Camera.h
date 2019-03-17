@@ -6,9 +6,19 @@
 class Camera
 {
 public:
-    static const int DEFAULT_SENSITIVITY = 200;
+    static const int DEFAULT_SENSITIVITY;
+
+	static const float DELTA_THRESHOLD;
+
+	enum Axis : int
+	{
+		  X = 0
+		, Y = 1
+		, Z = 2
+	};
 
 
+public:
     Camera(const Camera& camera) = default;
 
     Camera(Camera&& camera) = default;
@@ -29,9 +39,9 @@ public:
     void lookAt();
 
 
-    void rotate(float dHorisont, float dVertical);
+    void rotate(float delta, Axis axis);
 
-    void travelView(float distance);
+    void travelView(float distance, Axis axis);
 
 
 
@@ -46,11 +56,11 @@ public:
 
 
 private:
-    Mat4 m_mat;
+    Mat4 mMat;
 
-    Vec3 m_pos;
+    Vec3 mPos;
 
-    int m_sensivity;
+    int mSensivity;
 
 
     void updateMat();

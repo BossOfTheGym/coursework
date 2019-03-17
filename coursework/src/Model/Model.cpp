@@ -5,11 +5,13 @@
 
 
 //===SharedBlock===
-Model::SharedBlock::SharedBlock(UInt numMeshes, UInt numNodes)
+Model::SharedBlock::SharedBlock(UInt numMeshes, UInt numNodes, UInt numMaterials)
     : mNumMeshes(numMeshes)
     , mNumNodes(numNodes)
+    , mNumMaterials(numMaterials)
     , mMeshes(new Mesh[numMeshes])
     , mNodes(new Node[numNodes])
+    , mMaterials(new Texture2D[numMaterials])//TODO
 {}
 
 
@@ -22,8 +24,65 @@ Model::Model()
 
 
 Model::Model(const aiScene* scene)
+    : mObjectBlock()
+    , mSharedBlock(new SharedBlock())
 {
-    //TODO
+    std::function<UInt(const aiNode*)> countNodes = [&] (const aiNode* node) -> UInt
+    {
+        UInt count = 0;
+
+        if (node != nullptr)
+        {
+            count = node->mNumChildren;
+            for (UInt i = 0; i < node->mNumChildren; i++)
+            {
+                count += countNodes(node->mChildren[i]);
+            }
+        }
+
+        return count;
+    };
+
+    std::function<void(UInt&, std::map<const aiNode*, UInt>&, const aiNode*)> fillNodes =
+        [&, this] (UInt& label, std::map<const aiNode*, UInt>& mapping, const aiNode* node) -> void
+    {
+        if (node != nullptr)
+        {
+            UInt currLabel = label;
+
+            mapping[node] = label++;
+            for (UInt i = 0; i < node->mNumChildren; i++)
+            {
+                fillNodes(label, mapping, node->mChildren[i]);
+            }
+
+            mSharedBlock->mNodes[currLabel] = Node(mapping, node);
+        }
+    };
+
+
+    //nodes
+    UInt nodes = countNodes(scene->mRootNode);
+    mSharedBlock->mNumNodes = nodes;
+    mSharedBlock->mNodes.reset(new Node[nodes]);
+
+    UInt label = 0;
+    std::map<const aiNode*, UInt> mapping;
+    fillNodes(label, mapping, scene->mRootNode);
+
+
+    //meshes
+    UInt meshes = scene->mNumMeshes;
+    mSharedBlock->mNumMeshes = meshes;
+    mSharedBlock->mMeshes.reset(new Mesh[meshes]);
+    for (UInt i = 0; i < meshes; i++)
+    {
+        mSharedBlock->mMeshes[i] = Mesh(scene->mMeshes[i]);
+    }
+
+
+    //materials
+
 }
 
 

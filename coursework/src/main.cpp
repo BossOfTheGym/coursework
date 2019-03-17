@@ -261,11 +261,12 @@ Texture2D earth = loadEarth();
 ShaderProgram planetProgram = createPlanetProgram(shaders);
 ShaderProgram satelliteProgram = createSatelliteProgram(shaders);
 
-GLint model = planetProgram.getUniformLocation("model");
-GLint view = planetProgram.getUniformLocation("view");
+GLint model      = planetProgram.getUniformLocation("model");
+GLint view       = planetProgram.getUniformLocation("view");
 GLint projection = planetProgram.getUniformLocation("projection");
-GLint lightPos = planetProgram.getUniformLocation("lightPos");
+GLint lightPos   = planetProgram.getUniformLocation("lightPos");
 GLint lightColor = planetProgram.getUniformLocation("lightColor");
+
 GLint inner = planetProgram.getUniformLocation("inner");
 GLint outer = planetProgram.getUniformLocation("outer");
 
@@ -281,7 +282,6 @@ float deltaTess = 0.2f;
 
 double prevX = WIDTH / 2;
 double prevY = HEIGHT / 2;
-
 
 
 
@@ -555,9 +555,9 @@ void testAssimp()
 
 int main(int argc, char* argv[])
 {
-    featureTest();
+    //featureTest();
 
-    //testAssimp();
+    testAssimp();
 
 
 

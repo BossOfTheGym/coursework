@@ -1,5 +1,10 @@
 #pragma once
 
+#include <functional>
+#include <map>
+#include <vector>
+
+
 #include <assimp/scene.h>
 
 
@@ -27,12 +32,8 @@ public:
 
     struct ObjectBlock
     {
-        UInt mParent;
-
-        Mat4 mTransform;
-
-        
-        ObjectBlock(const UInt& parent, const aiMatrix4x4& transform);
+    public:
+        ObjectBlock(const aiMatrix4x4& transform = aiMatrix4x4());
 
         ObjectBlock(const ObjectBlock& ob) = default;
 
@@ -42,20 +43,18 @@ public:
         ObjectBlock& operator = (const ObjectBlock& ob) = default;
 
         ObjectBlock& operator = (ObjectBlock&& ob) = default;
+
+
+    public:
+        Mat4 mTransform;
     };
     using Object = ObjectBlock;
 
 
     struct SharedBlock
     {
-        UInt mNumChildren;
-        Indices mChildren;
-
-        UInt mNumMeshes;
-        Indices mMeshes;
-
-
-        SharedBlock();
+    public:
+        SharedBlock(UInt numChildren = 0, UInt numMeshes = 0);
 
         SharedBlock(const SharedBlock& sharedBlock) = delete;
 
@@ -65,6 +64,16 @@ public:
         SharedBlock& operator = (const SharedBlock& sharedBlock) = delete;
 
         SharedBlock& operator = (SharedBlock&& sharedBlock) = delete;
+
+
+    public:
+        UInt mNumChildren;
+        Indices mChildren;
+
+        UInt mNumMeshes;
+        Indices mMeshes;
+
+
     };
     using Shared = std::shared_ptr<SharedBlock>;
 
@@ -72,7 +81,7 @@ public:
 public:
     Node();
 
-    Node(const aiNode* node);
+    Node(std::map<const aiNode*, UInt>& mapping, const aiNode* node);
 
     Node(const Node& node);
 
@@ -102,9 +111,6 @@ public:
 
     const Mat4& transform() const;
 
-   
-    const UInt& parent() const;
-
 
 private:
     Object mObjectBlock;
@@ -121,6 +127,7 @@ public:
 
     struct ObjectBlock
     {
+    public:
         ObjectBlock() = default;
 
         ObjectBlock(const ObjectBlock& ob) = default;
@@ -137,11 +144,8 @@ public:
 
     struct SharedBlock
     {
-        UInt mMaterialIndex;
-        VAB mVertexBuffer;
-
-
-        SharedBlock(UInt materialIndex, VAB&& vab = VAB());
+    public:
+        SharedBlock(UInt materialIndex = 0, VAB&& vab = VAB());
 
         SharedBlock(const SharedBlock& sb) = delete;
 
@@ -151,6 +155,11 @@ public:
         SharedBlock& operator = (const SharedBlock& sb) = delete;
 
         SharedBlock& operator = (SharedBlock&& sb) = delete;
+
+
+    public:
+        UInt mMaterialIndex;
+        VAB mVertexBuffer;
     };
     using Shared = std::shared_ptr<SharedBlock>;
 
@@ -189,12 +198,14 @@ class Model
 {
 public:
     using UInt = unsigned int;
-    using Meshes = std::unique_ptr<Mesh[]>;
-    using Nodes  = std::unique_ptr<Node[]>;
+    using Meshes   = std::unique_ptr<Mesh[]>;
+    using Nodes    = std::unique_ptr<Node[]>;
+    using Materials = std::unique_ptr<Texture2D[]>;
 
 
     struct ObjectBlock
     {
+    public:
         ObjectBlock() = default;
 
         ObjectBlock(const ObjectBlock& ob) = default;
@@ -211,14 +222,8 @@ public:
 
     struct SharedBlock
     {
-        UInt mNumMeshes;
-        Meshes mMeshes;
-
-        UInt mNumNodes;
-        Nodes mNodes;
-
-
-        SharedBlock(UInt numMeshes, UInt numNodes);
+    public:
+        SharedBlock(UInt numMeshes = 0, UInt numNodes = 0, UInt numMaterials = 0);
 
         SharedBlock(const SharedBlock& sb) = delete;
 
@@ -228,6 +233,17 @@ public:
         SharedBlock& operator = (const SharedBlock& sb) = delete;
 
         SharedBlock& operator = (SharedBlock&& sb) = delete;
+
+
+    public:
+        UInt mNumMeshes;
+        Meshes mMeshes;
+
+        UInt mNumNodes;
+        Nodes mNodes;
+
+        UInt mNumMaterials;
+        Materials mMaterials;
     };
     using Shared = std::shared_ptr<SharedBlock>;
     

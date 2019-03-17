@@ -13,9 +13,20 @@ Mesh::SharedBlock::SharedBlock(Mesh::UInt materialIndex, Mesh::VAB&& vao)
 
 //===Mesh===
 //constructors & destructors
+Mesh::Mesh()
+    : mObjectBlock()
+    , mSharedBlock()
+{}
+
 Mesh::Mesh(const aiMesh* mesh)
+    : mObjectBlock()
+    , mSharedBlock(new SharedBlock())
 {
     //TODO
+    mSharedBlock->mMaterialIndex = mesh->mMaterialIndex;
+
+    //fill
+
 }
 
 

@@ -3,9 +3,8 @@
 
 //===ObjectBlock===
 //constructors and destructors
-Node::ObjectBlock::ObjectBlock(Node::UInt parent, const aiMatrix4x4& transform)
-    : mParent(parent)
-    , mTransform(aiMatrix4x4
+Node::ObjectBlock::ObjectBlock(const aiMatrix4x4& transform)
+    : mTransform(
           transform[0][0], transform[1][0], transform[2][0], transform[3][0]
         , transform[0][1], transform[1][1], transform[2][1], transform[3][1]
         , transform[0][2], transform[1][2], transform[2][2], transform[3][2]
@@ -26,9 +25,24 @@ Node::SharedBlock::SharedBlock(Node::UInt numChildren, Node::UInt numMeshes)
 
 //===Node===
 //constructors & destructor
-Node::Node(const aiNode* node)
+Node::Node()
+    : mObjectBlock()
+    , mSharedBlock()
+{}
+
+Node::Node(std::map<const aiNode*, UInt>& mapping, const aiNode* node)
+    : mObjectBlock(node->mTransformation)
+    , mSharedBlock(new SharedBlock(node->mNumChildren, node->mNumMeshes))
 {
-    //TODO
+    for (UInt i = 0; i < node->mNumChildren; i++)
+    {
+
+    }
+
+    for (UInt i = 0; i < node->mNumMeshes; i++)
+    {
+        mSharedBlock->mMeshes[i] = node->mMeshes[i];
+    }
 }
 
 
@@ -106,10 +120,4 @@ Mat4& Node::transform()
 const Mat4& Node::transform() const
 {
     return mObjectBlock.mTransform;
-}
-
-
-const Node::UInt& Node::parent() const
-{
-    return mObjectBlock.mParent;
 }

@@ -44,8 +44,8 @@ GLFWwindow* createWindow()
     GLFWwindow* win;
 
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-    glfwWindowHint(GLFW_DEPTH_BITS, 24);
-    glfwWindowHint(GLFW_STENCIL_BITS, 8);
+    glfwWindowHint(GLFW_DEPTH_BITS, 32);
+    glfwWindowHint(GLFW_STENCIL_BITS, 32);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -184,7 +184,7 @@ std::map<String, Shader> loadShaders()
     shaders.insert({"assets/shaders/sphere.gs", Shader(Shader::Geometry, "assets/shaders/sphere.gs")});
     shaders.insert({"assets/shaders/sphere.fs", Shader(Shader::Fragment, "assets/shaders/sphere.fs")});
 
-    shaders.insert({"assets/shaders/setellite.fs", Shader(Shader::Fragment, "assets/shaders/satellite.fs")});
+    shaders.insert({"assets/shaders/satellite.fs", Shader(Shader::Fragment, "assets/shaders/satellite.fs")});
 
 
     for (const auto&[location, shader] : shaders)
@@ -259,16 +259,28 @@ std::map<String, Shader> shaders = loadShaders();
 Texture2D earth = loadEarth();
 
 ShaderProgram planetProgram = createPlanetProgram(shaders);
+GLint planetModel      = planetProgram.getUniformLocation("model");
+GLint planetView       = planetProgram.getUniformLocation("view");
+GLint planetProjection = planetProgram.getUniformLocation("projection");
+GLint planetLightPos   = planetProgram.getUniformLocation("lightPos");
+GLint planetLightColor = planetProgram.getUniformLocation("lightColor");
+
+GLint planetInner = planetProgram.getUniformLocation("inner");
+GLint planetOuter = planetProgram.getUniformLocation("outer");
+
+
 ShaderProgram satelliteProgram = createSatelliteProgram(shaders);
+GLint satelliteModel      = satelliteProgram.getUniformLocation("model");
+GLint satelliteView       = satelliteProgram.getUniformLocation("view");
+GLint satelliteProjection = satelliteProgram.getUniformLocation("projection");
+GLint satelliteLightPos   = satelliteProgram.getUniformLocation("lightPos");
+GLint satelliteLightColor = satelliteProgram.getUniformLocation("lightColor");
 
-GLint model      = planetProgram.getUniformLocation("model");
-GLint view       = planetProgram.getUniformLocation("view");
-GLint projection = planetProgram.getUniformLocation("projection");
-GLint lightPos   = planetProgram.getUniformLocation("lightPos");
-GLint lightColor = planetProgram.getUniformLocation("lightColor");
+GLint satelliteColor = satelliteProgram.getUniformLocation("color");
 
-GLint inner = planetProgram.getUniformLocation("inner");
-GLint outer = planetProgram.getUniformLocation("outer");
+GLint satelliteInner = satelliteProgram.getUniformLocation("inner");
+GLint satelliteOuter = satelliteProgram.getUniformLocation("outer");
+
 
 VertexArrayBuffer icosahedron = createIcosahedron();
 
@@ -284,7 +296,7 @@ double prevX = WIDTH / 2;
 double prevY = HEIGHT / 2;
 
 
-
+//main
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     switch (key)
@@ -357,10 +369,10 @@ void featureTest()
 
 
     //loop params
-    glm::mat4 matProj = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 150.0f);
+    glm::mat4 matProj = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 300.0f);
     glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
 
-    glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
+    glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 0.0f, 1.0f));
 
     glm::vec3 vecLightPos   = glm::vec3(50.0f, 50.0f, 0.0f);
@@ -368,8 +380,11 @@ void featureTest()
 
 
     //orbit
-    glm::vec3 r(0.0f, 7.0f, 0.0f);
-    glm::vec3 v(16.0f, 0.0f, 0.0f);
+    glm::vec3 r1(0.0f, 7.0f, 0.0f);
+    glm::vec3 v1(16.0f, 0.0f, 0.0f);	
+
+	glm::vec3 r2(7.0f, 0.0f, 7.0f);
+	glm::vec3 v2(-5.0f, 14.0f, -5.0f);
 
     const float GM = 2000.0;
 
@@ -384,32 +399,46 @@ void featureTest()
         //prepare
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		//planet
         planetProgram.use();
-        planetProgram.setUniform1f(inner, innerTess);
-        planetProgram.setUniform1f(outer, outerTess);
-        planetProgram.setUniformVec3(lightPos, vecLightPos);
-        planetProgram.setUniformVec3(lightColor, vecLightColor);
-        planetProgram.setUniformMat4(projection, matProj);
-        planetProgram.setUniformMat4(view, camera.mat());
+        planetProgram.setUniform1f(planetInner, innerTess);
+        planetProgram.setUniform1f(planetOuter, outerTess);
+        planetProgram.setUniformVec3(planetLightPos, vecLightPos);
+        planetProgram.setUniformVec3(planetLightColor, vecLightColor);
+        planetProgram.setUniformMat4(planetProjection, matProj);
+        planetProgram.setUniformMat4(planetView, camera.mat());
+        planetProgram.setUniformMat4(planetModel, matModel);
 
-
-        //render
         Texture2D::active(GL_TEXTURE0);
         earth.bind();
+
         icosahedron.bindArray();
-
-
-        //planet
-        planetProgram.setUniformMat4(model, matModel);
         glDrawArrays(GL_PATCHES, 0, 60);
-        
 
+	
         //sat
+		satelliteProgram.use();
+		satelliteProgram.setUniform1f(satelliteInner, innerTess);
+		satelliteProgram.setUniform1f(satelliteOuter, outerTess);
+		satelliteProgram.setUniformVec3(satelliteLightPos, vecLightPos);
+		satelliteProgram.setUniformVec3(satelliteLightColor, vecLightColor);
+		satelliteProgram.setUniformMat4(satelliteProjection, matProj);
+		satelliteProgram.setUniformMat4(satelliteView, camera.mat());
         auto m = second;
-        m[3] = Vec4(r, 1.0f);
+        m[3] = Vec4(r1, 1.0f);
+		planetProgram.setUniformMat4(satelliteModel, m);
+		satelliteProgram.setUniformVec3(satelliteColor, Vec3(1.0f, 0.0, 0.0));
 
-        planetProgram.setUniformMat4(model, m);
+		icosahedron.bindArray();
         glDrawArrays(GL_PATCHES, 0, 60);
+
+		m = second;
+		m[3] = Vec4(r2, 1.0f);
+		planetProgram.setUniformMat4(satelliteModel, m);
+		satelliteProgram.setUniformVec3(satelliteColor, Vec3(0.0f, 0.0, 1.0));
+
+		icosahedron.bindArray();
+		glDrawArrays(GL_PATCHES, 0, 60);
 
 
         //update
@@ -422,15 +451,16 @@ void featureTest()
         delta = (t1 - t0);
         t0 = t1;
 
-        auto vj = v;
-        auto rj = r;
-        auto dot = glm::dot(r, r);
-        auto ur = glm::normalize(r);
-
         float dt = delta / 10;
 
-        v -= dt * GM / dot * ur;
-        r += dt * vj;
+        auto vj = v1;
+        v1 -= dt * GM / glm::dot(r1, r1) * glm::normalize(r1);
+        r1 += dt * vj;
+
+		vj = v2;
+		v2 -= dt * GM / glm::dot(r2, r2) * glm::normalize(r2);
+		r2 += dt * vj;
+
 
         std::this_thread::sleep_for(10ms);
 
@@ -445,7 +475,46 @@ void featureTest()
 
 
 
+//test gui
+void initGui()
+{
 
+}
+
+void renderGui()
+{
+
+}
+
+void destroyGui()
+{
+
+}
+
+
+void testGui()
+{
+    auto guiWindow = createWindow();
+
+    initGui();
+
+    while (!glfwWindowShouldClose(guiWindow))
+    {
+        glfwPollEvents();
+
+        renderGui();
+
+        glfwSwapBuffers(guiWindow);
+    }
+
+    destroyGui();
+
+    glfwDestroyWindow(guiWindow);
+    glfwTerminate();
+}
+
+
+//test assimp
 std::ostream& offset(int shift)
 {
     for (int i = 0; i < shift; i++)
@@ -522,8 +591,6 @@ void processScene(const aiScene* scene)
     processNode(0, scene->mRootNode);
 }
 
-
-
 bool importModel()
 {
     Assimp::Importer importer;
@@ -557,7 +624,9 @@ int main(int argc, char* argv[])
 {
     //featureTest();
 
-    testAssimp();
+	testGui();
+
+    //testAssimp();
 
 
 

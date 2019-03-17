@@ -2,8 +2,8 @@
 
 in vec4 tesModelPos;
 in vec4 tesWorldPos;
-in vec3 tesColor;
 in vec3 tesNormal;
+in vec3 tesColor;
 
 out vec4 FragColor;
 

@@ -14,7 +14,7 @@ public:
 
 
 public:
-    ShaderProgram();
+    ShaderProgram(const String& name = "");
 
     ShaderProgram(const ShaderProgram& shaderProgram) = delete;
 
@@ -74,12 +74,14 @@ public:
     const String& getInfoLog();
 
 
-    virtual void fake();
+    virtual const String& toString() const;
 
 private:
     void resetProgram();
 
 
 private:
-    GLuint m_id;
+    GLuint mId;
+
+    String mName;
 };

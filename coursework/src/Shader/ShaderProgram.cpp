@@ -6,12 +6,15 @@ thread_local String ShaderProgram::INFO_LOG;
 
 
 //constructors & destructor
-ShaderProgram::ShaderProgram() : m_id(glCreateProgram())
+ShaderProgram::ShaderProgram(const String& name) 
+    : mId(glCreateProgram())
+    , mName(name)
 {}
 
 ShaderProgram::ShaderProgram(ShaderProgram&& shaderProgram)
 {
-    m_id = shaderProgram.m_id;
+    mId = shaderProgram.mId;
+    mName = shaderProgram.mName;
 
     shaderProgram.resetProgram();
 }
@@ -28,7 +31,7 @@ ShaderProgram& ShaderProgram::operator = (ShaderProgram&& shaderProgram)
 {
     deleteProgram();
 
-    m_id = shaderProgram.m_id;
+    mId = shaderProgram.mId;
 
     shaderProgram.resetProgram();
 
@@ -39,23 +42,23 @@ ShaderProgram& ShaderProgram::operator = (ShaderProgram&& shaderProgram)
 //core functions
 void ShaderProgram::attachShader(const Shader& shader)
 {
-    glAttachShader(m_id, shader.getId());
+    glAttachShader(mId, shader.getId());
 }
 
 void ShaderProgram::detachShader(const Shader& shader)
 {
-    glDetachShader(m_id, shader.getId());
+    glDetachShader(mId, shader.getId());
 }
 
 
 void ShaderProgram::link()
 {
-    glLinkProgram(m_id);
+    glLinkProgram(mId);
 }
 
 void ShaderProgram::use()
 {
-    glUseProgram(m_id);
+    glUseProgram(mId);
 }
 
 
@@ -91,47 +94,48 @@ void ShaderProgram::setUniform1f(GLint location, float value)
 //locations
 GLint ShaderProgram::getUniformLocation(const String& name)
 {
-    return glGetUniformLocation(m_id, name.c_str());
+    return glGetUniformLocation(mId, name.c_str());
 }
 
 GLint ShaderProgram::getAttributeLocation(const String& name)
 {
-    return glGetAttribLocation(m_id, name.c_str());
+    return glGetAttribLocation(mId, name.c_str());
 }
 
 
 //delete & reset
 void ShaderProgram::deleteProgram()
 {
-    glDeleteProgram(m_id);
+    glDeleteProgram(mId);
 
     resetProgram();
 }
 
 void ShaderProgram::resetProgram()
 {
-    m_id = EMPTY;
+    mId = EMPTY;
+    mName = "";
 }
 
 
 
 //fake virtual
-void ShaderProgram::fake()
+const String& ShaderProgram::toString() const
 {
-
+    return mName;
 }
 
 //checks
 bool ShaderProgram::valid()
 {
-    return m_id == EMPTY;
+    return mId == EMPTY;
 }
 
 bool ShaderProgram::linked()
 {
     GLint result;
 
-    glGetProgramiv(m_id, GL_LINK_STATUS, &result);
+    glGetProgramiv(mId, GL_LINK_STATUS, &result);
 
     return result == GL_TRUE;
 }
@@ -140,7 +144,7 @@ bool ShaderProgram::linked()
 //get
 GLuint ShaderProgram::getId() const
 {
-    return m_id;
+    return mId;
 }
 
 
@@ -152,10 +156,10 @@ const String& ShaderProgram::getInfoLog()
     GLint length;
     GLint returned;
 
-    glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &length);
+    glGetProgramiv(mId, GL_INFO_LOG_LENGTH, &length);
     infoLog.resize(length);
 
-    glGetProgramInfoLog(m_id, length, &returned, infoLog.data());
+    glGetProgramInfoLog(mId, length, &returned, infoLog.data());
     infoLog.resize(returned);
 
     return infoLog;

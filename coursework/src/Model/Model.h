@@ -10,12 +10,15 @@
 
 #include <Common.h>
 
+#include <Entity/IObject.h>
+
 #include <Texture/Texture2D.h>
 
 #include <Shader/ShaderProgram.h>
 
 #include <Model/Model.h>
 #include <Model/VertexArrayBuffer.h>
+#include <Model/Material.h>
 
 
 class Mesh;
@@ -23,7 +26,7 @@ class Node;
 class Model;
 
 
-class Node
+class Node : public IObjectBase
 {
 public:
     using UInt = unsigned int;
@@ -54,7 +57,7 @@ public:
     struct SharedBlock
     {
     public:
-        SharedBlock(UInt numChildren = 0, UInt numMeshes = 0);
+        SharedBlock(UInt numChildren = 0, UInt numMeshes = 0, const String& name = "");
 
         SharedBlock(const SharedBlock& sharedBlock) = delete;
 
@@ -73,7 +76,7 @@ public:
         UInt mNumMeshes;
         Indices mMeshes;
 
-
+        String mName;
     };
     using Shared = std::shared_ptr<SharedBlock>;
 
@@ -81,7 +84,7 @@ public:
 public:
     Node();
 
-    Node(std::map<const aiNode*, UInt>& mapping, const aiNode* node);
+    Node(std::map<const aiNode*, UInt>& mapping, const aiNode* node, const String& name = "");
 
     Node(const Node& node);
 
@@ -94,6 +97,9 @@ public:
     Node& operator = (const Node& node);
 
     Node& operator = (Node&& node);
+
+
+    virtual const String& toString() const override;
 
 
 
@@ -119,7 +125,7 @@ private:
 
 
 
-class Mesh
+class Mesh : public IObjectBase
 {
 public:
     using UInt = unsigned int;
@@ -145,7 +151,7 @@ public:
     struct SharedBlock
     {
     public:
-        SharedBlock(UInt materialIndex = 0, VAB&& vab = VAB());
+        SharedBlock(UInt materialIndex = 0, VAB&& vab = VAB(), const String& name = "");
 
         SharedBlock(const SharedBlock& sb) = delete;
 
@@ -160,6 +166,8 @@ public:
     public:
         UInt mMaterialIndex;
         VAB mVertexBuffer;
+
+        String mName;
     };
     using Shared = std::shared_ptr<SharedBlock>;
 
@@ -167,7 +175,7 @@ public:
 public:
     Mesh();
 
-    Mesh(const aiMesh* mesh);
+    Mesh(const aiMesh* mesh, const String& name = "");
 
     Mesh(const Mesh& mesh);
 
@@ -182,6 +190,9 @@ public:
     Mesh& operator = (Mesh&& mesh);
 
 
+    virtual const String& toString() const override;
+
+
     const VAB& vab() const;
 
     const UInt& material() const;
@@ -194,7 +205,7 @@ private:
 
 
 
-class Model
+class Model : public IObjectBase
 {
 public:
     using UInt = unsigned int;
@@ -223,7 +234,7 @@ public:
     struct SharedBlock
     {
     public:
-        SharedBlock(UInt numMeshes = 0, UInt numNodes = 0, UInt numMaterials = 0);
+        SharedBlock(UInt numMeshes = 0, UInt numNodes = 0, UInt numMaterials = 0, const String& name = "");
 
         SharedBlock(const SharedBlock& sb) = delete;
 
@@ -244,6 +255,8 @@ public:
 
         UInt mNumMaterials;
         Materials mMaterials;
+
+        String mName;
     };
     using Shared = std::shared_ptr<SharedBlock>;
     
@@ -251,20 +264,22 @@ public:
 public:
     Model();
 
-    Model(const aiScene* scene);
+    Model(const aiScene* scene, const String& name = "");
 
     Model(const Model& model);
 
     Model(Model&& model);
 
 
-    ~Model();
+    virtual ~Model();
 
 
     Model& operator = (const Model& model);
 
     Model& operator = (Model&& model);
 
+
+    virtual const String& toString() const override;
 
 
     const UInt& numMeshes() const;

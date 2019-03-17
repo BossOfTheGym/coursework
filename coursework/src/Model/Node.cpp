@@ -15,11 +15,12 @@ Node::ObjectBlock::ObjectBlock(const aiMatrix4x4& transform)
 
 //===SharedBlock===
 //constructor and destructor
-Node::SharedBlock::SharedBlock(Node::UInt numChildren, Node::UInt numMeshes)
+Node::SharedBlock::SharedBlock(Node::UInt numChildren, Node::UInt numMeshes, const String& name)
     : mNumChildren(numChildren)
     , mNumMeshes(numMeshes)
     , mChildren(new Node::UInt[numChildren])
     , mMeshes(new Node::UInt[numMeshes])
+    , mName(name)
 {}
 
 
@@ -30,10 +31,11 @@ Node::Node()
     , mSharedBlock()
 {}
 
-Node::Node(std::map<const aiNode*, UInt>& mapping, const aiNode* node)
+Node::Node(std::map<const aiNode*, UInt>& mapping, const aiNode* node, const String& name)
     : mObjectBlock(node->mTransformation)
-    , mSharedBlock(new SharedBlock(node->mNumChildren, node->mNumMeshes))
+    , mSharedBlock(new SharedBlock(node->mNumChildren, node->mNumMeshes, name))
 {
+    //TODO
     for (UInt i = 0; i < node->mNumChildren; i++)
     {
 
@@ -86,6 +88,13 @@ Node& Node::operator = (Node&& node)
     }
 
     return *this;
+}
+
+
+//IObjectBase
+const String& Node::toString() const
+{
+    return mSharedBlock->mName;
 }
 
 

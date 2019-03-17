@@ -5,13 +5,14 @@
 
 
 //===SharedBlock===
-Model::SharedBlock::SharedBlock(UInt numMeshes, UInt numNodes, UInt numMaterials)
+Model::SharedBlock::SharedBlock(UInt numMeshes, UInt numNodes, UInt numMaterials, const String& name)
     : mNumMeshes(numMeshes)
     , mNumNodes(numNodes)
     , mNumMaterials(numMaterials)
     , mMeshes(new Mesh[numMeshes])
     , mNodes(new Node[numNodes])
     , mMaterials(new Texture2D[numMaterials])//TODO
+    , mName(name)
 {}
 
 
@@ -23,11 +24,12 @@ Model::Model()
 {}
 
 
-Model::Model(const aiScene* scene)
+Model::Model(const aiScene* scene, const String& name)
     : mObjectBlock()
     , mSharedBlock(new SharedBlock())
 {
-    std::function<UInt(const aiNode*)> countNodes = [&] (const aiNode* node) -> UInt
+    std::function<UInt(const aiNode*)> countNodes 
+        = [&] (const aiNode* node) -> UInt
     {
         UInt count = 0;
 
@@ -43,8 +45,8 @@ Model::Model(const aiScene* scene)
         return count;
     };
 
-    std::function<void(UInt&, std::map<const aiNode*, UInt>&, const aiNode*)> fillNodes =
-        [&, this] (UInt& label, std::map<const aiNode*, UInt>& mapping, const aiNode* node) -> void
+    std::function<void(UInt&, std::map<const aiNode*, UInt>&, const aiNode*)> fillNodes 
+        = [&, this] (UInt& label, std::map<const aiNode*, UInt>& mapping, const aiNode* node) -> void
     {
         if (node != nullptr)
         {
@@ -60,6 +62,8 @@ Model::Model(const aiScene* scene)
         }
     };
 
+    //name
+    mSharedBlock->mName = name;
 
     //nodes
     UInt nodes = countNodes(scene->mRootNode);
@@ -70,7 +74,6 @@ Model::Model(const aiScene* scene)
     std::map<const aiNode*, UInt> mapping;
     fillNodes(label, mapping, scene->mRootNode);
 
-
     //meshes
     UInt meshes = scene->mNumMeshes;
     mSharedBlock->mNumMeshes = meshes;
@@ -80,9 +83,8 @@ Model::Model(const aiScene* scene)
         mSharedBlock->mMeshes[i] = Mesh(scene->mMeshes[i]);
     }
 
-
     //materials
-
+    
 }
 
 
@@ -125,6 +127,13 @@ Model& Model::operator = (Model&& model)
     }
 
     return *this;
+}
+
+
+//IObjectBase
+const String& Model::toString() const
+{
+    return mSharedBlock->mName;
 }
 
 

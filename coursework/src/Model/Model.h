@@ -105,7 +105,7 @@ public:
 public:
 	Mesh();
 
-    Mesh(const aiMesh* mesh = nullptr);
+    Mesh(const aiMesh* mesh);
 
     Mesh(const Mesh& mesh) = delete;
 

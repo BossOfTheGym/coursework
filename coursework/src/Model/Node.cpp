@@ -16,8 +16,8 @@ Node::Node(const aiNode* node, const std::map<const aiNode*, UInt>& mapping) : N
 	{
 		mNumMeshes = node->mNumMeshes;
 		mNumChildren = node->mNumChildren;
-		mMeshes.reset(new UInt[mNumMeshes]);
-		mChildren.reset(new UInt[mNumChildren]);
+		mMeshes.reset(mNumMeshes ? new UInt[mNumMeshes]() : nullptr);
+		mChildren.reset(mNumChildren ? new UInt[mNumChildren]() : nullptr);
 		mName = node->mName.C_Str();
 
 		for (UInt i = 0; i < node->mNumChildren; i++)

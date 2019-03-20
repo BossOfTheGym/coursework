@@ -62,7 +62,7 @@ const Material::Textures& Material::diffuse()
 void Material::loadMaterial(const aiMaterial* material)
 {
 	mNumDiffuse = material->GetTextureCount(aiTextureType_DIFFUSE);
-	mDiffuse.reset(new Texture2D[mNumDiffuse]);
+	mDiffuse.reset(mNumDiffuse ? new Texture2D[mNumDiffuse] : nullptr);
 
 	aiString path;
 	for (UInt i = 0; i < mNumDiffuse; i++)

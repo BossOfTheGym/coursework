@@ -223,7 +223,7 @@ Texture2D loadEarth()
 
 ShaderProgram createPlanetProgram(std::map<String, Shader>& shadersHolder)
 {
-    ShaderProgram program;
+    ShaderProgram program("Planet");
     program.attachShader(shadersHolder["assets/shaders/sphere.vs"]);
     program.attachShader(shadersHolder["assets/shaders/sphere.tcs"]);
     program.attachShader(shadersHolder["assets/shaders/sphere.tes"]);
@@ -241,7 +241,7 @@ ShaderProgram createPlanetProgram(std::map<String, Shader>& shadersHolder)
 
 ShaderProgram createSatelliteProgram(std::map<String, Shader>& shadersHolder)
 {
-    ShaderProgram program;
+    ShaderProgram program("Satellite");
     program.attachShader(shadersHolder["assets/shaders/sphere.vs"]);
     program.attachShader(shadersHolder["assets/shaders/sphere.tcs"]);
     program.attachShader(shadersHolder["assets/shaders/sphere.tes"]);
@@ -784,7 +784,7 @@ bool importModel()
 
     processScene(scene);
 
-	Model m(scene);
+	Model m(scene, "Satellite");
 
     return true;
 }

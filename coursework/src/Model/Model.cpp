@@ -103,20 +103,20 @@ void Model::loadModel(const aiScene* scene, const String& name)
 	//nodes
 	UInt nodes = countNodes(scene->mRootNode);
 	mNumNodes = nodes;
-	mNodes.reset(new Node[mNumNodes]);
-	mNodeTransformations.reset(new Mat4[mNumNodes]);
+	mNodes.reset(mNumNodes ? new Node[mNumNodes]() : nullptr);
+	mNodeTransformations.reset(mNumNodes ? new Mat4[mNumNodes]() : nullptr);
 
 	UInt label = 0;
 	std::map<const aiNode*, UInt> mapping;
 	fillNodes(label, mapping, scene->mRootNode);
 
 
-	//meshes
+	//meshess
 	if (scene->HasMeshes())
 	{
 		UInt meshes = scene->mNumMeshes;
 		mNumMeshes = meshes;
-		mMeshes.reset(new Mesh[meshes]);
+		mMeshes.reset(mNumMeshes ? new Mesh[meshes]() : nullptr);
 		for (UInt i = 0; i < meshes; i++)
 		{
 			mMeshes[i] = Mesh(scene->mMeshes[i]);
@@ -127,10 +127,10 @@ void Model::loadModel(const aiScene* scene, const String& name)
 	if (scene->HasMaterials())
 	{
 		mNumMaterials = scene->mNumMaterials;
-		mMaterials.reset(new Material[mNumMaterials]);
+		mMaterials.reset(mNumMaterials ? new Material[mNumMaterials]() : nullptr);
 		for (UInt i = 0; i < scene->mNumMaterials; i++)
 		{
-			mMaterials[i] = Material(scene->mMaterials[i]);
+			mMaterials[i] = Material(scene->mMaterials[i], std::to_string(i));
 		}
 	}
 }
@@ -158,7 +158,8 @@ UInt Model::countNodes(const aiNode* node)
 
 	if (node != nullptr)
 	{
-		count = node->mNumChildren;
+		//count self
+		count = 1;
 		for (UInt i = 0; i < node->mNumChildren; i++)
 		{
 			count += countNodes(node->mChildren[i]);

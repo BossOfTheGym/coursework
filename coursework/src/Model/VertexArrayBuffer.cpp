@@ -117,6 +117,12 @@ void VertexArrayBuffer::bindArray()
 }
 
 
+void VertexArrayBuffer::subData(GLintptr offset, GLsizeiptr size, const GLvoid * data)
+{
+	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+}
+
+
 void VertexArrayBuffer::setAttribPointer(GLuint index, GLint size, GLenum element, GLsizei stride, const void* offset)
 {
     glEnableVertexAttribArray(index);

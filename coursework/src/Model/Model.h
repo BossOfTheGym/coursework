@@ -86,6 +86,14 @@ private:
 class Mesh : public IObjectBase
 {
 public:
+	static const GLuint VERTEX = 0;
+	static const GLuint COLOR = 1;
+	static const GLuint NORMAL = 2;
+	static const GLuint TANGENT = 3;
+	static const GLuint BITANGENT = 4;
+	static const GLuint TEXTURE = 5;
+
+public:
     using UInt = unsigned int;
     using VAB = VertexArrayBuffer;
 
@@ -114,6 +122,14 @@ public:
     const VAB& vab() const;
 
     const UInt& material() const;
+
+
+private:
+	void initVAB(const aiMesh* mesh);
+
+	auto&& getAttributes(const aiMesh* mesh);
+
+	void subData(GLuint attrib, GLint attribSize, GLint offset, GLsizei size, const float* data);
 
 
 private:

@@ -29,7 +29,8 @@ public:
 
     void bindArray();
 
-    
+	void subData(GLintptr offset, GLsizeiptr size, const GLvoid * data);
+
     void setAttribPointer(GLuint index, GLint size, GLenum element, GLsizei stride, const void* offset);
 
     void enableAttribArray(GLuint index);

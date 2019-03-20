@@ -49,6 +49,7 @@ GLFWwindow* createWindow()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     win = glfwCreateWindow(WIDTH, HEIGHT, "PINGAS PROD", nullptr, nullptr);
@@ -80,7 +81,7 @@ void pushVertex(std::vector<float>& data, const glm::vec3& vertex, const glm::ve
     data.push_back(tex.t);
 }
 
-std::vector<float> getIcosahedron(int split = 0)
+auto getIcosahedron(int split = 0)
 {
     const int PENTAGON_SIDES = 5;
 
@@ -102,6 +103,9 @@ std::vector<float> getIcosahedron(int split = 0)
 
 
     //init icosahedron verteces
+	int faces = 20;
+	int elements = 3 * faces;
+
     glm::vec3 top    = glm::vec3(0.0f, 0.0f, +1.0f);
     glm::vec3 bottom = glm::vec3(0.0f, 0.0f, -1.0f);
 
@@ -157,17 +161,19 @@ std::vector<float> getIcosahedron(int split = 0)
         pushVertex(icosahedron, bottomRing[curr], glm::vec3(0.0f, 1.0f, 0.0f), bottomRingTex[curr]);
     }
 
-    return icosahedron;
+	return std::make_tuple(elements, icosahedron);
 }
 
 VertexArrayBuffer createIcosahedron()
 {
-    VertexArrayBuffer ico(60, getIcosahedron());
+	auto[elements, data] = std::move(getIcosahedron());
+
+    VertexArrayBuffer ico(elements, data.size(), data.data());
 
     ico.bindArray();
-    ico.setAttribPointer(0, 8 * sizeof(float), (void *)(0));
-    ico.setAttribPointer(1, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-    ico.setAttribPointer(2, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+    ico.setAttribPointer(0, 3, GL_FLOAT, 8 * sizeof(float), (void *)(0));
+    ico.setAttribPointer(1, 3, GL_FLOAT, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+    ico.setAttribPointer(2, 2, GL_FLOAT, 8 * sizeof(float), (void *)(6 * sizeof(float)));
     
     return ico;
 }
@@ -420,6 +426,7 @@ void featureTest()
     double delta;
 
     t0 = glfwGetTime();
+	glfwShowWindow(window);
     glfwSetCursorPos(window, prevX, prevY);
     while (!glfwWindowShouldClose(window))
     {
@@ -503,19 +510,157 @@ void featureTest()
 
 
 //test gui
-void initGui()
-{
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
+bool show_demo_window = true;
+bool show_another_window = false;
+ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+
+void initGui(GLFWwindow* guiWindow)
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(guiWindow, true);
+	ImGui_ImplOpenGL3_Init("#version 430 core");
+}
+
+
+void renderEnvironmentGui()
+{
+	ImGui::Text("Environment options");
+}
+
+void renderPlanetGui()
+{
+	ImGui::Text("Planet options");
+
+	ImGui::Separator();
+	
+	static double mass = 0.0;
+	ImGui::InputDouble("Mass", &mass);
+}
+
+void renderSatellite1Gui()
+{
+	ImGui::Text("Satellite1 options");
+}
+
+void renderSatellite2Gui()
+{
+	ImGui::Text("Satellite2 options");
 }
 
 void renderGui()
 {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
 
+	if (show_demo_window)
+		ImGui::ShowDemoWindow(&show_demo_window);
+
+	{
+		static float f = 0.0f;
+		static int counter = 0;
+
+		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+		ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
+		ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+		ImGui::Checkbox("Another Window", &show_another_window);
+
+		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+			counter++;
+		ImGui::SameLine();
+		ImGui::Text("counter = %d", counter);
+
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::End();
+	}
+
+
+	if (show_another_window)
+	{
+		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+		ImGui::Text("Hello from another window!");
+		if (ImGui::Button("Close Me"))
+			show_another_window = false;
+		ImGui::End();
+	}
+
+	//my gui
+	ImGui::Begin("My gui");
+	const char* objects[4] = {"Environment", "Planet", "Satellite1", "Satellite2"};
+	static int current = 0;
+	if(ImGui::BeginCombo("", objects[current], ImGuiComboFlags_NoArrowButton))
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			bool selected = objects[current] == objects[i];
+			if(ImGui::Selectable(objects[i], selected))
+			{
+				current = i;
+			}
+			if(selected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::Separator();
+	//render selected option
+	switch(current)
+	{
+		case 0:
+		{
+			renderEnvironmentGui();
+			break;
+		}
+		case 1:
+		{
+			renderPlanetGui();
+			break;
+		}
+		case 2:
+		{
+			renderSatellite1Gui();
+			break;
+		}
+		case 3:
+		{
+			renderSatellite2Gui();
+			break;
+		}
+
+	}
+	ImGui::Button("AAA");
+	ImGui::End();
+	//end my gui
+	ImGui::Render();
+
+	glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+
 
 void destroyGui()
 {
-
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 
@@ -523,8 +668,9 @@ void testGui()
 {
     auto guiWindow = createWindow();
 
-    initGui();
+    initGui(guiWindow);
 
+	glfwShowWindow(guiWindow);
     while (!glfwWindowShouldClose(guiWindow))
     {
         glfwPollEvents();
@@ -539,6 +685,7 @@ void testGui()
     glfwDestroyWindow(guiWindow);
     glfwTerminate();
 }
+
 
 
 //test assimp

@@ -1,29 +1,19 @@
 #include "Model.h"
 
 
-//===ObjectBlock===
-
-
-//===SharedBlock===
-Mesh::SharedBlock::SharedBlock(Mesh::UInt materialIndex, Mesh::VAB&& vao, const String& name)
-    : mMaterialIndex(materialIndex)
-    , mVertexBuffer(std::move(vao))
-{}
-
-
 //===Mesh===
 //constructors & destructors
 Mesh::Mesh()
-    : mObjectBlock()
-    , mSharedBlock()
-{}
-
-Mesh::Mesh(const aiMesh* mesh, const String& name = "")
-    : mObjectBlock()
-    , mSharedBlock(new SharedBlock())
 {
+	//TODO
+}
+
+Mesh::Mesh(const aiMesh* mesh)
+{
+	//TODO
+
     //name
-    mSharedBlock->mName = name;
+    mName = mesh->mName.C_Str();
 
     //fill
     std::vector<float> vertices;
@@ -49,7 +39,21 @@ Mesh::Mesh(const aiMesh* mesh, const String& name = "")
     std::vector<float> colors;
     if (mesh->HasVertexColors(0))
     {
+		for (UInt i = 0; i < mesh->mNumFaces; i++)
+		{
+			auto& face = mesh->mFaces[i];
 
+			for (UInt j = 0; j < face.mNumIndices; j++)
+			{
+				auto& index = face.mIndices[j];
+
+				auto& color = mesh->mColors[0][index];
+				colors.push_back(color.r);
+				colors.push_back(color.g);
+				colors.push_back(color.b);
+				colors.push_back(color.a);
+			}
+		}
     }
 
 
@@ -106,22 +110,42 @@ Mesh::Mesh(const aiMesh* mesh, const String& name = "")
     }
     
 
+
+	std::vector<float> data;
+	if (mesh->HasPositions())
+	{
+		data.insert(data.end(), vertices.begin(), vertices.end());
+	}
+
+	if (mesh->HasVertexColors(0))
+	{
+		data.insert(data.end(), colors.begin(), colors.end());
+	}
+
+	if (mesh->HasNormals())
+	{
+		data.insert(data.end(), normals.begin(), normals.end());
+	}
+
+	if (mesh->HasTangentsAndBitangents())
+	{
+		data.insert(data.end(), tangents.begin(), tangents.end());
+		data.insert(data.end(), bitangents.begin(), bitangents.end());
+	}
+
+	if (mesh->HasTextureCoords(0))
+	{
+
+	}
+	
+
     //materials
-    mSharedBlock->mMaterialIndex = mesh->mMaterialIndex;
+    mMaterialIndex = mesh->mMaterialIndex;
 }
-
-
-Mesh::Mesh(const Mesh& mesh)
-{
-    mObjectBlock = mesh.mObjectBlock;
-    mSharedBlock = mesh.mSharedBlock;
-}
-
 
 Mesh::Mesh(Mesh&& mesh)
 {
-    mObjectBlock = mesh.mObjectBlock;
-    mSharedBlock = mesh.mSharedBlock;
+	//TODO
 }
 
 
@@ -130,24 +154,11 @@ Mesh::~Mesh()
 
 
 //operators
-Mesh& Mesh::operator = (const Mesh& mesh)
-{
-    if (this != &mesh)
-    {
-        mObjectBlock = mesh.mObjectBlock;
-        mSharedBlock = mesh.mSharedBlock;
-    }
-
-    return *this;
-}
-
-
 Mesh& Mesh::operator = (Mesh&& mesh)
 {
     if (this != &mesh)
     {
-        mObjectBlock = mesh.mObjectBlock;
-        mSharedBlock = mesh.mSharedBlock;
+        //TODO
     }
 
     return *this;
@@ -157,17 +168,17 @@ Mesh& Mesh::operator = (Mesh&& mesh)
 //IObjectBase
 const String& Mesh::toString() const
 {
-    return mSharedBlock->mName;
+    return mName;
 }
 
 
 //get & set
 const Mesh::VAB& Mesh::vab() const
 {
-    return mSharedBlock->mVertexBuffer;
+    return mVertexBuffer;
 }
 
 const Mesh::UInt& Mesh::material() const
 {
-    return mSharedBlock->mMaterialIndex;
+    return mMaterialIndex;
 }

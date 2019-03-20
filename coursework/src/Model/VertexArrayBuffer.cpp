@@ -2,18 +2,18 @@
 
 
 //constructors & destructor
-VertexArrayBuffer::VertexArrayBuffer(GLsizei elements, const std::vector<float>& data)
+VertexArrayBuffer::VertexArrayBuffer(GLsizei elements, GLsizei size, const float* data)
     : m_arrayId(EMPTY)
     , m_bufferId(EMPTY)
     , m_elements(elements)
 {
-    if (!data.empty())
+    if (size > 0)
     {
         glGenVertexArrays(1, &m_arrayId);
 
         if (m_arrayId != EMPTY)
         {
-            loadData(data);
+            loadData(size, data);
         }
     }
 }
@@ -55,6 +55,11 @@ GLuint VertexArrayBuffer::getArrayId() const
     return m_arrayId;
 }
 
+GLuint VertexArrayBuffer::getBufferId() const
+{
+	return m_bufferId;
+}
+
 GLsizei VertexArrayBuffer::getElements() const
 {
     return m_elements;
@@ -81,18 +86,14 @@ void VertexArrayBuffer::resetArrayBuffer()
 
 
 //core functions
-bool VertexArrayBuffer::loadData(const std::vector<float>& data)
+bool VertexArrayBuffer::loadData(GLsizei size, const float* data)
 {
     GLint prevArray;
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prevArray);
 
     glBindVertexArray(m_arrayId);
 
-    if (m_bufferId == EMPTY)
-    {
-        glGenBuffers(1, &m_bufferId);
-    }
-
+	glGenBuffers(1, &m_bufferId);
     if (m_bufferId == EMPTY)
     {
         glDeleteBuffers(1, &m_bufferId);
@@ -102,7 +103,7 @@ bool VertexArrayBuffer::loadData(const std::vector<float>& data)
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, m_bufferId);
-    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data, GL_STATIC_DRAW);
 
     glBindVertexArray(prevArray);
     return true;
@@ -112,13 +113,14 @@ bool VertexArrayBuffer::loadData(const std::vector<float>& data)
 void VertexArrayBuffer::bindArray()
 {
     glBindVertexArray(m_arrayId);
+	glBindBuffer(GL_ARRAY_BUFFER, m_bufferId);
 }
 
 
-void VertexArrayBuffer::setAttribPointer(GLuint index, GLsizei stride, const void* offset)
+void VertexArrayBuffer::setAttribPointer(GLuint index, GLint size, GLenum element, GLsizei stride, const void* offset)
 {
     glEnableVertexAttribArray(index);
-    glVertexAttribPointer(index, STANDART_SIZE, STANDART_ELEMENT, GL_FALSE, stride, offset);
+    glVertexAttribPointer(index, size, element, GL_FALSE, stride, offset);
 }
 
 void VertexArrayBuffer::enableAttribArray(GLuint index)

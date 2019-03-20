@@ -96,7 +96,14 @@ public:
 public:
     using UInt = unsigned int;
     using VAB = VertexArrayBuffer;
-
+	using Attributes = std::tuple<
+		  std::vector<float>
+		, std::vector<float>
+		, std::vector<float>
+		, std::vector<float>
+		, std::vector<float>
+		, std::vector<float>
+	>;
 
 public:
     Mesh();
@@ -127,7 +134,7 @@ public:
 private:
 	void initVAB(const aiMesh* mesh);
 
-	auto&& getAttributes(const aiMesh* mesh);
+	Attributes getAttributes(const aiMesh* mesh);
 
 	void subData(GLuint attrib, GLint attribSize, GLint offset, GLsizei size, const float* data);
 

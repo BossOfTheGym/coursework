@@ -13,14 +13,14 @@ Mesh::Mesh(const aiMesh* mesh)
 	: mName(mesh->mName.C_Str())
 {
     //get attributes
-	auto[ 
+	auto[
 		vertices
 		, colors
 		, normals
 		, tangents
 		, bitangents
 		, textureCoords
-	] = getAttributes(mesh);
+	] = std::move(getAttributes(mesh));
 
 	//all floats
 	auto size =
@@ -133,7 +133,7 @@ const Mesh::UInt& Mesh::material() const
 
 
 //private
-auto&& Mesh::getAttributes(const aiMesh* mesh)
+Mesh::Attributes Mesh::getAttributes(const aiMesh* mesh)
 {
 	std::vector<float> vertices;
 	if (mesh->HasPositions())
@@ -239,12 +239,12 @@ auto&& Mesh::getAttributes(const aiMesh* mesh)
 	}
 
 	return std::make_tuple(
-		std::move(vertices)
-		, std::move(colors)
-		, std::move(normals)
-		, std::move(tangents)
-		, std::move(bitangents)
-		, std::move(textureCoords)
+		vertices
+		, colors
+		, normals
+		, tangents
+		, bitangents
+		, textureCoords
 	);
 }
 

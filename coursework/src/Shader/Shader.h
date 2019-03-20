@@ -26,7 +26,9 @@ public:
 
 
 public:
-    Shader(Type type = Invalid, const String& location = "");
+	Shader();
+
+    Shader(Type type, const String& location);
 
     Shader(const Shader& shader) = delete;
 

@@ -5,88 +5,17 @@
 //constructors & destructors
 Mesh::Mesh()
 	: mName("")
+	, mMaterialIndex(INVALID)
 	, mVertexBuffer()
-	, mMaterialIndex()
 {}
 
-Mesh::Mesh(const aiMesh* mesh)
-	: mName(mesh->mName.C_Str())
+Mesh::Mesh(const aiMesh* mesh) : Mesh()
 {
-    //get attributes
-	auto[
-		vertices
-		, colors
-		, normals
-		, tangents
-		, bitangents
-		, textureCoords
-	] = std::move(getAttributes(mesh));
-
-	//all floats
-	auto size =
-		+ vertices.size()
-		+ colors.size()
-		+ normals.size()
-		+ tangents.size()
-		+ bitangents.size()
-		+ textureCoords.size();
-
-	//vertices
-	auto elements = 3 * mesh->mNumFaces;
-
-	//buffer offset
-	auto offset = 0;
-
-	//init buffer
-	GLint prevArray;
-	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prevArray);
-
-	mVertexBuffer = VAB(elements, size, nullptr);
-	mVertexBuffer.bindArray();
-	if (mesh->HasPositions())
+	if (mesh)
 	{
-		subData(VERTEX, 3, offset, vertices.size(), vertices.data());
-
-		offset += vertices.size() * sizeof(float);
+		mName = mesh->mName.C_Str();
+		loadMesh(mesh);
 	}
-
-	if (mesh->HasVertexColors(0))
-	{	
-		subData(COLOR, 4, offset, colors.size(), colors.data());
-
-		offset += colors.size() * sizeof(float);
-	}
-
-	if (mesh->HasNormals())
-	{
-		subData(NORMAL, 3, offset, normals.size(), normals.data());
-
-		offset += normals.size() * sizeof(float);
-	}
-
-	if (mesh->HasTangentsAndBitangents())
-	{
-		subData(TANGENT, 3, offset, tangents.size(), tangents.data());
-
-		offset += tangents.size() * sizeof(float);
-
-
-		subData(BITANGENT, 3, offset, bitangents.size(), bitangents.data());
-
-		offset += bitangents.size() * sizeof(float);
-	}
-
-	if (mesh->HasTextureCoords(0))
-	{
-		subData(TEXTURE, 3, offset, textureCoords.size(), textureCoords.data());
-
-		offset += textureCoords.size() * sizeof(float);
-	}
-	glBindVertexArray(prevArray);
-
-
-    //materials
-    mMaterialIndex = mesh->mMaterialIndex;
 }
 
 Mesh::Mesh(Mesh&& mesh)
@@ -126,13 +55,100 @@ const Mesh::VAB& Mesh::vab() const
     return mVertexBuffer;
 }
 
-const Mesh::UInt& Mesh::material() const
+const UInt& Mesh::material() const
 {
     return mMaterialIndex;
 }
 
 
 //private
+void Mesh::loadMesh(const aiMesh* mesh)
+{
+	//get attributes
+	auto[
+		vertices
+			, colors
+			, normals
+			, tangents
+			, bitangents
+			, textureCoords
+	] = std::move(getAttributes(mesh));
+
+	//all floats
+		auto size =
+			+vertices.size()
+			+ colors.size()
+			+ normals.size()
+			+ tangents.size()
+			+ bitangents.size()
+			+ textureCoords.size();
+
+		//vertices
+		auto elements = 3 * mesh->mNumFaces;
+
+		//buffer offset
+		auto offset = 0;
+
+		//init buffer
+		GLint prevArray;
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prevArray);
+
+		mVertexBuffer = VAB(elements, size, nullptr);
+		mVertexBuffer.bindArray();
+		if (mesh->HasPositions())
+		{
+			subData(VERTEX, 3, offset, vertices.size(), vertices.data());
+
+			offset += vertices.size() * sizeof(float);
+		}
+
+		if (mesh->HasVertexColors(0))
+		{
+			subData(COLOR, 4, offset, colors.size(), colors.data());
+
+			offset += colors.size() * sizeof(float);
+		}
+
+		if (mesh->HasNormals())
+		{
+			subData(NORMAL, 3, offset, normals.size(), normals.data());
+
+			offset += normals.size() * sizeof(float);
+		}
+
+		if (mesh->HasTangentsAndBitangents())
+		{
+			subData(TANGENT, 3, offset, tangents.size(), tangents.data());
+
+			offset += tangents.size() * sizeof(float);
+
+
+			subData(BITANGENT, 3, offset, bitangents.size(), bitangents.data());
+
+			offset += bitangents.size() * sizeof(float);
+		}
+
+		if (mesh->HasTextureCoords(0))
+		{
+			subData(TEXTURE, 3, offset, textureCoords.size(), textureCoords.data());
+
+			offset += textureCoords.size() * sizeof(float);
+		}
+		glBindVertexArray(prevArray);
+
+
+	//materials
+	mMaterialIndex = mesh->mMaterialIndex;
+}
+
+void Mesh::subData(GLuint attrib, GLint attribSize, GLint offset, GLsizei size, const float* data)
+{
+	mVertexBuffer.subData(offset, size * sizeof(float), data);
+
+	mVertexBuffer.setAttribPointer(attrib, attribSize, GL_FLOAT, attribSize * sizeof(float), (const void*)offset);
+	mVertexBuffer.enableAttribArray(attrib);
+}
+
 Mesh::Attributes Mesh::getAttributes(const aiMesh* mesh)
 {
 	std::vector<float> vertices;
@@ -246,12 +262,4 @@ Mesh::Attributes Mesh::getAttributes(const aiMesh* mesh)
 		, bitangents
 		, textureCoords
 	);
-}
-
-void Mesh::subData(GLuint attrib, GLint attribSize, GLint offset, GLsizei size, const float* data)
-{
-	mVertexBuffer.subData(offset, size * sizeof(float), data);
-
-	mVertexBuffer.setAttribPointer(attrib, attribSize, GL_FLOAT, attribSize * sizeof(float), (const void*)offset);
-	mVertexBuffer.enableAttribArray(attrib);
 }

@@ -184,7 +184,6 @@
     <ClInclude Include="src\Camera\Camera.h" />
     <ClInclude Include="src\Common.h" />
     <ClInclude Include="src\Holder\ShaderHolder.h" />
-    <ClInclude Include="src\Model\Material.h" />
     <ClInclude Include="src\Model\Model.h" />
     <ClInclude Include="src\Model\VertexArrayBuffer.h" />
     <ClInclude Include="src\Shader\Shader.h" />

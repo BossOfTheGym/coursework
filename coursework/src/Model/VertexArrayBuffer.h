@@ -11,7 +11,9 @@ public:
 
 
 public:
-    VertexArrayBuffer(GLsizei elements = static_cast<GLsizei>(0), GLsizei size = 0, const float* data = nullptr);
+	VertexArrayBuffer();
+
+    VertexArrayBuffer(GLsizei elements, GLsizei size, const float* data);
 
     VertexArrayBuffer(const VertexArrayBuffer& vertexBuffer) = delete;
 

@@ -14,14 +14,18 @@ void Texture2D::unbind()
 
 
 //constructors & destructor
+Texture2D::Texture2D()
+	:mId(EMPTY)
+{}
+
 Texture2D::Texture2D(const String& location)
 {
     GLint prevTexture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTexture);
 
-    glGenTextures(1, &m_id);
-    glBindTexture(GL_TEXTURE_2D, m_id);
-    if (m_id == EMPTY || !loadFromLocation(location))
+    glGenTextures(1, &mId);
+    glBindTexture(GL_TEXTURE_2D, mId);
+    if (mId == EMPTY || !loadFromLocation(location))
     {
         deleteTexture();
     }
@@ -34,9 +38,9 @@ Texture2D::Texture2D(int width, int height, const GLubyte* data)
     GLint prevTexture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTexture);
 
-    glGenTextures(1, &m_id);
-    glBindTexture(GL_TEXTURE_2D, m_id);
-    if (m_id == EMPTY || !loadFromData(width, height, data))
+    glGenTextures(1, &mId);
+    glBindTexture(GL_TEXTURE_2D, mId);
+    if (mId == EMPTY || !loadFromData(width, height, data))
     {
         deleteTexture();
     }
@@ -46,9 +50,9 @@ Texture2D::Texture2D(int width, int height, const GLubyte* data)
 
 
 
-Texture2D::Texture2D(Texture2D&& texture) : m_id(texture.m_id)
+Texture2D::Texture2D(Texture2D&& texture)
 {
-    texture.resetTexture();
+	*this = std::move(texture);
 }
 
 
@@ -61,11 +65,10 @@ Texture2D::~Texture2D()
 //operators
 Texture2D& Texture2D::operator = (Texture2D&& texture)
 {
-    deleteTexture();
-
-    m_id = texture.m_id;
-
-    texture.resetTexture();
+	if (this != &texture)
+	{
+		std::swap(mId, texture.mId);
+	}
 
     return *this;
 }
@@ -74,7 +77,7 @@ Texture2D& Texture2D::operator = (Texture2D&& texture)
 //core functions
 void Texture2D::bind()
 {
-    glBindTexture(GL_TEXTURE_2D, m_id);
+    glBindTexture(GL_TEXTURE_2D, mId);
 }
 
 
@@ -87,14 +90,14 @@ void Texture2D::texParameteri(GLenum name, GLint parameter)
 //get & set
 GLuint Texture2D::getId() const
 {
-    return m_id;
+    return mId;
 }
 
 
 //delete
 void Texture2D::deleteTexture()
 {
-    glDeleteTextures(1, &m_id);
+    glDeleteTextures(1, &mId);
 
     resetTexture();
 }
@@ -173,5 +176,5 @@ int Texture2D::loadFromData(int width, int height, const GLubyte* data)
 
 void Texture2D::resetTexture()
 {
-    m_id = EMPTY;
+    mId = EMPTY;
 }

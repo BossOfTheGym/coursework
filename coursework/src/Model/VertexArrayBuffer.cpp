@@ -2,6 +2,12 @@
 
 
 //constructors & destructor
+VertexArrayBuffer::VertexArrayBuffer()
+	: mArrayId(EMPTY)
+	, mBufferId(EMPTY)
+	, mElements(0)
+{}
+
 VertexArrayBuffer::VertexArrayBuffer(GLsizei elements, GLsizei size, const float* data)
     : mArrayId(EMPTY)
     , mBufferId(EMPTY)

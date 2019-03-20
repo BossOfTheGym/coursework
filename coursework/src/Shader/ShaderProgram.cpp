@@ -6,6 +6,11 @@ thread_local String ShaderProgram::INFO_LOG;
 
 
 //constructors & destructor
+ShaderProgram::ShaderProgram()
+	: mId(EMPTY)
+	, mName("")
+{}
+
 ShaderProgram::ShaderProgram(const String& name) 
     : mId(glCreateProgram())
     , mName(name)

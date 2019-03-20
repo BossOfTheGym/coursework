@@ -3,29 +3,34 @@
 //===Node===
 //constructors & destructor
 Node::Node()
-	: mNumMeshes(0)
+	: mName("")
 	, mNumChildren(0)
+	, mNumMeshes(0)
 	, mMeshes(nullptr)
 	, mChildren(nullptr)
-	, mName("")
 {}
 
-Node::Node(std::map<const aiNode*, UInt>& mapping, const aiNode* node)
-	: mNumMeshes(node->mNumMeshes)
-	, mNumChildren(node->mNumChildren)
-	, mMeshes(new UInt[mNumMeshes])
-	, mChildren(new UInt[mNumChildren])
-	, mName(node->mName.C_Str())
+Node::Node(const aiNode* node, const std::map<const aiNode*, UInt>& mapping) : Node()
 {
-    for (UInt i = 0; i < node->mNumChildren; i++)
-    {
-		mChildren[i] = mapping[node->mChildren[i]];
-    }
+	if (node)
+	{
+		mNumMeshes = node->mNumMeshes;
+		mNumChildren = node->mNumChildren;
+		mMeshes.reset(new UInt[mNumMeshes]);
+		mChildren.reset(new UInt[mNumChildren]);
+		mName = node->mName.C_Str();
 
-    for (UInt i = 0; i < node->mNumMeshes; i++)
-    {
-        mMeshes[i] = node->mMeshes[i];
-    }
+		for (UInt i = 0; i < node->mNumChildren; i++)
+		{
+			auto it = mapping.find(node->mChildren[i]);
+			mChildren[i] = it->second;
+		}
+
+		for (UInt i = 0; i < node->mNumMeshes; i++)
+		{
+			mMeshes[i] = node->mMeshes[i];
+		}
+	}
 }
 
 Node::Node(Node&& node)
@@ -43,11 +48,11 @@ Node& Node::operator = (Node&& node)
 {
     if (this != &node)
     {
-		mNumChildren = node.mNumChildren;
-		mChildren.swap(node.mChildren);
+		std::swap(mNumChildren, node.mNumChildren);
+		swap(mChildren, node.mChildren);
 
-		mNumMeshes = node.mNumMeshes;
-		mMeshes.swap(node.mMeshes);
+		std::swap(mNumMeshes, node.mNumMeshes);
+		std::swap(mMeshes, node.mMeshes);
     }
 
     return *this;
@@ -62,7 +67,7 @@ const String& Node::toString() const
 
 
 //get & set
-const Node::UInt& Node::numChildren() const
+const UInt& Node::numChildren() const
 {
     return mNumChildren;
 }
@@ -73,7 +78,7 @@ const Node::Indices& Node::children() const
 }
 
 
-const Node::UInt& Node::numMeshes() const
+const UInt& Node::numMeshes() const
 {
     return mNumMeshes;
 }

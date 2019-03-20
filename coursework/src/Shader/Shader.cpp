@@ -8,7 +8,12 @@ thread_local String Shader::INFO_LOG;
 
 
 //constructors
-Shader::Shader(Type type, const String& location) : mId(EMPTY), mType(type)
+Shader::Shader()
+	: mId(EMPTY)
+	, mType(Invalid)
+{}
+
+Shader::Shader(Type type, const String& location) : Shader()
 {
     loadFromLocation(type, location);
 }

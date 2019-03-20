@@ -21,6 +21,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+
 #include <map>
 
 
@@ -783,6 +784,8 @@ bool importModel()
 
     processScene(scene);
 
+	Model m(scene);
+
     return true;
 }
 
@@ -796,11 +799,11 @@ void testAssimp()
 
 int main(int argc, char* argv[])
 {
-    featureTest();
+    //featureTest();
 
 	//testGui();
 
-    //testAssimp();
+    testAssimp();
 
 
 

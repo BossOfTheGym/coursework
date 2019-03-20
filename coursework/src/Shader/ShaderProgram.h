@@ -14,6 +14,8 @@ public:
 
 
 public:
+	ShaderProgram();
+
     ShaderProgram(const String& name = "");
 
     ShaderProgram(const ShaderProgram& shaderProgram) = delete;

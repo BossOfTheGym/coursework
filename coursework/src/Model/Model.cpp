@@ -3,20 +3,28 @@
 
 //===Model===
 //constructors & destructor
-Model::Model(const aiScene* scene, const String& name)
+Model::Model()
+	: mNumMeshes(0)
+	, mMeshes(nullptr)
+	, mNumNodes(0)
+	, mNodes(nullptr)
+	, mNodeTransformations(nullptr)
+	, mNumMaterials(0)
+	, mMaterials(nullptr)
+	, mName("")
+{}
+
+Model::Model(const aiScene* scene, const String& name) : Model()
 {
 	if (scene)
 	{
-		if (!loadModel(scene, name))
-		{
-			//resetModel
-		}
+		loadModel(scene, name);
 	}
 }
 
 Model::Model(Model&& model)
 {
-    //TODO
+	*this = std::move(model);
 }
 
 
@@ -29,7 +37,15 @@ Model& Model::operator = (Model&& model)
 {
     if (this != &model)
     {
-        //TODO
+		std::swap(mNumMeshes, model.mNumMeshes);
+		std::swap(mMeshes, model.mMeshes);
+
+		std::swap(mNumNodes, model.mNumNodes);
+		std::swap(mNodes, model.mNodes);
+		std::swap(mNodeTransformations, model.mNodeTransformations);
+
+		std::swap(mNumMaterials, model.mNumMaterials);
+		std::swap(mMaterials, model.mMaterials);
     }
 
     return *this;
@@ -44,7 +60,7 @@ const String& Model::toString() const
 
 
 //get & set
-const Model::UInt& Model::numMeshes() const
+const UInt& Model::numMeshes() const
 {
     return mNumMeshes;
 }
@@ -55,7 +71,7 @@ const Model::Meshes& Model::meshes() const
 }
 
 
-const Model::UInt& Model::numNodes() const
+const UInt& Model::numNodes() const
 {
     return mNumNodes;
 }
@@ -63,6 +79,11 @@ const Model::UInt& Model::numNodes() const
 const Model::Nodes& Model::nodes() const
 {
     return mNodes;
+}
+
+const Model::Transformations& Model::transformations() const
+{
+	return mNodeTransformations;
 }
 
 
@@ -73,63 +94,87 @@ const Node& Model::root() const
 
 
 //load
-bool Model::loadModel(const aiScene* scene, const String& name)
+//TODO
+void Model::loadModel(const aiScene* scene, const String& name)
 {
-	static std::function<UInt(const aiNode*)> countNodes
-		= [&] (const aiNode* node) -> UInt
-	{
-		UInt count = 0;
-
-		if (node != nullptr)
-		{
-			count = node->mNumChildren;
-			for (UInt i = 0; i < node->mNumChildren; i++)
-			{
-				count += countNodes(node->mChildren[i]);
-			}
-		}
-
-		return count;
-	};
-
-	static std::function<void(UInt&, std::map<const aiNode*, UInt>&, const aiNode*)> fillNodes
-		= [&, this] (UInt& label, std::map<const aiNode*, UInt>& mapping, const aiNode* node) -> void
-	{
-		if (node != nullptr)
-		{
-			UInt currLabel = label;
-
-			mapping[node] = label++;
-			for (UInt i = 0; i < node->mNumChildren; i++)
-			{
-				fillNodes(label, mapping, node->mChildren[i]);
-			}
-
-			mNodes[currLabel] = Node(mapping, node);
-		}
-	};
-
 	//name
 	mName = name;
 
 	//nodes
 	UInt nodes = countNodes(scene->mRootNode);
 	mNumNodes = nodes;
-	mNodes.reset(new Node[nodes]);
+	mNodes.reset(new Node[mNumNodes]);
+	mNodeTransformations.reset(new Mat4[mNumNodes]);
 
 	UInt label = 0;
 	std::map<const aiNode*, UInt> mapping;
 	fillNodes(label, mapping, scene->mRootNode);
 
+
 	//meshes
-	UInt meshes = scene->mNumMeshes;
-	mNumMeshes = meshes;
-	mMeshes.reset(new Mesh[meshes]);
-	for (UInt i = 0; i < meshes; i++)
+	if (scene->HasMeshes())
 	{
-		mMeshes[i] = Mesh(scene->mMeshes[i]);
+		UInt meshes = scene->mNumMeshes;
+		mNumMeshes = meshes;
+		mMeshes.reset(new Mesh[meshes]);
+		for (UInt i = 0; i < meshes; i++)
+		{
+			mMeshes[i] = Mesh(scene->mMeshes[i]);
+		}
 	}
 
 	//materials
-	return true;
+	if (scene->HasMaterials())
+	{
+		mNumMaterials = scene->mNumMaterials;
+		mMaterials.reset(new Material[mNumMaterials]);
+		for (UInt i = 0; i < scene->mNumMaterials; i++)
+		{
+			mMaterials[i] = Material(scene->mMaterials[i]);
+		}
+	}
+}
+
+void Model::fillNodes(UInt& label, std::map<const aiNode*, UInt>& mapping, const aiNode* node)
+{
+	if (node != nullptr)
+	{
+		UInt currLabel = label;
+
+		mapping[node] = label++;
+		for (UInt i = 0; i < node->mNumChildren; i++)
+		{
+			fillNodes(label, mapping, node->mChildren[i]);
+		}
+
+		mNodes[currLabel] = Node(node, mapping);
+		mNodeTransformations[currLabel] = toMat4(node->mTransformation);
+	}
+};
+
+UInt Model::countNodes(const aiNode* node)
+{
+	UInt count = 0;
+
+	if (node != nullptr)
+	{
+		count = node->mNumChildren;
+		for (UInt i = 0; i < node->mNumChildren; i++)
+		{
+			count += countNodes(node->mChildren[i]);
+		}
+	}
+
+	return count;
+};
+
+
+Mat4 toMat4(const aiMatrix4x4& mat)
+{
+	return Mat4(
+		mat[0][0], mat[1][0], mat[2][0], mat[3][0],
+		mat[0][1], mat[1][1], mat[2][1], mat[3][1],
+		mat[0][2], mat[1][2], mat[2][2], mat[3][2],
+		mat[0][3], mat[1][3], mat[2][3], mat[3][3]
+	);
 }

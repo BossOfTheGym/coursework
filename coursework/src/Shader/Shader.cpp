@@ -8,17 +8,14 @@ thread_local String Shader::INFO_LOG;
 
 
 //constructors
-Shader::Shader(Type type, const String& location) : m_id(EMPTY), m_type(type)
+Shader::Shader(Type type, const String& location) : mId(EMPTY), mType(type)
 {
     loadFromLocation(type, location);
 }
 
 Shader::Shader(Shader&& shader)
 {
-    m_id   = shader.m_id;
-    m_type = shader.m_type;
-
-    shader.resetShader();
+	*this = std::move(shader);
 }
 
 
@@ -32,12 +29,11 @@ Shader::~Shader()
 //operators
 Shader& Shader::operator = (Shader&& shader)
 {
-    deleteShader();
-
-    m_id   = shader.m_id;
-    m_type = shader.m_type;
-
-    shader.resetShader();
+	if (this != &shader)
+	{
+		std::swap(mId, shader.mId);
+		std::swap(mType, shader.mType);
+	}
 
     return *this;
 }
@@ -84,10 +80,10 @@ int Shader::loadFromString(Type type, const String& source)
         return false;
     }
 
-    m_id   = glCreateShader(type);
-    m_type = type;
+    mId   = glCreateShader(type);
+    mType = type;
 
-    if (m_id == EMPTY)
+    if (mId == EMPTY)
     {
         resetShader();
 
@@ -97,8 +93,8 @@ int Shader::loadFromString(Type type, const String& source)
     const GLchar* src = source.c_str();
     GLint size = source.size();
 
-    glShaderSource(m_id, 1, &src, &size);
-    glCompileShader(m_id);
+    glShaderSource(mId, 1, &src, &size);
+    glCompileShader(mId);
 
     if (!compiled())
     {
@@ -112,22 +108,22 @@ int Shader::loadFromString(Type type, const String& source)
 //delete & reset
 void Shader::deleteShader()
 {
-    glDeleteShader(m_id);
+    glDeleteShader(mId);
 
     resetShader();
 }
 
 void Shader::resetShader()
 {
-    m_id   = EMPTY;
-    m_type = Type::Invalid;
+    mId   = EMPTY;
+    mType = Type::Invalid;
 }
 
 
 //checks
 bool Shader::valid() const
 {
-    return m_id != EMPTY;
+    return mId != EMPTY;
 }
 
 bool Shader::compiled() const
@@ -138,7 +134,7 @@ bool Shader::compiled() const
     }
 
     GLint result;
-    glGetShaderiv(m_id, GL_COMPILE_STATUS, &result);
+    glGetShaderiv(mId, GL_COMPILE_STATUS, &result);
 
     return result == GL_TRUE;
 }
@@ -151,10 +147,10 @@ const String& Shader::getInfoLog() const
     GLint length;
     GLint returned;
 
-    glGetShaderiv(m_id, GL_INFO_LOG_LENGTH, &length);
+    glGetShaderiv(mId, GL_INFO_LOG_LENGTH, &length);
     infoLog.resize(length);
 
-    glGetShaderInfoLog(m_id, length, &returned, infoLog.data());
+    glGetShaderInfoLog(mId, length, &returned, infoLog.data());
     infoLog.resize(returned);
 
     return infoLog;
@@ -164,10 +160,10 @@ const String& Shader::getInfoLog() const
 //get & set
 GLuint Shader::getId() const
 {
-    return m_id;
+    return mId;
 }
 
 Shader::Type Shader::getType() const
 {
-    return m_type;
+    return mType;
 }

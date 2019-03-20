@@ -3,26 +3,34 @@
 //===Node===
 //constructors & destructor
 Node::Node()
-{
-	//TODO
-}
+	: mNumMeshes(0)
+	, mNumChildren(0)
+	, mMeshes(nullptr)
+	, mChildren(nullptr)
+	, mName("")
+{}
 
 Node::Node(std::map<const aiNode*, UInt>& mapping, const aiNode* node)
+	: mNumMeshes(node->mNumMeshes)
+	, mNumChildren(node->mNumChildren)
+	, mMeshes(new UInt[mNumMeshes])
+	, mChildren(new UInt[mNumChildren])
+	, mName(node->mName.C_Str())
 {
-    //TODO
-    /*for (UInt i = 0; i < node->mNumChildren; i++)
+    for (UInt i = 0; i < node->mNumChildren; i++)
     {
+		mChildren[i] = mapping[node->mChildren[i]];
     }
 
     for (UInt i = 0; i < node->mNumMeshes; i++)
     {
         mMeshes[i] = node->mMeshes[i];
-    }*/
+    }
 }
 
 Node::Node(Node&& node)
 {
-	//TODO
+	*this = std::move(node);
 }
 
 
@@ -35,7 +43,11 @@ Node& Node::operator = (Node&& node)
 {
     if (this != &node)
     {
-        //TODO
+		mNumChildren = node.mNumChildren;
+		mChildren.swap(node.mChildren);
+
+		mNumMeshes = node.mNumMeshes;
+		mMeshes.swap(node.mMeshes);
     }
 
     return *this;
@@ -69,15 +81,4 @@ const Node::UInt& Node::numMeshes() const
 const Node::Indices& Node::meshes() const
 {
     return mMeshes;
-}
-
-
-Mat4& Node::transform()
-{
-    return mTransform;
-}
-
-const Mat4& Node::transform() const
-{
-    return mTransform;
 }

@@ -70,7 +70,7 @@ private:
 
 
 private:    
-    GLuint m_id;
-    Type m_type;
+    GLuint mId;
+    Type mType;
 };
 

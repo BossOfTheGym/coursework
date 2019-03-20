@@ -56,8 +56,8 @@ private:
 
 
 private:
-    GLuint m_arrayId;
-    GLuint m_bufferId;
+    GLuint mArrayId;
+    GLuint mBufferId;
 
-    GLsizei m_elements;
+    GLsizei mElements;
 };

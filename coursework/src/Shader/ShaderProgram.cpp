@@ -13,10 +13,7 @@ ShaderProgram::ShaderProgram(const String& name)
 
 ShaderProgram::ShaderProgram(ShaderProgram&& shaderProgram)
 {
-    mId = shaderProgram.mId;
-    mName = shaderProgram.mName;
-
-    shaderProgram.resetProgram();
+	*this = std::move(shaderProgram);
 }
 
 
@@ -29,11 +26,10 @@ ShaderProgram::~ShaderProgram()
 //operators
 ShaderProgram& ShaderProgram::operator = (ShaderProgram&& shaderProgram)
 {
-    deleteProgram();
-
-    mId = shaderProgram.mId;
-
-    shaderProgram.resetProgram();
+	if (this != &shaderProgram)
+	{
+		std::swap(mId, shaderProgram.mId);
+	}
 
     return *this;
 }

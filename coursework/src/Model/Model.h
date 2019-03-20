@@ -64,14 +64,7 @@ public:
     const Indices& meshes() const;
 
 
-    Mat4& transform();
-
-    const Mat4& transform() const;
-
-
 private:
-	Mat4 mTransform;
-
 	UInt mNumChildren;
 	Indices mChildren;
 
@@ -152,9 +145,10 @@ class Model : public IObjectBase
 {
 public:
     using UInt = unsigned int;
-    using Meshes   = std::unique_ptr<Mesh[]>;
-    using Nodes    = std::unique_ptr<Node[]>;
-    using Materials = std::unique_ptr<Texture2D[]>;
+    using Meshes = std::unique_ptr<Mesh[]>;
+    using Nodes = std::unique_ptr<Node[]>;
+    using Materials = std::unique_ptr<Material[]>;
+	using Transformations = std::unique_ptr<Mat4[]>;
 
         
 public:
@@ -187,6 +181,7 @@ public:
 
     const Nodes& nodes() const;
 
+	const Transformations& transformations() const;
 
     const Node& root() const;
 
@@ -194,12 +189,14 @@ public:
 private:
 	bool loadModel(const aiScene* scene, const String& name);
 
+
 private:
 	UInt mNumMeshes;
 	Meshes mMeshes;
 
 	UInt mNumNodes;
 	Nodes mNodes;
+	Transformations mNodeTransformations;
 
 	UInt mNumMaterials;
 	Materials mMaterials;

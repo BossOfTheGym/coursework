@@ -55,17 +55,17 @@ VertexArrayBuffer& VertexArrayBuffer::operator = (VertexArrayBuffer&& vertexBuff
 
 
 //get;
-GLuint VertexArrayBuffer::getArrayId() const
+GLuint VertexArrayBuffer::arrayId() const
 {
     return mArrayId;
 }
 
-GLuint VertexArrayBuffer::getBufferId() const
+GLuint VertexArrayBuffer::bufferId() const
 {
 	return mBufferId;
 }
 
-GLsizei VertexArrayBuffer::getElements() const
+GLsizei VertexArrayBuffer::elements() const
 {
     return mElements;
 }
@@ -115,7 +115,7 @@ bool VertexArrayBuffer::loadData(GLsizei size, const float* data)
 }
 
 
-void VertexArrayBuffer::bindArray()
+void VertexArrayBuffer::bindArray() const
 {
     glBindVertexArray(mArrayId);
 	glBindBuffer(GL_ARRAY_BUFFER, mBufferId);

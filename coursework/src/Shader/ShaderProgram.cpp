@@ -43,6 +43,7 @@ ShaderProgram& ShaderProgram::operator = (ShaderProgram&& shaderProgram)
 //core functions
 void ShaderProgram::attachShader(const Shader& shader)
 {
+	std::cout << "Attached: " << shader.getId() << std::endl;
     glAttachShader(mId, shader.getId());
 }
 

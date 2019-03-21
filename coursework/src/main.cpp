@@ -22,9 +22,6 @@
 #include <assimp/postprocess.h>
 
 
-#include <map>
-
-
 const int WIDTH  = 1200;
 const int HEIGHT = 900;
  
@@ -46,7 +43,7 @@ GLFWwindow* createWindow()
 
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
     glfwWindowHint(GLFW_DEPTH_BITS, 32);
-    glfwWindowHint(GLFW_STENCIL_BITS, 32);
+    glfwWindowHint(GLFW_STENCIL_BITS, 8);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -180,19 +177,42 @@ VertexArrayBuffer createIcosahedron()
 }
 
 
+Model createSatelliteModel()
+{
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(
+		"assets/textures/Satellite/10477_Satellite_v1_L3.obj",
+		aiProcess_CalcTangentSpace |
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_SortByPType |
+		aiProcess_OptimizeMeshes |
+		aiProcess_JoinIdenticalVertices
+	);
+
+	if (!scene)
+	{
+		std::cerr << "Failed to load satellite model" << std::endl;
+	}
+
+	return Model(scene, "Satellite");
+}
+
 
 std::map<String, Shader> loadShaders()
 {    
     std::map<String, Shader> shaders;
 
-    shaders.insert({"assets/shaders/sphere.vs", Shader(Shader::Vertex, "assets/shaders/sphere.vs")});
-    shaders.insert({"assets/shaders/sphere.tcs", Shader(Shader::TessControl, "assets/shaders/sphere.tcs")});
-    shaders.insert({"assets/shaders/sphere.tes", Shader(Shader::TessEvaluation, "assets/shaders/sphere.tes")});
-    shaders.insert({"assets/shaders/sphere.gs", Shader(Shader::Geometry, "assets/shaders/sphere.gs")});
-    shaders.insert({"assets/shaders/sphere.fs", Shader(Shader::Fragment, "assets/shaders/sphere.fs")});
+    shaders["assets/shaders/sphere.vs"] = std::move(Shader(Shader::Vertex, "assets/shaders/sphere.vs"));
+    shaders["assets/shaders/sphere.tcs"] = std::move(Shader(Shader::TessControl, "assets/shaders/sphere.tcs"));
+    shaders["assets/shaders/sphere.tes"] = std::move(Shader(Shader::TessEvaluation, "assets/shaders/sphere.tes"));
+    shaders["assets/shaders/sphere.gs"] = std::move(Shader(Shader::Geometry, "assets/shaders/sphere.gs"));
+    shaders["assets/shaders/sphere.fs"] = std::move(Shader(Shader::Fragment, "assets/shaders/sphere.fs"));
 
-    shaders.insert({"assets/shaders/satellite.fs", Shader(Shader::Fragment, "assets/shaders/satellite.fs")});
+    shaders["assets/shaders/satellite.fs"] = std::move(Shader(Shader::Fragment, "assets/shaders/satellite.fs"));
 
+	shaders["assets/shaders/simple.vs"] = std::move(Shader(Shader::Vertex, "assets/shaders/simple.vs"));
+	shaders["assets/shaders/simple.fs"] = std::move(Shader(Shader::Fragment, "assets/shaders/simple.fs"));
 
     for (const auto&[location, shader] : shaders)
     {
@@ -205,7 +225,6 @@ std::map<String, Shader> loadShaders()
 
     return shaders;
 }
-
 
 
 Texture2D loadEarth()
@@ -223,6 +242,8 @@ Texture2D loadEarth()
 
 ShaderProgram createPlanetProgram(std::map<String, Shader>& shadersHolder)
 {
+	std::cout << "Building planet program" << std::endl;
+
     ShaderProgram program("Planet");
     program.attachShader(shadersHolder["assets/shaders/sphere.vs"]);
     program.attachShader(shadersHolder["assets/shaders/sphere.tcs"]);
@@ -241,6 +262,8 @@ ShaderProgram createPlanetProgram(std::map<String, Shader>& shadersHolder)
 
 ShaderProgram createSatelliteProgram(std::map<String, Shader>& shadersHolder)
 {
+	std::cout << "Building satellite program" << std::endl;
+
     ShaderProgram program("Satellite");
     program.attachShader(shadersHolder["assets/shaders/sphere.vs"]);
     program.attachShader(shadersHolder["assets/shaders/sphere.tcs"]);
@@ -256,51 +279,70 @@ ShaderProgram createSatelliteProgram(std::map<String, Shader>& shadersHolder)
     return program;
 }
 
+ShaderProgram createSimpleProgram(std::map<String, Shader>& shadersHolder)
+{
+	std::cout << "Building model program" << std::endl;
+
+	ShaderProgram program("Simple");
+	program.attachShader(shadersHolder["assets/shaders/simple.vs"]);
+	program.attachShader(shadersHolder["assets/shaders/simple.fs"]);
+
+	program.link();
+	if (!program.linked())
+	{
+		std::cerr << program.getInfoLog();
+	}
+
+	return program;
+}
 
 
 //globals
-GLFWwindow* window = createWindow();
-
-std::map<String, Shader> shaders = loadShaders();
-
-Texture2D earth = loadEarth();
-
-ShaderProgram planetProgram = createPlanetProgram(shaders);
-GLint planetModel      = planetProgram.getUniformLocation("model");
-GLint planetView       = planetProgram.getUniformLocation("view");
-GLint planetProjection = planetProgram.getUniformLocation("projection");
-GLint planetLightPos   = planetProgram.getUniformLocation("lightPos");
-GLint planetLightColor = planetProgram.getUniformLocation("lightColor");
-
-GLint planetInner = planetProgram.getUniformLocation("inner");
-GLint planetOuter = planetProgram.getUniformLocation("outer");
+GLFWwindow* window;
+std::map<String, Shader> shaders;
+Texture2D earth;
+VertexArrayBuffer icosahedron;
+Model satellite;
 
 
-ShaderProgram satelliteProgram = createSatelliteProgram(shaders);
-GLint satelliteModel      = satelliteProgram.getUniformLocation("model");
-GLint satelliteView       = satelliteProgram.getUniformLocation("view");
-GLint satelliteProjection = satelliteProgram.getUniformLocation("projection");
-GLint satelliteLightPos   = satelliteProgram.getUniformLocation("lightPos");
-GLint satelliteLightColor = satelliteProgram.getUniformLocation("lightColor");
-
-GLint satelliteColor = satelliteProgram.getUniformLocation("color");
-
-GLint satelliteInner = satelliteProgram.getUniformLocation("inner");
-GLint satelliteOuter = satelliteProgram.getUniformLocation("outer");
+ShaderProgram planetProgram;
+GLint planetModel;
+GLint planetView;
+GLint planetProjection;
+GLint planetLightPos;
+GLint planetLightColor;
+GLint planetInner;
+GLint planetOuter;
 
 
-VertexArrayBuffer icosahedron = createIcosahedron();
+ShaderProgram satelliteProgram;
+GLint satelliteModel;
+GLint satelliteView;
+GLint satelliteProjection;
+GLint satelliteLightPos;
+GLint satelliteLightColor;
+GLint satelliteColor;
+GLint satelliteInner;
+GLint satelliteOuter;
 
-Camera camera(glm::lookAt(glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)), Vec3(0.0f, 0.0f, 30.0f));
 
-bool fill = false;
+ShaderProgram simpleProgram;
+GLint simpleModel;
+GLint simpleView;
+GLint simpleProj;
 
-float innerTess = 10.0f;
-float outerTess = 10.0f;
-float deltaTess = 0.2f;
 
-double prevX = WIDTH / 2;
-double prevY = HEIGHT / 2;
+Camera camera;
+
+
+bool fill;
+
+float innerTess;
+float outerTess;
+float deltaTess;
+
+double prevX;
+double prevY;
 
 
 //main
@@ -388,8 +430,100 @@ void errorCallback(int error, const char* msg)
 }
 
 
+void renderMesh(const Model& model, const UInt& index)
+{
+	const VertexArrayBuffer& vab = model.meshes()[index].vab();
+
+	vab.bindArray();
+	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
+}
+
+void renderNode(const Model& model, const UInt& index, const Mat4& mat)
+{
+	const Node& node = model.nodes()[index];
+	
+	Mat4 currentTransform = mat * model.transformations()[index];
+	for (UInt i = 0; i < node.numChildren(); i++)
+	{
+		renderNode(model, node.children()[i], currentTransform);
+	}
+
+	simpleProgram.setUniformMat4(simpleModel, currentTransform);
+	for(UInt i = 0; i < node.numMeshes(); i++)
+	{
+		renderMesh(model, i);
+	}
+}
+
+void renderModel(const Model& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	simpleProgram.use();
+	simpleProgram.setUniformMat4(simpleView, matView);
+	simpleProgram.setUniformMat4(simpleProj, matProj);
+	renderNode(model, 0, matModel);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+
+void initGlobals()
+{
+	window  = std::move(createWindow());
+	shaders = std::move(loadShaders());
+	earth   = std::move(loadEarth());
+	icosahedron = std::move(createIcosahedron());
+ 	satellite   = std::move(createSatelliteModel());
+
+
+	planetProgram = createPlanetProgram(shaders);
+	planetModel      = planetProgram.getUniformLocation("model");
+	planetView       = planetProgram.getUniformLocation("view");
+	planetProjection = planetProgram.getUniformLocation("projection");
+	planetLightPos   = planetProgram.getUniformLocation("lightPos");
+	planetLightColor = planetProgram.getUniformLocation("lightColor");
+
+	planetInner = planetProgram.getUniformLocation("inner");
+	planetOuter = planetProgram.getUniformLocation("outer");
+
+
+	satelliteProgram = createSatelliteProgram(shaders);
+	satelliteModel      = satelliteProgram.getUniformLocation("model");
+	satelliteView       = satelliteProgram.getUniformLocation("view");
+	satelliteProjection = satelliteProgram.getUniformLocation("projection");
+	satelliteLightPos   = satelliteProgram.getUniformLocation("lightPos");
+	satelliteLightColor = satelliteProgram.getUniformLocation("lightColor");
+
+	satelliteColor = satelliteProgram.getUniformLocation("color");
+
+	satelliteInner = satelliteProgram.getUniformLocation("inner");
+	satelliteOuter = satelliteProgram.getUniformLocation("outer");
+
+
+	simpleProgram = createSimpleProgram(shaders);
+	simpleModel = simpleProgram.getUniformLocation("model");
+	simpleView  = simpleProgram.getUniformLocation("view");
+	simpleProj  = simpleProgram.getUniformLocation("proj");
+
+
+	camera = Camera(glm::lookAt(glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)), Vec3(0.0f, 0.0f, 30.0f));
+
+
+	fill = false;
+
+	innerTess = 10.0f;
+	outerTess = 10.0f;
+	deltaTess = 0.2f;
+
+	prevX = WIDTH / 2;
+	prevY = HEIGHT / 2;
+}
+
 void featureTest()
 {
+	initGlobals();
+
     //setups
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -403,7 +537,7 @@ void featureTest()
 
 
     //loop params
-    glm::mat4 matProj = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 300.0f);
+    glm::mat4 matProj = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 500.0f);
     glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
 
     glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(0.3f));
@@ -434,6 +568,11 @@ void featureTest()
         //prepare
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		//test
+		auto satModel = glm::scale(Mat4(1.0f), Vec3(3.0f));
+		satModel[3] = Vec4(-5.0, -5.0, 0.0, 1.0);
+		renderModel(satellite, satModel, camera.mat(), matProj);
+
 		//planet
         planetProgram.use();
         planetProgram.setUniform1f(planetInner, innerTess);
@@ -448,7 +587,7 @@ void featureTest()
         earth.bind();
 
         icosahedron.bindArray();
-        glDrawArrays(GL_PATCHES, 0, 60);
+        glDrawArrays(GL_PATCHES, 0, icosahedron.elements());
 
 	
         //sat
@@ -465,7 +604,7 @@ void featureTest()
 		satelliteProgram.setUniformVec3(satelliteColor, Vec3(1.0f, 0.0, 0.0));
 
 		icosahedron.bindArray();
-        glDrawArrays(GL_PATCHES, 0, 60);
+        glDrawArrays(GL_PATCHES, 0, icosahedron.elements());
 
 		m = second;
 		m[3] = Vec4(r2, 1.0f);
@@ -473,7 +612,7 @@ void featureTest()
 		satelliteProgram.setUniformVec3(satelliteColor, Vec3(0.0f, 0.0, 1.0));
 
 		icosahedron.bindArray();
-		glDrawArrays(GL_PATCHES, 0, 60);
+		glDrawArrays(GL_PATCHES, 0, icosahedron.elements());
 
 
         //update
@@ -689,122 +828,11 @@ void testGui()
 
 
 
-//test assimp
-std::ostream& offset(int shift)
-{
-    for (int i = 0; i < shift; i++)
-    {
-        std::cout << "    ";
-    }
-
-    return std::cout;
-}
-
-void processMesh(int shift, const aiMesh* mesh)
-{
-    offset(shift) << "Name: " << mesh->mName.C_Str() << std::endl;
-    offset(shift) << "Color channels: " << mesh->GetNumColorChannels() << std::endl;
-    offset(shift) << "UV channels: " << mesh->GetNumUVChannels() << std::endl;
-    offset(shift) << "Has bones: " << mesh->HasBones() << std::endl;
-    offset(shift) << "Has faces: " << mesh->HasFaces() << std::endl;
-    offset(shift) << "Has normals: " << mesh->HasNormals() << std::endl;
-    offset(shift) << "Has positions: " << mesh->HasPositions() << std::endl;
-    offset(shift) << "Has tangents and bitangents: " << mesh->HasTangentsAndBitangents() << std::endl;
-}
-
-void processNode(int shift, const aiNode* node)
-{
-    offset(shift) << "Node: " << node->mName.C_Str() << std::endl;
-
-
-    offset(shift) << "Transformation: " << std::endl;
-    auto& transform = node->mTransformation;
-    offset(shift) << transform[0][0] << transform[0][1] << transform[0][2] << transform[0][3] << std::endl;
-    offset(shift) << transform[1][0] << transform[1][1] << transform[1][2] << transform[1][3] << std::endl;
-    offset(shift) << transform[2][0] << transform[2][1] << transform[2][2] << transform[2][3] << std::endl;
-    offset(shift) << transform[3][0] << transform[3][1] << transform[3][2] << transform[3][3] << std::endl;
-
-    
-    offset(shift) << "Meshes: " << node->mNumMeshes << std::endl;
-    for(unsigned int i = 0; i < node->mNumMeshes; i++)
-    {
-        offset(shift) << "Mesh: " << node->mMeshes[i] << std::endl;
-    }
-
-
-    offset(shift) << "Children: " << node->mNumChildren << std::endl;
-    for (unsigned int i = 0; i < node->mNumChildren; i++)
-    {
-        processNode(shift + 1, node->mChildren[i]);
-    }
-}
-
-void processScene(const aiScene* scene)
-{
-    std::cout << "Has animations: " << scene->HasAnimations() << std::endl;
-    std::cout << "Has cameras: " << scene->HasCameras() << std::endl;
-    std::cout << "Has lights: " << scene->HasLights() << std::endl;
-    std::cout << "Has materials: " << scene->HasMaterials() << std::endl;
-    std::cout << "Has meshes: " << scene->HasMeshes() << std::endl;
-    std::cout << "Has textures: " << scene->HasTextures() << std::endl;
-
-    std::cout << "Animations: " << scene->mNumAnimations << std::endl;
-    std::cout << "Cameras: " << scene->mNumCameras << std::endl;
-    std::cout << "Lights: " << scene->mNumLights << std::endl;
-    std::cout << "Materials: " << scene->mNumMaterials << std::endl;
-    std::cout << "Meshes: " << scene->mNumMeshes << std::endl;
-    std::cout << "Textures: " << scene->mNumTextures << std::endl;
-
-
-    std::cout << "Meshes: " << std::endl;
-    for(unsigned int i = 0; i < scene->mNumMeshes; i++)
-    {
-        processMesh(0, scene->mMeshes[i]);
-    }
-
-
-    processNode(0, scene->mRootNode);
-}
-
-bool importModel()
-{
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(
-        "assets/textures/Satellite/10477_Satellite_v1_L3.obj",
-        aiProcess_CalcTangentSpace |
-        aiProcess_Triangulate |
-        aiProcess_JoinIdenticalVertices |
-        aiProcess_SortByPType
-    );
-    
-    if (!scene)
-    {
-        return false;
-    }
-
-    processScene(scene);
-
-	Model m(scene, "Satellite");
-
-    return true;
-}
-
-void testAssimp()
-{
-    importModel();
-}
-
-
-
-
 int main(int argc, char* argv[])
 {
-    //featureTest();
+    featureTest();
 
 	//testGui();
-
-    testAssimp();
-
 
 
     return EXIT_SUCCESS;

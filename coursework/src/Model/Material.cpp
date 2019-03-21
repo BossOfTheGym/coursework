@@ -69,6 +69,7 @@ void Material::loadMaterial(const aiMaterial* material)
 	{
 		if (material->GetTexture(aiTextureType_DIFFUSE, i, &path) == AI_SUCCESS)
 		{
+			std::cerr << path.C_Str() << std::endl;
 			mDiffuse[i] = Texture2D(path.C_Str());
 		}
 	}

@@ -29,7 +29,7 @@ public:
 
 
 
-    void bindArray();
+    void bindArray() const;
 
 	void subData(GLintptr offset, GLsizeiptr size, const GLvoid * data);
 
@@ -41,11 +41,11 @@ public:
 
 
 
-    GLuint getArrayId() const;
+    GLuint arrayId() const;
 
-	GLuint getBufferId() const;
+	GLuint bufferId() const;
 
-    GLsizei getElements() const;
+    GLsizei elements() const;
 
 
     void deleteArrayBuffer();

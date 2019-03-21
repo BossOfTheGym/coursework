@@ -17,7 +17,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-const float PI   = static_cast<float>(acos(-1.0));
+ const float PI   = static_cast<float>(acos(-1.0));
 const float PI_2 = static_cast<float>(2 * PI);
 
 

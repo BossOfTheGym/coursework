@@ -145,7 +145,7 @@ bool Shader::compiled() const
 }
 
 
-const String& Shader::getInfoLog() const
+const String& Shader::infoLog() const
 {
     String& infoLog = Shader::INFO_LOG;
 
@@ -163,12 +163,12 @@ const String& Shader::getInfoLog() const
 
 
 //get & set
-GLuint Shader::getId() const
+GLuint Shader::id() const
 {
     return mId;
 }
 
-Shader::Type Shader::getType() const
+Shader::Type Shader::type() const
 {
     return mType;
 }

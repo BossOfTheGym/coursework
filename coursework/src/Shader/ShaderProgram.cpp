@@ -43,13 +43,13 @@ ShaderProgram& ShaderProgram::operator = (ShaderProgram&& shaderProgram)
 //core functions
 void ShaderProgram::attachShader(const Shader& shader)
 {
-	std::cout << "Attached: " << shader.getId() << std::endl;
-    glAttachShader(mId, shader.getId());
+	std::cout << "Attached: " << shader.id() << std::endl;
+    glAttachShader(mId, shader.id());
 }
 
 void ShaderProgram::detachShader(const Shader& shader)
 {
-    glDetachShader(mId, shader.getId());
+    glDetachShader(mId, shader.id());
 }
 
 
@@ -144,14 +144,14 @@ bool ShaderProgram::linked()
 
 
 //get
-GLuint ShaderProgram::getId() const
+GLuint ShaderProgram::id() const
 {
     return mId;
 }
 
 
 //info log
-const String& ShaderProgram::getInfoLog()
+const String& ShaderProgram::infoLog()
 {
     String& infoLog = ShaderProgram::INFO_LOG;
 

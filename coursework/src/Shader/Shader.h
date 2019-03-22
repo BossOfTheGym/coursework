@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Common.h"
+#include <Common.h>
 
 
 class Shader
@@ -47,9 +47,9 @@ public:
 
 
 
-    GLuint getId() const;
+    GLuint id() const;
 
-    Type getType() const;
+    Type type() const;
 
 
     bool valid() const;
@@ -57,7 +57,7 @@ public:
     bool compiled() const;
 
 
-    const String& getInfoLog() const;
+    const String& infoLog() const;
 
 
 private:

@@ -71,9 +71,9 @@ public:
 
 
 
-    GLuint getId() const;
+    GLuint id() const;
     
-    const String& getInfoLog();
+    const String& infoLog();
 
 
     virtual const String& toString() const;

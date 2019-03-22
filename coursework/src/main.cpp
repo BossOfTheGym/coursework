@@ -219,7 +219,7 @@ std::map<String, Shader> loadShaders()
         if (!shader.compiled())
         {
             std::cerr << "FAILED TO COMPILE SHADER: " << location << std::endl;
-            std::cerr << shader.getInfoLog();
+            std::cerr << shader.infoLog();
         }
     }
 
@@ -254,7 +254,7 @@ ShaderProgram createPlanetProgram(std::map<String, Shader>& shadersHolder)
     program.link();
     if (!program.linked())
     {
-        std::cerr << program.getInfoLog();
+        std::cerr << program.infoLog();
     }
 
     return program;
@@ -273,7 +273,7 @@ ShaderProgram createSatelliteProgram(std::map<String, Shader>& shadersHolder)
     program.link();
     if (!program.linked())
     {
-        std::cerr << program.getInfoLog();
+        std::cerr << program.infoLog();
     }
 
     return program;
@@ -290,7 +290,7 @@ ShaderProgram createSimpleProgram(std::map<String, Shader>& shadersHolder)
 	program.link();
 	if (!program.linked())
 	{
-		std::cerr << program.getInfoLog();
+		std::cerr << program.infoLog();
 	}
 
 	return program;

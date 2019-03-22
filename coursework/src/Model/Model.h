@@ -28,7 +28,7 @@ class Material;
 class Model;
 
 
-class Node : public IObjectBase
+class Node : public IObject
 {
 public:
     using Indices = std::unique_ptr<UInt[]>;
@@ -78,7 +78,7 @@ private:
 
 
 
-class Mesh : public IObjectBase
+class Mesh : public IObject
 {
 public:
 	static const UInt INVALID = -1;
@@ -145,7 +145,7 @@ private:
 
 
 
-class Material : public IObjectBase
+class Material : public IObject
 {
 public:
 	using Textures = std::unique_ptr<Texture2D[]>;
@@ -192,7 +192,7 @@ private:
 
 
 
-class Model : public IObjectBase
+class Model : public IObject
 {
 public:
     using Meshes    = std::unique_ptr<Mesh[]>;

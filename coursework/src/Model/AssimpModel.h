@@ -1,11 +1,9 @@
 #pragma once
 
-#include <functional>
-#include <map>
-#include <vector>
-
 
 #include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
 
 #include <Common.h>
@@ -17,38 +15,37 @@
 #include <Shader/ShaderProgram.h>
 
 #include <Model/Base.h>
-#include <Model/Model.h>
 #include <Model/VertexArrayBuffer.h>
 
 
-class Node;
-class Mesh;
-class Material;
-class Model;
+class AssimpNode;
+class AssimpMesh;
+class AssimpMaterial;
+class AssimpModel;
 
 
-class Node : public INode
+class AssimpNode : public INode
 {
 public:
 	using Indices = std::unique_ptr<UInt[]>;
 
 
 public:
-	Node();
+	AssimpNode();
 
-	Node(const aiNode* node, const std::map<const aiNode*, UInt>& mapping);
+	AssimpNode(const aiNode* node, const std::map<const aiNode*, UInt>& mapping);
 
-    Node(const Node& node) = delete;
+    AssimpNode(const AssimpNode& node) = delete;
 
-    Node(Node&& node);
-
-
-    virtual ~Node();
+    AssimpNode(AssimpNode&& node);
 
 
-	Node& operator = (const Node& node) = delete;
+    virtual ~AssimpNode();
 
-    Node& operator = (Node&& node);
+
+	AssimpNode& operator = (const AssimpNode& node) = delete;
+
+    AssimpNode& operator = (AssimpNode&& node);
 
 
     virtual const String& toString() const override;
@@ -76,7 +73,7 @@ private:
 };
 
 
-class Mesh : public IMesh
+class AssimpMesh : public IMesh
 {
 public:
 	using Attributes = std::tuple<
@@ -90,21 +87,21 @@ public:
 
 
 public:
-	Mesh();
+	AssimpMesh();
 
-    Mesh(const aiMesh* mesh);
+    AssimpMesh(const aiMesh* mesh);
 
-    Mesh(const Mesh& mesh) = delete;
+    AssimpMesh(const AssimpMesh& mesh) = delete;
 
-    Mesh(Mesh&& mesh);
-
-
-    virtual ~Mesh();
+    AssimpMesh(AssimpMesh&& mesh);
 
 
-    Mesh& operator = (const Mesh& mesh) = delete;
+    virtual ~AssimpMesh();
 
-    Mesh& operator = (Mesh&& mesh);
+
+    AssimpMesh& operator = (const AssimpMesh& mesh) = delete;
+
+    AssimpMesh& operator = (AssimpMesh&& mesh);
 
 
     virtual const String& toString() const override;
@@ -131,28 +128,28 @@ private:
 };
 
 
-class Material : public IMaterial
+class AssimpMaterial : public IMaterial
 {
 public:
 	using TexturesPtr = std::unique_ptr<Texture2D[]>;
 
 
 public:
-	Material();
+	AssimpMaterial();
 
-	Material(const aiMaterial* material, const String& name);
+	AssimpMaterial(const aiMaterial* material, const String& name);
 
-	Material(const Material& material) = delete;
+	AssimpMaterial(const AssimpMaterial& material) = delete;
 
-	Material(Material&& material);
-
-
-	virtual ~Material();
+	AssimpMaterial(AssimpMaterial&& material);
 
 
-	Material& operator = (const Material& material) = delete;
+	virtual ~AssimpMaterial();
 
-	Material& operator = (Material&& material);
+
+	AssimpMaterial& operator = (const AssimpMaterial& material) = delete;
+
+	AssimpMaterial& operator = (AssimpMaterial&& material);
 
 
 
@@ -177,31 +174,31 @@ private:
 };
 
 
-class Model : public IModel
+class AssimpModel : public IModel
 {
 public:
-    using Meshes    = std::unique_ptr<Mesh[]>;
-    using Nodes     = std::unique_ptr<Node[]>;
-    using Materials = std::unique_ptr<Material[]>;
+    using Meshes    = std::unique_ptr<AssimpMesh[]>;
+    using Nodes     = std::unique_ptr<AssimpNode[]>;
+    using Materials = std::unique_ptr<AssimpMaterial[]>;
 	using Transformations = std::unique_ptr<Mat4[]>;
 
         
 public:
-	Model();
+	AssimpModel();
 
-    Model(const aiScene* scene, const String& name);
+    AssimpModel(const String& location);
 
-    Model(const Model& model) = delete;
+    AssimpModel(const AssimpModel& model) = delete;
 
-    Model(Model&& model);
-
-
-    virtual ~Model();
+    AssimpModel(AssimpModel&& model);
 
 
-    Model& operator = (const Model& model) = delete;
+    virtual ~AssimpModel();
 
-    Model& operator = (Model&& model);
+
+    AssimpModel& operator = (const AssimpModel& model) = delete;
+
+    AssimpModel& operator = (AssimpModel&& model);
 
 
 
@@ -221,7 +218,7 @@ public:
 	const Mat4* transformations() const;
 
 
-    const INode& root() const;
+    const INode* root() const;
 
 
 private:

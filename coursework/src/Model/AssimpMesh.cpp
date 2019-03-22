@@ -1,15 +1,15 @@
-#include "Model.h"
+#include "AssimpModel.h"
 
 
 //===Mesh===
 //constructors & destructors
-Mesh::Mesh()
+AssimpMesh::AssimpMesh()
 	: mName("")
 	, mMaterialIndex(INVALID)
 	, mVertexBuffer()
 {}
 
-Mesh::Mesh(const aiMesh* mesh) : Mesh()
+AssimpMesh::AssimpMesh(const aiMesh* mesh) : AssimpMesh()
 {
 	if (mesh)
 	{
@@ -18,18 +18,18 @@ Mesh::Mesh(const aiMesh* mesh) : Mesh()
 	}
 }
 
-Mesh::Mesh(Mesh&& mesh)
+AssimpMesh::AssimpMesh(AssimpMesh&& mesh)
 {
 	*this = std::move(mesh);
 }
 
 
-Mesh::~Mesh()
+AssimpMesh::~AssimpMesh()
 {}
 
 
 //operators
-Mesh& Mesh::operator = (Mesh&& mesh)
+AssimpMesh& AssimpMesh::operator = (AssimpMesh&& mesh)
 {
     if (this != &mesh)
     {
@@ -43,26 +43,26 @@ Mesh& Mesh::operator = (Mesh&& mesh)
 
 
 //IObjectBase
-const String& Mesh::toString() const
+const String& AssimpMesh::toString() const
 {
     return mName;
 }
 
 
 //get & set
-const Mesh::VAB& Mesh::vab() const
+const AssimpMesh::VAB& AssimpMesh::vab() const
 {
     return mVertexBuffer;
 }
 
-const UInt& Mesh::material() const
+const UInt& AssimpMesh::material() const
 {
     return mMaterialIndex;
 }
 
 
 //private
-void Mesh::loadMesh(const aiMesh* mesh)
+void AssimpMesh::loadMesh(const aiMesh* mesh)
 {
 	//get attributes
 	auto[
@@ -142,7 +142,7 @@ void Mesh::loadMesh(const aiMesh* mesh)
 	mMaterialIndex = mesh->mMaterialIndex;
 }
 
-void Mesh::subData(GLuint attrib, GLint attribSize, GLint offset, GLsizei size, const float* data)
+void AssimpMesh::subData(GLuint attrib, GLint attribSize, GLint offset, GLsizei size, const float* data)
 {
 	mVertexBuffer.subData(offset, size * sizeof(float), data);
 
@@ -150,7 +150,7 @@ void Mesh::subData(GLuint attrib, GLint attribSize, GLint offset, GLsizei size, 
 	mVertexBuffer.enableAttribArray(attrib);
 }
 
-Mesh::Attributes Mesh::getAttributes(const aiMesh* mesh)
+AssimpMesh::Attributes AssimpMesh::getAttributes(const aiMesh* mesh)
 {
 	std::vector<float> vertices;
 	if (mesh->HasPositions())

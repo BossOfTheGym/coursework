@@ -1,14 +1,14 @@
-#include "Model.h"
+#include "AssimpModel.h"
 
 
 //constructors & destructor
-Material::Material()
+AssimpMaterial::AssimpMaterial()
 	: mNumDiffuse()
 	, mDiffuse()
 	, mName("")
 {}
 
-Material::Material(const aiMaterial* material, const String& name) : Material()
+AssimpMaterial::AssimpMaterial(const aiMaterial* material, const String& name) : AssimpMaterial()
 {
 	if (material)
 	{
@@ -16,18 +16,18 @@ Material::Material(const aiMaterial* material, const String& name) : Material()
 	}
 }
 
-Material::Material(Material&& material)
+AssimpMaterial::AssimpMaterial(AssimpMaterial&& material)
 {
 	*this = std::move(material);
 }
 
 
-Material::~Material()
+AssimpMaterial::~AssimpMaterial()
 {}
 
 
 //operators
-Material& Material::operator = (Material&& material)
+AssimpMaterial& AssimpMaterial::operator = (AssimpMaterial&& material)
 {
 	if (this != &material)
 	{
@@ -40,26 +40,26 @@ Material& Material::operator = (Material&& material)
 
 
 //IObjectBase
-const String& Material::toString() const
+const String& AssimpMaterial::toString() const
 {
 	return mName;
 }
 
 
 //get & set
-const UInt& Material::numDiffuse() const
+const UInt& AssimpMaterial::numDiffuse() const
 {
 	return mNumDiffuse;
 }
 
-const Texture2D* Material::diffuse() const
+const Texture2D* AssimpMaterial::diffuse() const
 {
 	return mDiffuse.get();
 }
 
 
 //private
-void Material::loadMaterial(const aiMaterial* material)
+void AssimpMaterial::loadMaterial(const aiMaterial* material)
 {
 	mNumDiffuse = material->GetTextureCount(aiTextureType_DIFFUSE);
 	mDiffuse.reset(mNumDiffuse ? new Texture2D[mNumDiffuse] : nullptr);

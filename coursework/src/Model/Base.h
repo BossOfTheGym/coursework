@@ -77,5 +77,5 @@ public:
 	virtual const Mat4* transformations() const = 0;
 
 
-	virtual const INode& root() const = 0;
+	virtual const INode* root() const = 0;
 };

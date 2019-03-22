@@ -8,7 +8,7 @@
 #include <Texture/Texture2D.h>
 
 #include <Model/VertexArrayBuffer.h>
-#include <Model/Model.h>
+#include <Model/AssimpModel.h>
 
 
 #include <imgui.h>
@@ -77,71 +77,6 @@ void pushVertex(std::vector<float>& data, const Vec3& vertex, const Vec3& color,
 
     data.push_back(tex.s);
     data.push_back(tex.t);
-}
-
-auto splitTriangle(const Vec3& vertex0, const Vec3& vertex1, const Vec3& vertex2, int split)
-{
-	/*//buffer for vertices 
-	Vertex vertexBuffer[MAX_SPLIT + 1][MAX_SPLIT + 1];
-	
-	//lambda(gomogenious coordinates) stride
-	float delta = 1.0f / maxSplit;
-	
-	//gl_in vertices & colors
-	vec3 vertex0 = gl_in[0].gl_Position.xyz;
-	vec3 vertex1 = gl_in[1].gl_Position.xyz;
-	vec3 vertex2 = gl_in[2].gl_Position.xyz;
-
-	vec3 color0 = ourColor[0];
-	vec3 color1 = ourColor[1];
-	vec3 color2 = ourColor[2];
-
-
-	//initialize buffer
-	for(int i = 0; i <= maxSplit; i++)
-	{
-		for(int j = 0 ; j <= maxSplit - i; j++)
-		{
-			//barycentric coordinates
-			float lambda0 = i * delta;
-			float lambda1 = j * delta;
-			float lambda2 = 1.0f - lambda1 - lambda0;
-
-			vec3 newVertex = lambda0 * vertex0 + lambda1 * vertex1 + lambda2 * vertex2;
-			vec3 newColor  = lambda0 * color0  + lambda1 * color1  + lambda2 * color2;
-
-
-			vertexBuffer[i][j].pos   = projection * view * model * vec4(normalize(newVertex), 1.0);
-			vertexBuffer[i][j].color = newColor;
-		}
-	}
-
-
-	//assemble triangles
-	for(int i = 0; i < maxSplit; i++)
-	{
-		for(int j = 0; j < maxSplit - i - 1; j++)
-		{
-			assembleTriangle(
-				  vertexBuffer[  i  ][  j  ].pos, vertexBuffer[  i  ][  j  ].color
-				, vertexBuffer[  i  ][j + 1].pos, vertexBuffer[  i  ][j + 1].color
-				, vertexBuffer[i + 1][  j  ].pos, vertexBuffer[i + 1][  j  ].color
-			);
-
-			assembleTriangle(
-				  vertexBuffer[i + 1][  j  ].pos, vertexBuffer[i + 1][  j  ].color
-				, vertexBuffer[i + 1][j + 1].pos, vertexBuffer[i + 1][j + 1].color
-				, vertexBuffer[  i  ][j + 1].pos, vertexBuffer[  i  ][j + 1].color
-			);
-		}
-
-		assembleTriangle(
-			  vertexBuffer[  i  ][maxSplit - i - 1].pos, vertexBuffer[  i  ][maxSplit - i - 1].color
-			, vertexBuffer[  i  ][maxSplit - i    ].pos, vertexBuffer[  i  ][maxSplit - i    ].color
-			, vertexBuffer[i + 1][maxSplit - i - 1].pos, vertexBuffer[i + 1][maxSplit - i - 1].color
-		);
-	}*/
-	return 0;
 }
 
 auto getIcosahedron(int split = 0)
@@ -242,7 +177,7 @@ auto createIcosahedron()
 }
 
 
-Model createSatelliteModel()
+AssimpModel createSatelliteModel()
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(
@@ -260,7 +195,7 @@ Model createSatelliteModel()
 		std::cerr << "Failed to load satellite model" << std::endl;
 	}
 
-	return Model(scene, "Satellite");
+	return AssimpModel(scene, "Satellite");
 }
 
 
@@ -367,7 +302,7 @@ GLFWwindow* window;
 std::map<String, Shader> shaders;
 Texture2D earth;
 VertexArrayBuffer icosahedron;
-Model satellite;
+AssimpModel satellite;
 
 
 ShaderProgram planetProgram;
@@ -496,17 +431,17 @@ void errorCallback(int error, const char* msg)
 }
 
 
-void renderMesh(const Model& model, const UInt& index)
+void renderMesh(const AssimpModel& model, const UInt& index)
 {
-	const auto& vab = static_cast<const Mesh*>(model.meshes())[index].vab();
+	const auto& vab = static_cast<const AssimpMesh*>(model.meshes())[index].vab();
 
 	vab.bindArray();
 	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
 }
 
-void renderNode(const Model& model, const UInt& index, const Mat4& mat)
+void renderNode(const AssimpModel& model, const UInt& index, const Mat4& mat)
 {
-	const auto& node = static_cast<const Node*>(model.nodes())[index];
+	const auto& node = static_cast<const AssimpNode*>(model.nodes())[index];
 	
 	Mat4 currentTransform = mat * model.transformations()[index];
 	for (UInt i = 0; i < node.numChildren(); i++)
@@ -521,7 +456,7 @@ void renderNode(const Model& model, const UInt& index, const Mat4& mat)
 	}
 }
 
-void renderModel(const Model& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
+void renderModel(const AssimpModel& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 

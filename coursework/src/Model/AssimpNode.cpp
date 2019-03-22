@@ -1,8 +1,9 @@
-#include "Model.h"
+#include "AssimpModel.h"
+
 
 //===Node===
 //constructors & destructor
-Node::Node()
+AssimpNode::AssimpNode()
 	: mName("")
 	, mNumChildren(0)
 	, mNumMeshes(0)
@@ -10,7 +11,7 @@ Node::Node()
 	, mChildren(nullptr)
 {}
 
-Node::Node(const aiNode* node, const std::map<const aiNode*, UInt>& mapping) : Node()
+AssimpNode::AssimpNode(const aiNode* node, const std::map<const aiNode*, UInt>& mapping) : AssimpNode()
 {
 	if (node)
 	{
@@ -33,18 +34,18 @@ Node::Node(const aiNode* node, const std::map<const aiNode*, UInt>& mapping) : N
 	}
 }
 
-Node::Node(Node&& node)
+AssimpNode::AssimpNode(AssimpNode&& node)
 {
 	*this = std::move(node);
 }
 
 
-Node::~Node()
+AssimpNode::~AssimpNode()
 {}
 
 
 //operators
-Node& Node::operator = (Node&& node)
+AssimpNode& AssimpNode::operator = (AssimpNode&& node)
 {
     if (this != &node)
     {
@@ -60,30 +61,30 @@ Node& Node::operator = (Node&& node)
 
 
 //IObjectBase
-const String& Node::toString() const
+const String& AssimpNode::toString() const
 {
     return mName;
 }
 
 
 //get & set
-const UInt& Node::numChildren() const
+const UInt& AssimpNode::numChildren() const
 {
     return mNumChildren;
 }
 
-const UInt* Node::children() const
+const UInt* AssimpNode::children() const
 {
     return mChildren.get();
 }
 
 
-const UInt& Node::numMeshes() const
+const UInt& AssimpNode::numMeshes() const
 {
     return mNumMeshes;
 }
 
-const UInt* Node::meshes() const
+const UInt* AssimpNode::meshes() const
 {
     return mMeshes.get();
 }

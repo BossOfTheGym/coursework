@@ -1,13 +1,19 @@
 #pragma once
 
 #include <iostream>
-#include <cmath>
-#include <vector>
-#include <string>
 #include <fstream>
+
+#include <cmath>
+
 #include <thread>
 #include <memory>
+
 #include <filesystem>
+#include <functional>
+
+#include <string>
+#include <vector>
+#include <map>
 
 
 #include <GL/glew.h>

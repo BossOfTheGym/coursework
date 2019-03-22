@@ -1,9 +1,9 @@
-#include "Model.h"
+#include "AssimpModel.h"
 
 
 //===Model===
 //constructors & destructor
-Model::Model()
+AssimpModel::AssimpModel()
 	: mNumMeshes(0)
 	, mMeshes(nullptr)
 	, mNumNodes(0)
@@ -14,26 +14,41 @@ Model::Model()
 	, mName("")
 {}
 
-Model::Model(const aiScene* scene, const String& name) : Model()
+AssimpModel::AssimpModel(const String& location) : AssimpModel()
 {
+	Assimp::Importer importer;
+
+	const aiScene* scene = importer.ReadFile(
+		location,
+		  aiProcess_CalcTangentSpace 
+		| aiProcess_Triangulate 
+		| aiProcess_JoinIdenticalVertices 
+		| aiProcess_SortByPType 
+		| aiProcess_OptimizeMeshes 
+	);
+
 	if (scene)
 	{
-		loadModel(scene, name);
+		loadModel(scene, location);
+	}
+	else
+	{
+		std::cerr << "Failed to load satellite model" << std::endl;
 	}
 }
 
-Model::Model(Model&& model)
+AssimpModel::AssimpModel(AssimpModel&& model)
 {
 	*this = std::move(model);
 }
 
 
-Model::~Model()
+AssimpModel::~AssimpModel()
 {}
 
 
 //operators
-Model& Model::operator = (Model&& model)
+AssimpModel& AssimpModel::operator = (AssimpModel&& model)
 {
     if (this != &model)
     {
@@ -53,48 +68,48 @@ Model& Model::operator = (Model&& model)
 
 
 //IObjectBase
-const String& Model::toString() const
+const String& AssimpModel::toString() const
 {
     return mName;
 }
 
 
 //get & set
-const UInt& Model::numMeshes() const
+const UInt& AssimpModel::numMeshes() const
 {
     return mNumMeshes;
 }
 
-const IMesh* Model::meshes() const
+const IMesh* AssimpModel::meshes() const
 {
     return mMeshes.get();
 }
 
 
-const UInt& Model::numNodes() const
+const UInt& AssimpModel::numNodes() const
 {
     return mNumNodes;
 }
 
-const INode* Model::nodes() const
+const INode* AssimpModel::nodes() const
 {
     return mNodes.get();
 }
 
-const Mat4* Model::transformations() const
+const Mat4* AssimpModel::transformations() const
 {
 	return mNodeTransformations.get();
 }
 
 
-const INode& Model::root() const
+const INode* AssimpModel::root() const
 {
-    return mNodes[0];
+    return (mNodes ? mNodes[0] : nullptr);
 }
 
 
 //load
-void Model::loadModel(const aiScene* scene, const String& name)
+void AssimpModel::loadModel(const aiScene* scene, const String& name)
 {
 	//name
 	mName = name;
@@ -102,7 +117,7 @@ void Model::loadModel(const aiScene* scene, const String& name)
 	//nodes
 	UInt nodes = countNodes(scene->mRootNode);
 	mNumNodes = nodes;
-	mNodes.reset(mNumNodes ? new Node[mNumNodes]() : nullptr);
+	mNodes.reset(mNumNodes ? new AssimpNode[mNumNodes]() : nullptr);
 	mNodeTransformations.reset(mNumNodes ? new Mat4[mNumNodes]() : nullptr);
 
 	UInt label = 0;
@@ -115,10 +130,10 @@ void Model::loadModel(const aiScene* scene, const String& name)
 	{
 		UInt meshes = scene->mNumMeshes;
 		mNumMeshes = meshes;
-		mMeshes.reset(mNumMeshes ? new Mesh[meshes]() : nullptr);
+		mMeshes.reset(mNumMeshes ? new AssimpMesh[meshes]() : nullptr);
 		for (UInt i = 0; i < meshes; i++)
 		{
-			mMeshes[i] = Mesh(scene->mMeshes[i]);
+			mMeshes[i] = AssimpMesh(scene->mMeshes[i]);
 		}
 	}
 
@@ -126,15 +141,15 @@ void Model::loadModel(const aiScene* scene, const String& name)
 	if (scene->HasMaterials())
 	{
 		mNumMaterials = scene->mNumMaterials;
-		mMaterials.reset(mNumMaterials ? new Material[mNumMaterials]() : nullptr);
+		mMaterials.reset(mNumMaterials ? new AssimpMaterial[mNumMaterials]() : nullptr);
 		for (UInt i = 0; i < scene->mNumMaterials; i++)
 		{
-			mMaterials[i] = Material(scene->mMaterials[i], std::to_string(i));
+			mMaterials[i] = AssimpMaterial(scene->mMaterials[i], std::to_string(i));
 		}
 	}
 }
 
-void Model::fillNodes(UInt& label, std::map<const aiNode*, UInt>& mapping, const aiNode* node)
+void AssimpModel::fillNodes(UInt& label, std::map<const aiNode*, UInt>& mapping, const aiNode* node)
 {
 	if (node != nullptr)
 	{
@@ -146,12 +161,12 @@ void Model::fillNodes(UInt& label, std::map<const aiNode*, UInt>& mapping, const
 			fillNodes(label, mapping, node->mChildren[i]);
 		}
 
-		mNodes[currLabel] = Node(node, mapping);
+		mNodes[currLabel] = AssimpNode(node, mapping);
 		mNodeTransformations[currLabel] = toMat4(node->mTransformation);
 	}
 };
 
-UInt Model::countNodes(const aiNode* node)
+UInt AssimpModel::countNodes(const aiNode* node)
 {
 	UInt count = 0;
 

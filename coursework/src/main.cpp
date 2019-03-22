@@ -7,8 +7,9 @@
 
 #include <Texture/Texture2D.h>
 
-#include <Model/VertexArrayBuffer.h>
+#include <Model/Base.h>
 #include <Model/AssimpModel.h>
+#include <Model/VertexArrayBuffer.h>
 
 
 #include <imgui.h>
@@ -410,19 +411,20 @@ void errorCallback(int error, const char* msg)
 }
 
 
-void renderMesh(const AssimpModel& model, const UInt& index)
+void renderMesh(const IModel& model, const UInt& index)
 {
-	const auto& vab = static_cast<const AssimpMesh*>(model.meshes())[index].vab();
+	const auto& vab = (model.meshes()[index])->vab();
 
 	vab.bindArray();
 	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
 }
 
-void renderNode(const AssimpModel& model, const UInt& index, const Mat4& mat)
+void renderNode(const IModel& model, const UInt& index, const Mat4& mat)
 {
-	const auto& node = static_cast<const AssimpNode*>(model.nodes())[index];
-	
-	Mat4 currentTransform = mat * model.transformations()[index];
+	const INode& node = *(model.nodes()[index]);
+	const Mat4& transform = *(model.transformations()[index]);
+
+	Mat4 currentTransform = mat * transform;
 	for (UInt i = 0; i < node.numChildren(); i++)
 	{
 		renderNode(model, node.children()[i], currentTransform);
@@ -435,7 +437,7 @@ void renderNode(const AssimpModel& model, const UInt& index, const Mat4& mat)
 	}
 }
 
-void renderModel(const AssimpModel& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
+void renderModel(const IModel& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -605,7 +607,7 @@ void featureTest()
         delta = (t1 - t0);
         t0 = t1;
 
-        float dt = static_cast<double>(delta / 10);
+        float dt = static_cast<float>(delta / 10);
 
         auto vj = v1;
         v1 -= dt * GM / glm::dot(r1, r1) * glm::normalize(r1);

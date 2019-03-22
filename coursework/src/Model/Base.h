@@ -58,7 +58,7 @@ class IMaterial : public IObject
 public:
 	virtual const UInt& numDiffuse() const = 0;
 
-	virtual const Texture2D* diffuse() const = 0;
+	virtual const Texture2D** diffuse() const = 0;
 };
 
 
@@ -67,14 +67,14 @@ class IModel : public IObject
 public:
 	virtual const UInt& numMeshes() const = 0;
 
-	virtual const IMesh* meshes() const = 0;
+	virtual const IMesh** meshes() const = 0;
 
 
 	virtual const UInt& numNodes() const = 0;
 
-	virtual const INode* nodes() const = 0;
+	virtual const INode** nodes() const = 0;
 
-	virtual const Mat4* transformations() const = 0;
+	virtual const Mat4** transformations() const = 0;
 
 
 	virtual const INode* root() const = 0;

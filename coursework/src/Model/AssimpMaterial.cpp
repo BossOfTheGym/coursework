@@ -3,8 +3,9 @@
 
 //constructors & destructor
 AssimpMaterial::AssimpMaterial()
-	: mNumDiffuse()
-	, mDiffuse()
+	: mNumDiffuse(0)
+	, mDiffuse(nullptr)
+	, mDiffusePtrs(nullptr)
 	, mName("")
 {}
 
@@ -33,6 +34,7 @@ AssimpMaterial& AssimpMaterial::operator = (AssimpMaterial&& material)
 	{
 		std::swap(mNumDiffuse, material.mNumDiffuse);
 		std::swap(mDiffuse, material.mDiffuse);
+		std::swap(mDiffusePtrs, material.mDiffusePtrs);
 	}
 
 	return *this;
@@ -52,9 +54,9 @@ const UInt& AssimpMaterial::numDiffuse() const
 	return mNumDiffuse;
 }
 
-const Texture2D* AssimpMaterial::diffuse() const
+const Texture2D** AssimpMaterial::diffuse() const
 {
-	return mDiffuse.get();
+	return (const Texture2D**)mDiffusePtrs.get();
 }
 
 
@@ -69,8 +71,14 @@ void AssimpMaterial::loadMaterial(const aiMaterial* material)
 	{
 		if (material->GetTexture(aiTextureType_DIFFUSE, i, &path) == AI_SUCCESS)
 		{
-			std::cerr << path.C_Str() << std::endl;
 			mDiffuse[i] = Texture2D(path.C_Str());
 		}
+	}
+
+
+	mDiffusePtrs.reset(mNumDiffuse ? new Texture2D*[mNumDiffuse] : nullptr);
+	for (UInt i = 0; i < mNumDiffuse; i++)
+	{
+		mDiffusePtrs[i] = &mDiffuse[i];
 	}
 }

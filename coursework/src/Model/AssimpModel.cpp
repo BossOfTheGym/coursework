@@ -6,11 +6,15 @@
 AssimpModel::AssimpModel()
 	: mNumMeshes(0)
 	, mMeshes(nullptr)
+	, mMeshesPtrs(nullptr)
 	, mNumNodes(0)
 	, mNodes(nullptr)
+	, mNodesPtrs(nullptr)
 	, mNodeTransformations(nullptr)
+	, mNodeTransformationsPtrs(nullptr)
 	, mNumMaterials(0)
 	, mMaterials(nullptr)
+	, mMaterialsPtrs(nullptr)
 	, mName("")
 {}
 
@@ -33,7 +37,7 @@ AssimpModel::AssimpModel(const String& location) : AssimpModel()
 	}
 	else
 	{
-		std::cerr << "Failed to load satellite model" << std::endl;
+		std::cerr << "Failed to load model: " << location << std::endl;
 	}
 }
 
@@ -54,13 +58,17 @@ AssimpModel& AssimpModel::operator = (AssimpModel&& model)
     {
 		std::swap(mNumMeshes, model.mNumMeshes);
 		std::swap(mMeshes, model.mMeshes);
+		std::swap(mMeshesPtrs, model.mMeshesPtrs);
 
 		std::swap(mNumNodes, model.mNumNodes);
 		std::swap(mNodes, model.mNodes);
 		std::swap(mNodeTransformations, model.mNodeTransformations);
+		std::swap(mNodesPtrs, model.mNodesPtrs);
+		std::swap(mNodeTransformationsPtrs, model.mNodeTransformationsPtrs);
 
 		std::swap(mNumMaterials, model.mNumMaterials);
 		std::swap(mMaterials, model.mMaterials);
+		std::swap(mMaterialsPtrs, model.mMaterialsPtrs);
     }
 
     return *this;
@@ -80,9 +88,9 @@ const UInt& AssimpModel::numMeshes() const
     return mNumMeshes;
 }
 
-const IMesh* AssimpModel::meshes() const
+const IMesh** AssimpModel::meshes() const
 {
-    return mMeshes.get();
+    return (const IMesh**)mMeshesPtrs.get();
 }
 
 
@@ -91,14 +99,14 @@ const UInt& AssimpModel::numNodes() const
     return mNumNodes;
 }
 
-const INode* AssimpModel::nodes() const
+const INode** AssimpModel::nodes() const
 {
-    return mNodes.get();
+    return (const INode**)mNodesPtrs.get();
 }
 
-const Mat4* AssimpModel::transformations() const
+const Mat4** AssimpModel::transformations() const
 {
-	return mNodeTransformations.get();
+	return (const Mat4**)mNodeTransformationsPtrs.get();
 }
 
 
@@ -115,8 +123,19 @@ void AssimpModel::loadModel(const aiScene* scene, const String& name)
 	mName = name;
 
 	//nodes
-	UInt nodes = countNodes(scene->mRootNode);
-	mNumNodes = nodes;
+	loadNodes(scene);
+
+	//meshes
+	loadMeshes(scene);
+
+	//materials
+	loadMaterials(scene);
+}
+
+void AssimpModel::loadNodes(const aiScene* scene)
+{
+	mNumNodes = countNodes(scene->mRootNode);
+
 	mNodes.reset(mNumNodes ? new AssimpNode[mNumNodes]() : nullptr);
 	mNodeTransformations.reset(mNumNodes ? new Mat4[mNumNodes]() : nullptr);
 
@@ -125,7 +144,17 @@ void AssimpModel::loadModel(const aiScene* scene, const String& name)
 	fillNodes(label, mapping, scene->mRootNode);
 
 
-	//meshess
+	mNodesPtrs.reset(mNumNodes ? new AssimpNode*[mNumNodes] : nullptr);
+	mNodeTransformationsPtrs.reset(mNumNodes ? new Mat4*[mNumNodes] : nullptr);
+	for (UInt i = 0; i < mNumNodes; i++)
+	{
+		mNodesPtrs[i] = &mNodes[i];
+		mNodeTransformationsPtrs[i] = &mNodeTransformations[i];
+	}
+}
+
+void AssimpModel::loadMeshes(const aiScene* scene)
+{
 	if (scene->HasMeshes())
 	{
 		UInt meshes = scene->mNumMeshes;
@@ -135,9 +164,18 @@ void AssimpModel::loadModel(const aiScene* scene, const String& name)
 		{
 			mMeshes[i] = AssimpMesh(scene->mMeshes[i]);
 		}
-	}
 
-	//materials
+
+		mMeshesPtrs.reset(mNumMeshes ? new AssimpMesh*[mNumMeshes] : nullptr);
+		for (UInt i = 0; i < mNumMeshes; i++)
+		{
+			mMeshesPtrs[i] = &mMeshes[i];
+		}
+	}
+}
+
+void AssimpModel::loadMaterials(const aiScene* scene)
+{
 	if (scene->HasMaterials())
 	{
 		mNumMaterials = scene->mNumMaterials;
@@ -146,8 +184,16 @@ void AssimpModel::loadModel(const aiScene* scene, const String& name)
 		{
 			mMaterials[i] = AssimpMaterial(scene->mMaterials[i], std::to_string(i));
 		}
-	}
+
+
+		mMaterialsPtrs.reset(mNumMaterials ? new AssimpMaterial*[mNumMaterials] : nullptr);
+		for (UInt i = 0; i < mNumMaterials; i++)
+		{
+			mMaterialsPtrs[i] = &mMaterials[i];
+		}
+	}	
 }
+
 
 void AssimpModel::fillNodes(UInt& label, std::map<const aiNode*, UInt>& mapping, const aiNode* node)
 {

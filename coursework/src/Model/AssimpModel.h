@@ -131,7 +131,8 @@ private:
 class AssimpMaterial : public IMaterial
 {
 public:
-	using TexturesPtr = std::unique_ptr<Texture2D[]>;
+	using Textures = std::unique_ptr<Texture2D[]>;
+	using TexturesPtrs = std::unique_ptr<Texture2D*[]>;
 
 
 public:
@@ -159,7 +160,7 @@ public:
 
 	virtual const UInt& numDiffuse() const override;
 
-	virtual const Texture2D* diffuse() const override;
+	virtual const Texture2D** diffuse() const override;
 
 
 private:
@@ -168,7 +169,8 @@ private:
 
 private:
 	UInt mNumDiffuse;
-	TexturesPtr mDiffuse;
+	Textures mDiffuse;
+	TexturesPtrs mDiffusePtrs;
 
 	String mName;
 };
@@ -177,10 +179,17 @@ private:
 class AssimpModel : public IModel
 {
 public:
-    using Meshes    = std::unique_ptr<AssimpMesh[]>;
-    using Nodes     = std::unique_ptr<AssimpNode[]>;
+    using Meshes = std::unique_ptr<AssimpMesh[]>;
+	using MeshesPtrs = std::unique_ptr<AssimpMesh*[]>;
+
+    using Nodes = std::unique_ptr<AssimpNode[]>;
+	using NodesPtrs = std::unique_ptr<AssimpNode*[]>;
+
     using Materials = std::unique_ptr<AssimpMaterial[]>;
+	using MaterialsPtrs = std::unique_ptr<AssimpMaterial*[]>;
+
 	using Transformations = std::unique_ptr<Mat4[]>;
+	using TransformationsPtrs = std::unique_ptr<Mat4*[]>;
 
         
 public:
@@ -206,39 +215,51 @@ public:
 
 
 
-    const UInt& numMeshes() const;
+    virtual const UInt& numMeshes() const override;
 
-    const IMesh* meshes() const;
+    virtual const IMesh** meshes() const override;
     
 
-    const UInt& numNodes() const;
+    virtual const UInt& numNodes() const override;
 
-    const INode* nodes() const;
+    virtual const INode** nodes() const override;
 
-	const Mat4* transformations() const;
+	virtual const Mat4** transformations() const override;
 
 
-    const INode* root() const;
+    virtual const INode* root() const override;
 
 
 private:
 	void loadModel(const aiScene* scene, const String& name);
+
+	void loadNodes(const aiScene* scene);
+
+	void loadMeshes(const aiScene* scene);
+
+	void loadMaterials(const aiScene* scene);
+
 
 	void fillNodes(UInt& label, std::map<const aiNode*, UInt>& mapping, const aiNode* node);
 
 	UInt countNodes(const aiNode* node);
 
 
+
 private:
 	UInt mNumMeshes;
 	Meshes mMeshes;
+	MeshesPtrs mMeshesPtrs;
 
 	UInt mNumNodes;
 	Nodes mNodes;
+	NodesPtrs mNodesPtrs;
 	Transformations mNodeTransformations;
+	TransformationsPtrs mNodeTransformationsPtrs;
 
 	UInt mNumMaterials;
 	Materials mMaterials;
+	MaterialsPtrs mMaterialsPtrs;
 
 	String mName;
 };

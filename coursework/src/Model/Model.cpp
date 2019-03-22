@@ -65,9 +65,9 @@ const UInt& Model::numMeshes() const
     return mNumMeshes;
 }
 
-const Model::Meshes& Model::meshes() const
+const IMesh* Model::meshes() const
 {
-    return mMeshes;
+    return mMeshes.get();
 }
 
 
@@ -76,25 +76,24 @@ const UInt& Model::numNodes() const
     return mNumNodes;
 }
 
-const Model::Nodes& Model::nodes() const
+const INode* Model::nodes() const
 {
-    return mNodes;
+    return mNodes.get();
 }
 
-const Model::Transformations& Model::transformations() const
+const Mat4* Model::transformations() const
 {
-	return mNodeTransformations;
+	return mNodeTransformations.get();
 }
 
 
-const Node& Model::root() const
+const INode& Model::root() const
 {
     return mNodes[0];
 }
 
 
 //load
-//TODO
 void Model::loadModel(const aiScene* scene, const String& name)
 {
 	//name

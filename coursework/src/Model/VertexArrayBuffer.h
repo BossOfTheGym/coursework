@@ -7,10 +7,6 @@
 class VertexArrayBuffer
 {
 public:
-    static const GLuint EMPTY = 0;
-
-
-public:
 	VertexArrayBuffer();
 
     VertexArrayBuffer(GLsizei elements, GLsizei size, const float* data);

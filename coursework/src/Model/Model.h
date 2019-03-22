@@ -16,11 +16,10 @@
 
 #include <Shader/ShaderProgram.h>
 
+#include <Model/Base.h>
 #include <Model/Model.h>
 #include <Model/VertexArrayBuffer.h>
 
-
-using UInt = unsigned int;
 
 class Node;
 class Mesh;
@@ -28,10 +27,10 @@ class Material;
 class Model;
 
 
-class Node : public IObject
+class Node : public INode
 {
 public:
-    using Indices = std::unique_ptr<UInt[]>;
+	using Indices = std::unique_ptr<UInt[]>;
 
 
 public:
@@ -44,7 +43,7 @@ public:
     Node(Node&& node);
 
 
-    ~Node();
+    virtual ~Node();
 
 
 	Node& operator = (const Node& node) = delete;
@@ -56,14 +55,14 @@ public:
 
 
 
-    const UInt& numChildren() const;
+    virtual const UInt& numChildren() const override;
 
-    const Indices& children() const;
+    virtual const UInt* children() const override;
 
 
-    const UInt& numMeshes() const;
+    virtual const UInt& numMeshes() const override;
 
-    const Indices& meshes() const;
+    virtual const UInt* meshes() const override;
 
 
 private:
@@ -77,22 +76,9 @@ private:
 };
 
 
-
-class Mesh : public IObject
+class Mesh : public IMesh
 {
 public:
-	static const UInt INVALID = -1;
-
-	static const GLuint VERTEX    = 0;
-	static const GLuint COLOR     = 1;
-	static const GLuint NORMAL    = 2;
-	static const GLuint TANGENT   = 3;
-	static const GLuint BITANGENT = 4;
-	static const GLuint TEXTURE   = 5;
-
-
-public:
-    using VAB = VertexArrayBuffer;
 	using Attributes = std::tuple<
 		  std::vector<float> // vertex
 		, std::vector<float> // color
@@ -101,6 +87,7 @@ public:
 		, std::vector<float> // bitangent
 		, std::vector<float> // texture
 	>;
+
 
 public:
 	Mesh();
@@ -112,7 +99,7 @@ public:
     Mesh(Mesh&& mesh);
 
 
-    ~Mesh();
+    virtual ~Mesh();
 
 
     Mesh& operator = (const Mesh& mesh) = delete;
@@ -123,9 +110,9 @@ public:
     virtual const String& toString() const override;
 
 
-    const VAB& vab() const;
+    virtual const VAB& vab() const override;
 
-    const UInt& material() const;
+    virtual const UInt& material() const override;
 
 
 private:
@@ -144,11 +131,10 @@ private:
 };
 
 
-
-class Material : public IObject
+class Material : public IMaterial
 {
 public:
-	using Textures = std::unique_ptr<Texture2D[]>;
+	using TexturesPtr = std::unique_ptr<Texture2D[]>;
 
 
 public:
@@ -161,7 +147,7 @@ public:
 	Material(Material&& material);
 
 
-	~Material();
+	virtual ~Material();
 
 
 	Material& operator = (const Material& material) = delete;
@@ -174,9 +160,9 @@ public:
 
 
 
-	const UInt& numDiffuse(const String& path) const;
+	virtual const UInt& numDiffuse() const override;
 
-	const Textures& diffuse();
+	virtual const Texture2D* diffuse() const override;
 
 
 private:
@@ -185,14 +171,13 @@ private:
 
 private:
 	UInt mNumDiffuse;
-	Textures mDiffuse;
+	TexturesPtr mDiffuse;
 
 	String mName;
 };
 
 
-
-class Model : public IObject
+class Model : public IModel
 {
 public:
     using Meshes    = std::unique_ptr<Mesh[]>;
@@ -226,17 +211,17 @@ public:
 
     const UInt& numMeshes() const;
 
-    const Meshes& meshes() const;
+    const IMesh* meshes() const;
     
 
     const UInt& numNodes() const;
 
-    const Nodes& nodes() const;
+    const INode* nodes() const;
 
-	const Transformations& transformations() const;
+	const Mat4* transformations() const;
 
 
-    const Node& root() const;
+    const INode& root() const;
 
 
 private:

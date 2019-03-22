@@ -10,10 +10,6 @@ private:
 
 
 public:
-    static const GLuint EMPTY  = 0;
-
-
-public:
     enum Type : GLenum
     {
           Vertex         = GL_VERTEX_SHADER

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -183,7 +183,10 @@
   <ItemGroup>
     <ClInclude Include="src\Camera\Camera.h" />
     <ClInclude Include="src\Common.h" />
+    <ClInclude Include="src\Entity\IObject.h" />
+    <ClInclude Include="src\Entity\ITimeVarying.h" />
     <ClInclude Include="src\Holder\ShaderHolder.h" />
+    <ClInclude Include="src\Model\Base.h" />
     <ClInclude Include="src\Model\Model.h" />
     <ClInclude Include="src\Model\VertexArrayBuffer.h" />
     <ClInclude Include="src\Shader\Shader.h" />

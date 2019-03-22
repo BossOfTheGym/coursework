@@ -66,28 +66,29 @@ void Mesh::loadMesh(const aiMesh* mesh)
 {
 	//get attributes
 	auto[
-		vertices
-			, colors
-			, normals
-			, tangents
-			, bitangents
-			, textureCoords
+		  vertices
+		, colors
+		, normals
+		, tangents
+		, bitangents
+		, textureCoords
 	] = std::move(getAttributes(mesh));
 
 	//all floats
-	auto size =
-		+vertices.size()
+	auto size = static_cast<GLsizei>(
+		+ vertices.size()
 		+ colors.size()
 		+ normals.size()
 		+ tangents.size()
 		+ bitangents.size()
-		+ textureCoords.size();
+		+ textureCoords.size()
+	);
 
 	//vertices
-	auto elements = 3 * mesh->mNumFaces;
+	auto elements = static_cast<GLsizei>(3 * mesh->mNumFaces);
 
 	//buffer offset
-	auto offset = 0;
+	auto offset = static_cast<int>(0);
 
 	//init buffer
 	GLint prevArray;
@@ -97,42 +98,42 @@ void Mesh::loadMesh(const aiMesh* mesh)
 	mVertexBuffer.bindArray();
 	if (mesh->HasPositions())
 	{
-		subData(VERTEX, 3, offset, vertices.size(), vertices.data());
+		subData(VERTEX, 3, offset, static_cast<GLsizei>(vertices.size()), vertices.data());
 
-		offset += vertices.size() * sizeof(float);
+		offset += static_cast<int>(vertices.size() * sizeof(float));
 	}
 
 	if (mesh->HasVertexColors(0))
 	{
-		subData(COLOR, 4, offset, colors.size(), colors.data());
+		subData(COLOR, 4, offset, static_cast<GLsizei>(colors.size()), colors.data());
 
-		offset += colors.size() * sizeof(float);
+		offset += static_cast<int>(colors.size() * sizeof(float));
 	}
 
 	if (mesh->HasNormals())
 	{
-		subData(NORMAL, 3, offset, normals.size(), normals.data());
+		subData(NORMAL, 3, offset, static_cast<GLsizei>(normals.size()), normals.data());
 
-		offset += normals.size() * sizeof(float);
+		offset += static_cast<int>(normals.size() * sizeof(float));
 	}
 
 	if (mesh->HasTangentsAndBitangents())
 	{
-		subData(TANGENT, 3, offset, tangents.size(), tangents.data());
+		subData(TANGENT, 3, offset, static_cast<GLsizei>(tangents.size()), tangents.data());
 
-		offset += tangents.size() * sizeof(float);
+		offset += static_cast<int>(tangents.size() * sizeof(float));
 
 
-		subData(BITANGENT, 3, offset, bitangents.size(), bitangents.data());
+		subData(BITANGENT, 3, offset, static_cast<GLsizei>(bitangents.size()), bitangents.data());
 
-		offset += bitangents.size() * sizeof(float);
+		offset += static_cast<int>(bitangents.size() * sizeof(float));
 	}
 
 	if (mesh->HasTextureCoords(0))
 	{
-		subData(TEXTURE, 3, offset, textureCoords.size(), textureCoords.data());
+		subData(TEXTURE, 3, offset, static_cast<GLsizei>(textureCoords.size()), textureCoords.data());
 
-		offset += textureCoords.size() * sizeof(float);
+		offset += static_cast<int>(textureCoords.size() * sizeof(float));
 	}
 	glBindVertexArray(prevArray);
 

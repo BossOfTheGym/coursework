@@ -10,10 +10,6 @@ private:
 
 
 public:
-    static const GLuint EMPTY = 0;
-
-
-public:
 	ShaderProgram();
 
     ShaderProgram(const String& name);

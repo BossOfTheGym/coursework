@@ -47,14 +47,14 @@ const String& Material::toString() const
 
 
 //get & set
-const UInt& Material::numDiffuse(const String& path) const
+const UInt& Material::numDiffuse() const
 {
 	return mNumDiffuse;
 }
 
-const Material::Textures& Material::diffuse()
+const Texture2D* Material::diffuse() const
 {
-	return mDiffuse;
+	return mDiffuse.get();
 }
 
 

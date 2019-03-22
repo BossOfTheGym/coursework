@@ -65,7 +65,7 @@ GLFWwindow* createWindow()
 
 
 
-void pushVertex(std::vector<float>& data, const glm::vec3& vertex, const glm::vec3& color, const glm::vec2& tex = glm::vec2())
+void pushVertex(std::vector<float>& data, const Vec3& vertex, const Vec3& color, const Vec2& tex = Vec2())
 {
     data.push_back(vertex.x);
     data.push_back(vertex.y);
@@ -77,6 +77,71 @@ void pushVertex(std::vector<float>& data, const glm::vec3& vertex, const glm::ve
 
     data.push_back(tex.s);
     data.push_back(tex.t);
+}
+
+auto splitTriangle(const Vec3& vertex0, const Vec3& vertex1, const Vec3& vertex2, int split)
+{
+	/*//buffer for vertices 
+	Vertex vertexBuffer[MAX_SPLIT + 1][MAX_SPLIT + 1];
+	
+	//lambda(gomogenious coordinates) stride
+	float delta = 1.0f / maxSplit;
+	
+	//gl_in vertices & colors
+	vec3 vertex0 = gl_in[0].gl_Position.xyz;
+	vec3 vertex1 = gl_in[1].gl_Position.xyz;
+	vec3 vertex2 = gl_in[2].gl_Position.xyz;
+
+	vec3 color0 = ourColor[0];
+	vec3 color1 = ourColor[1];
+	vec3 color2 = ourColor[2];
+
+
+	//initialize buffer
+	for(int i = 0; i <= maxSplit; i++)
+	{
+		for(int j = 0 ; j <= maxSplit - i; j++)
+		{
+			//barycentric coordinates
+			float lambda0 = i * delta;
+			float lambda1 = j * delta;
+			float lambda2 = 1.0f - lambda1 - lambda0;
+
+			vec3 newVertex = lambda0 * vertex0 + lambda1 * vertex1 + lambda2 * vertex2;
+			vec3 newColor  = lambda0 * color0  + lambda1 * color1  + lambda2 * color2;
+
+
+			vertexBuffer[i][j].pos   = projection * view * model * vec4(normalize(newVertex), 1.0);
+			vertexBuffer[i][j].color = newColor;
+		}
+	}
+
+
+	//assemble triangles
+	for(int i = 0; i < maxSplit; i++)
+	{
+		for(int j = 0; j < maxSplit - i - 1; j++)
+		{
+			assembleTriangle(
+				  vertexBuffer[  i  ][  j  ].pos, vertexBuffer[  i  ][  j  ].color
+				, vertexBuffer[  i  ][j + 1].pos, vertexBuffer[  i  ][j + 1].color
+				, vertexBuffer[i + 1][  j  ].pos, vertexBuffer[i + 1][  j  ].color
+			);
+
+			assembleTriangle(
+				  vertexBuffer[i + 1][  j  ].pos, vertexBuffer[i + 1][  j  ].color
+				, vertexBuffer[i + 1][j + 1].pos, vertexBuffer[i + 1][j + 1].color
+				, vertexBuffer[  i  ][j + 1].pos, vertexBuffer[  i  ][j + 1].color
+			);
+		}
+
+		assembleTriangle(
+			  vertexBuffer[  i  ][maxSplit - i - 1].pos, vertexBuffer[  i  ][maxSplit - i - 1].color
+			, vertexBuffer[  i  ][maxSplit - i    ].pos, vertexBuffer[  i  ][maxSplit - i    ].color
+			, vertexBuffer[i + 1][maxSplit - i - 1].pos, vertexBuffer[i + 1][maxSplit - i - 1].color
+		);
+	}*/
+	return 0;
 }
 
 auto getIcosahedron(int split = 0)
@@ -162,11 +227,11 @@ auto getIcosahedron(int split = 0)
 	return std::make_tuple(elements, icosahedron);
 }
 
-VertexArrayBuffer createIcosahedron()
+auto createIcosahedron()
 {
 	auto[elements, data] = std::move(getIcosahedron());
 
-    VertexArrayBuffer ico(elements, data.size(), data.data());
+    VertexArrayBuffer ico(elements, static_cast<GLsizei>(data.size()), data.data());
 
     ico.bindArray();
     ico.setAttribPointer(0, 3, GL_FLOAT, 8 * sizeof(float), (void *)(0));
@@ -382,7 +447,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 		case (GLFW_KEY_D):
 		{
-			camera.travelView(-0.3, Camera::X);
+			camera.travelView(-0.3f, Camera::X);
 
 			break;
 		}
@@ -414,8 +479,9 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
 			axis1 = Camera::Y;
 			axis2 = Camera::X;
 		}
-		camera.rotate(xPos - prevX, axis1);
-		camera.rotate(yPos - prevY, axis2);
+
+		camera.rotate(static_cast<float>(xPos - prevX), axis1);
+		camera.rotate(static_cast<float>(yPos - prevY), axis2);
     }
     prevX = xPos;
     prevY = yPos;
@@ -432,7 +498,7 @@ void errorCallback(int error, const char* msg)
 
 void renderMesh(const Model& model, const UInt& index)
 {
-	const VertexArrayBuffer& vab = model.meshes()[index].vab();
+	const auto& vab = static_cast<const Mesh*>(model.meshes())[index].vab();
 
 	vab.bindArray();
 	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
@@ -440,7 +506,7 @@ void renderMesh(const Model& model, const UInt& index)
 
 void renderNode(const Model& model, const UInt& index, const Mat4& mat)
 {
-	const Node& node = model.nodes()[index];
+	const auto& node = static_cast<const Node*>(model.nodes())[index];
 	
 	Mat4 currentTransform = mat * model.transformations()[index];
 	for (UInt i = 0; i < node.numChildren(); i++)
@@ -541,7 +607,7 @@ void featureTest()
     glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
 
     glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(0.3f));
-    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.2f), glm::vec3(1.0f, 0.0f, 1.0f));
+    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.02f), glm::vec3(1.0f, 0.0f, 1.0f));
 
     glm::vec3 vecLightPos   = glm::vec3(50.0f, 50.0f, 0.0f);
     glm::vec3 vecLightColor = glm::vec3(1.0f);
@@ -552,7 +618,7 @@ void featureTest()
     glm::vec3 v1(16.0f, 0.0f, 0.0f);	
 
 	glm::vec3 r2(7.0f, 0.0f, 7.0f);
-	glm::vec3 v2(-5.0f, 14.0f, -5.0f);
+	glm::vec3 v2(-5.0f, 12.0f, -5.0f);
 
     const float GM = 2000.0;
 
@@ -625,7 +691,7 @@ void featureTest()
         delta = (t1 - t0);
         t0 = t1;
 
-        float dt = delta / 10;
+        float dt = static_cast<double>(delta / 10);
 
         auto vj = v1;
         v1 -= dt * GM / glm::dot(r1, r1) * glm::normalize(r1);

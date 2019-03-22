@@ -72,9 +72,9 @@ const UInt& Node::numChildren() const
     return mNumChildren;
 }
 
-const Node::Indices& Node::children() const
+const UInt* Node::children() const
 {
-    return mChildren;
+    return mChildren.get();
 }
 
 
@@ -83,7 +83,7 @@ const UInt& Node::numMeshes() const
     return mNumMeshes;
 }
 
-const Node::Indices& Node::meshes() const
+const UInt* Node::meshes() const
 {
-    return mMeshes;
+    return mMeshes.get();
 }

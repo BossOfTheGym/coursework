@@ -177,27 +177,6 @@ auto createIcosahedron()
 }
 
 
-AssimpModel createSatelliteModel()
-{
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(
-		"assets/textures/Satellite/10477_Satellite_v1_L3.obj",
-		aiProcess_CalcTangentSpace |
-		aiProcess_Triangulate |
-		aiProcess_JoinIdenticalVertices |
-		aiProcess_SortByPType |
-		aiProcess_OptimizeMeshes |
-		aiProcess_JoinIdenticalVertices
-	);
-
-	if (!scene)
-	{
-		std::cerr << "Failed to load satellite model" << std::endl;
-	}
-
-	return AssimpModel(scene, "Satellite");
-}
-
 
 std::map<String, Shader> loadShaders()
 {    
@@ -475,8 +454,8 @@ void initGlobals()
 	shaders = std::move(loadShaders());
 	earth   = std::move(loadEarth());
 	icosahedron = std::move(createIcosahedron());
- 	satellite   = std::move(createSatelliteModel());
-
+	satellite = AssimpModel("assets/textures/Satellite/10477_Satellite_v1_L3.obj");
+	 
 
 	planetProgram = createPlanetProgram(shaders);
 	planetModel      = planetProgram.getUniformLocation("model");

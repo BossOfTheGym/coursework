@@ -104,7 +104,7 @@ const Mat4* AssimpModel::transformations() const
 
 const INode* AssimpModel::root() const
 {
-    return (mNodes ? mNodes[0] : nullptr);
+    return (mNodes ? &mNodes[0] : nullptr);
 }
 
 

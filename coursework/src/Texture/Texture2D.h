@@ -40,9 +40,9 @@ public:
     Texture2D& operator = (Texture2D&& tex);
 
 
-    void bind();
+    void bind() const;
 
-    void texParameteri(GLenum name, GLint parameter);
+    void texParameteri(GLenum name, GLint parameter) const;
 
 
     GLuint getId() const;

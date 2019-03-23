@@ -175,6 +175,10 @@
     <ClCompile Include="src\Model\AssimpMesh.cpp" />
     <ClCompile Include="src\Model\AssimpModel.cpp" />
     <ClCompile Include="src\Model\AssimpNode.cpp" />
+    <ClCompile Include="src\Model\PlanetMaterial.cpp" />
+    <ClCompile Include="src\Model\PlanetMesh.cpp" />
+    <ClCompile Include="src\Model\PlanetModel.cpp" />
+    <ClCompile Include="src\Model\PlanetNode.cpp" />
     <ClCompile Include="src\Model\VertexArrayBuffer.cpp" />
     <ClCompile Include="src\Shader\Shader.cpp" />
     <ClCompile Include="src\Shader\ShaderProgram.cpp" />
@@ -188,6 +192,7 @@
     <ClInclude Include="src\Holder\ShaderHolder.h" />
     <ClInclude Include="src\Model\AssimpModel.h" />
     <ClInclude Include="src\Model\Base.h" />
+    <ClInclude Include="src\Model\PlanetModel.h" />
     <ClInclude Include="src\Model\VertexArrayBuffer.h" />
     <ClInclude Include="src\Shader\Shader.h" />
     <ClInclude Include="src\Shader\ShaderProgram.h" />

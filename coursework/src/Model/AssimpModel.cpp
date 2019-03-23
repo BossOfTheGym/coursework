@@ -1,7 +1,6 @@
 #include "AssimpModel.h"
 
 
-//===Model===
 //constructors & destructor
 AssimpModel::AssimpModel()
 	: mNumMeshes(0)
@@ -75,14 +74,14 @@ AssimpModel& AssimpModel::operator = (AssimpModel&& model)
 }
 
 
-//IObjectBase
+//IObject
 const String& AssimpModel::toString() const
 {
     return mName;
 }
 
 
-//get & set
+//IModel
 const UInt& AssimpModel::numMeshes() const
 {
     return mNumMeshes;
@@ -110,9 +109,14 @@ const Mat4** AssimpModel::transformations() const
 }
 
 
-const INode* AssimpModel::root() const
+const UInt& AssimpModel::numMaterials() const
 {
-    return (mNodes ? &mNodes[0] : nullptr);
+	return mNumMaterials;
+}
+
+const IMaterial** AssimpModel::materials() const
+{
+	return (const IMaterial**)mMaterialsPtrs.get();
 }
 
 
@@ -230,6 +234,7 @@ UInt AssimpModel::countNodes(const aiNode* node)
 };
 
 
+//utils
 Mat4 toMat4(const aiMatrix4x4& mat)
 {
 	return Mat4(

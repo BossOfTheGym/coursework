@@ -41,64 +41,64 @@ ShaderProgram& ShaderProgram::operator = (ShaderProgram&& shaderProgram)
 
 
 //core functions
-void ShaderProgram::attachShader(const Shader& shader)
+void ShaderProgram::attachShader(const Shader& shader) const
 {
     glAttachShader(mId, shader.id());
 }
 
-void ShaderProgram::detachShader(const Shader& shader)
+void ShaderProgram::detachShader(const Shader& shader) const
 {
     glDetachShader(mId, shader.id());
 }
 
 
-void ShaderProgram::link()
+void ShaderProgram::link() const
 {
     glLinkProgram(mId);
 }
 
-void ShaderProgram::use()
+void ShaderProgram::use() const
 {
     glUseProgram(mId);
 }
 
 
 //uniforms
-void ShaderProgram::setUniformMat4(GLint location, const Mat4& mat)
+void ShaderProgram::setUniformMat4(GLint location, const Mat4& mat) const
 {
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void ShaderProgram::setUniformMat3(GLint location, const Mat3& mat)
+void ShaderProgram::setUniformMat3(GLint location, const Mat3& mat) const
 {
     glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 
-void ShaderProgram::setUniformVec4(GLint location, const Vec4& vec)
+void ShaderProgram::setUniformVec4(GLint location, const Vec4& vec) const
 {
     glUniform4fv(location, 1, glm::value_ptr(vec));
 }
 
-void ShaderProgram::setUniformVec3(GLint location, const Vec3& vec)
+void ShaderProgram::setUniformVec3(GLint location, const Vec3& vec) const
 {
     glUniform3fv(location, 1, glm::value_ptr(vec));
 }
 
 
-void ShaderProgram::setUniform1f(GLint location, float value)
+void ShaderProgram::setUniform1f(GLint location, float value) const
 {
     glUniform1f(location, value);
 }
 
 
 //locations
-GLint ShaderProgram::getUniformLocation(const String& name)
+GLint ShaderProgram::getUniformLocation(const String& name) const
 {
     return glGetUniformLocation(mId, name.c_str());
 }
 
-GLint ShaderProgram::getAttributeLocation(const String& name)
+GLint ShaderProgram::getAttributeLocation(const String& name) const
 {
     return glGetAttribLocation(mId, name.c_str());
 }
@@ -127,12 +127,12 @@ const String& ShaderProgram::toString() const
 }
 
 //checks
-bool ShaderProgram::valid()
+bool ShaderProgram::valid() const
 {
-    return mId == EMPTY;
+    return mId != EMPTY;
 }
 
-bool ShaderProgram::linked()
+bool ShaderProgram::linked() const
 {
     GLint result;
 
@@ -150,7 +150,7 @@ GLuint ShaderProgram::id() const
 
 
 //info log
-const String& ShaderProgram::infoLog()
+const String& ShaderProgram::infoLog() const
 {
     String& infoLog = ShaderProgram::INFO_LOG;
 

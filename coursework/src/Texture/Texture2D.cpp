@@ -75,13 +75,13 @@ Texture2D& Texture2D::operator = (Texture2D&& texture)
 
 
 //core functions
-void Texture2D::bind()
+void Texture2D::bind() const
 {
     glBindTexture(GL_TEXTURE_2D, mId);
 }
 
 
-void Texture2D::texParameteri(GLenum name, GLint parameter)
+void Texture2D::texParameteri(GLenum name, GLint parameter) const
 {
     glTexParameteri(GL_TEXTURE_2D, name, parameter);
 }
@@ -103,7 +103,7 @@ void Texture2D::deleteTexture()
 }
 
 
-//private
+//load
 int Texture2D::loadFromLocation(const String& location)
 {
     FREE_IMAGE_FORMAT format = FreeImage_GetFileType(location.c_str(), 0);

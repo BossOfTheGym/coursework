@@ -41,14 +41,14 @@ AssimpMaterial& AssimpMaterial::operator = (AssimpMaterial&& material)
 }
 
 
-//IObjectBase
+//IObject
 const String& AssimpMaterial::toString() const
 {
 	return mName;
 }
 
 
-//get & set
+//IMaterial
 const UInt& AssimpMaterial::numDiffuse() const
 {
 	return mNumDiffuse;
@@ -60,7 +60,7 @@ const Texture2D** AssimpMaterial::diffuse() const
 }
 
 
-//private
+//load
 void AssimpMaterial::loadMaterial(const aiMaterial* material)
 {
 	mNumDiffuse = material->GetTextureCount(aiTextureType_DIFFUSE);

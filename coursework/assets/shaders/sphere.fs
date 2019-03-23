@@ -56,10 +56,10 @@ void main()
 
 
 	//edge
-	if(abs(geoGomo[0]) < 0.02f || abs(geoGomo[1]) < 0.02f || abs(geoGomo[2]) < 0.02f)
-	{
-		tex = vec4(0.0);
-	}
+	//if(abs(geoGomo[0]) < 0.02f || abs(geoGomo[1]) < 0.02f || abs(geoGomo[2]) < 0.02f)
+	//{
+	//	tex = vec4(0.0);
+	//}
 
 	//result
     FragColor = vec4(light * tex.xyz, 1.0f);

@@ -18,11 +18,6 @@
 #include <Model/VertexArrayBuffer.h>
 
 
-class AssimpNode;
-class AssimpMesh;
-class AssimpMaterial;
-class AssimpModel;
-
 
 class AssimpNode : public INode
 {
@@ -48,10 +43,11 @@ public:
     AssimpNode& operator = (AssimpNode&& node);
 
 
+	//IObject
     virtual const String& toString() const override;
 
 
-
+	//INode
     virtual const UInt& numChildren() const override;
 
     virtual const UInt* children() const override;
@@ -104,9 +100,11 @@ public:
     AssimpMesh& operator = (AssimpMesh&& mesh);
 
 
+	//IObject
     virtual const String& toString() const override;
 
 
+	//IMesh
     virtual const VAB& vab() const override;
 
     virtual const UInt& material() const override;
@@ -121,8 +119,8 @@ private:
 
 
 private:
-	UInt mMaterialIndex;
 	VAB mVertexBuffer;
+	UInt mMaterialIndex;
 
 	String mName;
 };
@@ -153,11 +151,11 @@ public:
 	AssimpMaterial& operator = (AssimpMaterial&& material);
 
 
-
+	//IObject
 	virtual const String& toString() const override;
 
 
-
+	//IMaterial
 	virtual const UInt& numDiffuse() const override;
 
 	virtual const Texture2D** diffuse() const override;
@@ -210,11 +208,11 @@ public:
     AssimpModel& operator = (AssimpModel&& model);
 
 
-
+	//IObject
     virtual const String& toString() const override;
 
 
-
+	//IModel
     virtual const UInt& numMeshes() const override;
 
     virtual const IMesh** meshes() const override;
@@ -227,8 +225,9 @@ public:
 	virtual const Mat4** transformations() const override;
 
 
-    virtual const INode* root() const override;
+	virtual const UInt& numMaterials() const override;
 
+	virtual const IMaterial** materials() const override;
 
 private:
 	void loadModel(const aiScene* scene, const String& name);
@@ -265,5 +264,5 @@ private:
 };
 
 
-//util
+//utils
 Mat4 toMat4(const aiMatrix4x4& mat);

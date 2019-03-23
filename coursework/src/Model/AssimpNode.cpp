@@ -1,7 +1,6 @@
 #include "AssimpModel.h"
 
 
-//===Node===
 //constructors & destructor
 AssimpNode::AssimpNode()
 	: mName("")
@@ -60,14 +59,14 @@ AssimpNode& AssimpNode::operator = (AssimpNode&& node)
 }
 
 
-//IObjectBase
+//IObject
 const String& AssimpNode::toString() const
 {
     return mName;
 }
 
 
-//get & set
+//INode
 const UInt& AssimpNode::numChildren() const
 {
     return mNumChildren;

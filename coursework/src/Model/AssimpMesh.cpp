@@ -1,7 +1,6 @@
 #include "AssimpModel.h"
 
 
-//===Mesh===
 //constructors & destructors
 AssimpMesh::AssimpMesh()
 	: mName("")
@@ -42,14 +41,14 @@ AssimpMesh& AssimpMesh::operator = (AssimpMesh&& mesh)
 }
 
 
-//IObjectBase
+//IObject
 const String& AssimpMesh::toString() const
 {
     return mName;
 }
 
 
-//get & set
+//IMesh
 const AssimpMesh::VAB& AssimpMesh::vab() const
 {
     return mVertexBuffer;
@@ -61,7 +60,7 @@ const UInt& AssimpMesh::material() const
 }
 
 
-//private
+//load
 void AssimpMesh::loadMesh(const aiMesh* mesh)
 {
 	//get attributes

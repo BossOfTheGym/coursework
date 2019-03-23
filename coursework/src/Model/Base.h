@@ -9,9 +9,9 @@
 using UInt = unsigned int;
 
 
-class IMaterial;
-class IMesh;
 class INode;
+class IMesh;
+class IMaterial;
 class IModel;
 
 
@@ -77,5 +77,7 @@ public:
 	virtual const Mat4** transformations() const = 0;
 
 
-	virtual const INode* root() const = 0;
+	virtual const UInt& numMaterials() const = 0;
+
+	virtual const IMaterial** materials() const = 0;
 };

@@ -28,48 +28,48 @@ public:
 
 
 
-    void attachShader(const Shader& shader);
+    void attachShader(const Shader& shader) const;
 
-    void detachShader(const Shader& shader);
-
-
-    void link();
-
-    void use();
+    void detachShader(const Shader& shader) const;
 
 
+    void link() const;
 
-    void setUniformMat4(GLint location, const Mat4& mat);
-
-    void setUniformMat3(GLint location, const Mat3& mat);
-
-
-    void setUniformVec4(GLint location, const Vec4& vec);
-
-    void setUniformVec3(GLint location, const Vec3& vec);
+    void use() const;
 
 
-    void setUniform1f(GLint location, float value);
+
+    void setUniformMat4(GLint location, const Mat4& mat) const;
+
+    void setUniformMat3(GLint location, const Mat3& mat) const;
 
 
-    GLint getUniformLocation(const String& name);
+    void setUniformVec4(GLint location, const Vec4& vec) const;
 
-    GLint getAttributeLocation(const String& name);
+    void setUniformVec3(GLint location, const Vec3& vec) const;
+
+
+    void setUniform1f(GLint location, float value) const;
+
+
+    GLint getUniformLocation(const String& name) const;
+
+    GLint getAttributeLocation(const String& name) const;
 
 
 
     void deleteProgram();
 
 
-    bool valid();
+    bool valid() const;
 
-    bool linked();
+    bool linked() const;
 
 
 
     GLuint id() const;
     
-    const String& infoLog();
+    const String& infoLog() const;
 
 
     virtual const String& toString() const;

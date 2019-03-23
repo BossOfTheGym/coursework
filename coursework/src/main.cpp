@@ -10,6 +10,7 @@
 #include <Model/Base.h>
 #include <Model/AssimpModel.h>
 #include <Model/VertexArrayBuffer.h>
+#include <Model/PlanetModel.h>
 
 
 #include <imgui.h>
@@ -283,7 +284,7 @@ std::map<String, Shader> shaders;
 Texture2D earth;
 VertexArrayBuffer icosahedron;
 AssimpModel satellite;
-
+PlanetModel test;
 
 ShaderProgram planetProgram;
 GLint planetModel;
@@ -314,8 +315,11 @@ GLint simpleProj;
 
 Camera camera;
 
+Vec3 vecLightPos   = Vec3(50.0f, 50.0f, 0.0f);
+Vec3 vecLightColor = Vec3(1.0f);
 
-bool fill;
+
+bool fill = false;
 
 float innerTess;
 float outerTess;
@@ -340,7 +344,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
             break;
         }
-
         case (GLFW_KEY_W):
         {
 
@@ -411,7 +414,7 @@ void errorCallback(int error, const char* msg)
 }
 
 
-void renderMesh(const IModel& model, const UInt& index)
+void renderAssimpMesh(const IModel& model, const UInt& index)
 {
 	const auto& vab = (model.meshes()[index])->vab();
 
@@ -419,7 +422,7 @@ void renderMesh(const IModel& model, const UInt& index)
 	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
 }
 
-void renderNode(const IModel& model, const UInt& index, const Mat4& mat)
+void renderAssimpNode(const IModel& model, const UInt& index, const Mat4& mat)
 {
 	const INode& node = *(model.nodes()[index]);
 	const Mat4& transform = *(model.transformations()[index]);
@@ -427,27 +430,79 @@ void renderNode(const IModel& model, const UInt& index, const Mat4& mat)
 	Mat4 currentTransform = mat * transform;
 	for (UInt i = 0; i < node.numChildren(); i++)
 	{
-		renderNode(model, node.children()[i], currentTransform);
+		renderAssimpNode(model, node.children()[i], currentTransform);
 	}
 
 	simpleProgram.setUniformMat4(simpleModel, currentTransform);
 	for(UInt i = 0; i < node.numMeshes(); i++)
 	{
-		renderMesh(model, i);
+		renderAssimpMesh(model, i);
 	}
 }
 
-void renderModel(const IModel& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
+void renderAssimpModel(const IModel& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
 {
+	GLint mode[2];
+	glGetIntegerv(GL_POLYGON_MODE, mode);
+
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	simpleProgram.use();
 	simpleProgram.setUniformMat4(simpleView, matView);
 	simpleProgram.setUniformMat4(simpleProj, matProj);
-	renderNode(model, 0, matModel);
+	renderAssimpNode(model, 0, matModel);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
 }
+
+
+void renderPlanetMesh(const IModel& model, const UInt& index)
+{
+	const IMesh& mesh = *(model.meshes()[index]);
+
+	UInt i = mesh.material();
+
+	const IMaterial& material = *(model.materials()[i]);
+
+	Texture2D::active(GL_TEXTURE0);
+	(material.diffuse()[0])->bind();
+
+	mesh.vab().bindArray();
+	glDrawArrays(GL_PATCHES, 0, mesh.vab().elements());
+}
+
+void renderPlanetNode(const IModel& model, const UInt& index, const Mat4& mat)
+{
+	const INode& node = *(model.nodes()[index]);
+	const Mat4& transform = *(model.transformations()[index]);
+
+	Mat4 currentTransform = mat * transform;
+	for (UInt i = 0; i < node.numChildren(); i++)
+	{
+		renderPlanetNode(model, node.children()[i], currentTransform);
+	}
+
+	//set model
+	planetProgram.setUniformMat4(planetModel, currentTransform);
+	for(UInt i = 0; i < node.numMeshes(); i++)
+	{
+		renderPlanetMesh(model, i);
+	}
+}
+
+void renderPlanetModel(const IModel& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
+{
+	planetProgram.use();
+	planetProgram.setUniform1f(planetInner, 3.0);
+	planetProgram.setUniform1f(planetOuter, 3.0);
+	planetProgram.setUniformVec3(planetLightPos, vecLightPos);
+	planetProgram.setUniformVec3(planetLightColor, vecLightColor);
+	planetProgram.setUniformMat4(planetView, matView);
+	planetProgram.setUniformMat4(planetProjection, matProj);
+
+	renderPlanetNode(model, 0, matModel);
+}
+
 
 
 void initGlobals()
@@ -456,8 +511,9 @@ void initGlobals()
 	shaders = std::move(loadShaders());
 	earth   = std::move(loadEarth());
 	icosahedron = std::move(createIcosahedron());
-	satellite = AssimpModel("assets/textures/Satellite/10477_Satellite_v1_L3.obj");
-	 
+	satellite = std::move(AssimpModel("assets/textures/Satellite/10477_Satellite_v1_L3.obj"));
+	test = std::move(PlanetModel(3, "assets/textures/earth/earthmap1k.jpg", "Earth"));
+	
 
 	planetProgram = createPlanetProgram(shaders);
 	planetModel      = planetProgram.getUniformLocation("model");
@@ -525,9 +581,6 @@ void featureTest()
     glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(0.3f));
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.02f), glm::vec3(1.0f, 0.0f, 1.0f));
 
-    glm::vec3 vecLightPos   = glm::vec3(50.0f, 50.0f, 0.0f);
-    glm::vec3 vecLightColor = glm::vec3(1.0f);
-
 
     //orbit
     glm::vec3 r1(0.0f, 7.0f, 0.0f);
@@ -551,27 +604,13 @@ void featureTest()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//test
-		auto satModel = glm::scale(Mat4(1.0f), Vec3(3.0f));
-		satModel[3] = Vec4(-5.0, -5.0, 0.0, 1.0);
-		renderModel(satellite, satModel, camera.mat(), matProj);
-
+		auto satModel = matModel;
+		satModel[3] = Vec4(-4.0, 0.0, 5.0, 1.0);
+		renderAssimpModel(satellite, satModel, camera.mat(), matProj);
+ 
 		//planet
-        planetProgram.use();
-        planetProgram.setUniform1f(planetInner, innerTess);
-        planetProgram.setUniform1f(planetOuter, outerTess);
-        planetProgram.setUniformVec3(planetLightPos, vecLightPos);
-        planetProgram.setUniformVec3(planetLightColor, vecLightColor);
-        planetProgram.setUniformMat4(planetProjection, matProj);
-        planetProgram.setUniformMat4(planetView, camera.mat());
-        planetProgram.setUniformMat4(planetModel, matModel);
+		renderPlanetModel(test, matModel, camera.mat(), matProj);
 
-        Texture2D::active(GL_TEXTURE0);
-        earth.bind();
-
-        icosahedron.bindArray();
-        glDrawArrays(GL_PATCHES, 0, icosahedron.elements());
-
-	
         //sat
 		satelliteProgram.use();
 		satelliteProgram.setUniform1f(satelliteInner, innerTess);

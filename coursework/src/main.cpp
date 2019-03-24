@@ -7,10 +7,8 @@
 
 #include <Texture/Texture2D.h>
 
-#include <Model/Base.h>
-#include <Model/AssimpModel.h>
+#include <Model/Model.h>
 #include <Model/VertexArrayBuffer.h>
-#include <Model/PlanetModel.h>
 
 
 #include <imgui.h>
@@ -283,8 +281,7 @@ GLFWwindow* window;
 std::map<String, Shader> shaders;
 Texture2D earth;
 VertexArrayBuffer icosahedron;
-AssimpModel satellite;
-PlanetModel test;
+Model satellite;
 
 ShaderProgram planetProgram;
 GLint planetModel;
@@ -414,33 +411,35 @@ void errorCallback(int error, const char* msg)
 }
 
 
-void renderAssimpMesh(const IModel& model, const UInt& index)
+void renderAssimpMesh(const Model& model, const UInt& index)
 {
-	const auto& vab = (model.meshes()[index])->vab();
+	const auto& vab = model.meshes()[index].vab();
 
 	vab.bindArray();
 	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
 }
 
-void renderAssimpNode(const IModel& model, const UInt& index, const Mat4& mat)
+void renderAssimpNode(const Model& model, const UInt& index, const Mat4& mat)
 {
-	const INode& node = *(model.nodes()[index]);
-	const Mat4& transform = *(model.transformations()[index]);
+	const auto& nodes = model.nodes();
+	const auto& transforms = model.transformations();
 
-	Mat4 currentTransform = mat * transform;
-	for (UInt i = 0; i < node.numChildren(); i++)
+	auto currentTransform = mat * transforms[index];
+
+	const auto& node = nodes[index];
+	for (UInt i = 0; i < node.children().size(); i++)
 	{
 		renderAssimpNode(model, node.children()[i], currentTransform);
 	}
 
 	simpleProgram.setUniformMat4(simpleModel, currentTransform);
-	for(UInt i = 0; i < node.numMeshes(); i++)
+	for(UInt i = 0; i < node.meshes().size(); i++)
 	{
 		renderAssimpMesh(model, i);
 	}
 }
 
-void renderAssimpModel(const IModel& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
+void renderAssimpModel(const Model& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
 {
 	GLint mode[2];
 	glGetIntegerv(GL_POLYGON_MODE, mode);
@@ -456,54 +455,6 @@ void renderAssimpModel(const IModel& model, const Mat4& matModel, const Mat4& ma
 }
 
 
-void renderPlanetMesh(const IModel& model, const UInt& index)
-{
-	const IMesh& mesh = *(model.meshes()[index]);
-
-	UInt i = mesh.material();
-
-	const IMaterial& material = *(model.materials()[i]);
-
-	Texture2D::active(GL_TEXTURE0);
-	(material.diffuse()[0])->bind();
-
-	mesh.vab().bindArray();
-	glDrawArrays(GL_PATCHES, 0, mesh.vab().elements());
-}
-
-void renderPlanetNode(const IModel& model, const UInt& index, const Mat4& mat)
-{
-	const INode& node = *(model.nodes()[index]);
-	const Mat4& transform = *(model.transformations()[index]);
-
-	Mat4 currentTransform = mat * transform;
-	for (UInt i = 0; i < node.numChildren(); i++)
-	{
-		renderPlanetNode(model, node.children()[i], currentTransform);
-	}
-
-	//set model
-	planetProgram.setUniformMat4(planetModel, currentTransform);
-	for(UInt i = 0; i < node.numMeshes(); i++)
-	{
-		renderPlanetMesh(model, i);
-	}
-}
-
-void renderPlanetModel(const IModel& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
-{
-	planetProgram.use();
-	planetProgram.setUniform1f(planetInner, 3.0);
-	planetProgram.setUniform1f(planetOuter, 3.0);
-	planetProgram.setUniformVec3(planetLightPos, vecLightPos);
-	planetProgram.setUniformVec3(planetLightColor, vecLightColor);
-	planetProgram.setUniformMat4(planetView, matView);
-	planetProgram.setUniformMat4(planetProjection, matProj);
-
-	renderPlanetNode(model, 0, matModel);
-}
-
-
 
 void initGlobals()
 {
@@ -511,8 +462,7 @@ void initGlobals()
 	shaders = std::move(loadShaders());
 	earth   = std::move(loadEarth());
 	icosahedron = std::move(createIcosahedron());
-	satellite = std::move(AssimpModel("assets/textures/Satellite/10477_Satellite_v1_L3.obj"));
-	test = std::move(PlanetModel(3, "assets/textures/earth/earthmap1k.jpg", "Earth"));
+	satellite = std::move(Model::buildFromAssimp("assets/textures/Satellite/10477_Satellite_v1_L3.obj", "satellite"));
 	
 
 	planetProgram = createPlanetProgram(shaders);
@@ -609,7 +559,7 @@ void featureTest()
 		renderAssimpModel(satellite, satModel, camera.mat(), matProj);
  
 		//planet
-		renderPlanetModel(test, matModel, camera.mat(), matProj);
+		//<missing>
 
         //sat
 		satelliteProgram.use();
@@ -869,9 +819,9 @@ void testGui()
 
 int main(int argc, char* argv[])
 {
-    //featureTest();
+    featureTest();
 
-	testGui();
+	//testGui();
 
 
     return EXIT_SUCCESS;

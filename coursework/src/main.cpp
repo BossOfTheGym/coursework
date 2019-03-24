@@ -696,6 +696,10 @@ void initGui(GLFWwindow* guiWindow)
 void renderEnvironmentGui()
 {
 	ImGui::Text("Environment options");
+
+	ImGui::Text("Integration method");
+	ImGui::Text("Time speed");
+	ImGui::Text("Scale");
 }
 
 void renderPlanetGui()
@@ -706,17 +710,31 @@ void renderPlanetGui()
 	
 	static double mass = 0.0;
 	ImGui::InputDouble("Mass", &mass);
+	ImGui::Text("Rotation");
 }
 
 void renderSatellite1Gui()
 {
 	ImGui::Text("Satellite1 options");
+
+	//Orbit params
+	ImGui::Text("angle1");
+	ImGui::Text("angle2");
+	ImGui::Text("angle3");
+	ImGui::Text("e");
+	ImGui::Text("a");
+	ImGui::Text("");
+
+	//Ivp
+	ImGui::Text("");
+	ImGui::Text("");
 }
 
 void renderSatellite2Gui()
 {
 	ImGui::Text("Satellite2 options");
 }
+
 
 void renderGui()
 {
@@ -851,9 +869,9 @@ void testGui()
 
 int main(int argc, char* argv[])
 {
-    featureTest();
+    //featureTest();
 
-	//testGui();
+	testGui();
 
 
     return EXIT_SUCCESS;

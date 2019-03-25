@@ -39,7 +39,7 @@ Node& Node::operator = (Node&& node)
 }
 
 
-//IObject
+//INameable
 const String& Node::toString() const
 {
     return mName;

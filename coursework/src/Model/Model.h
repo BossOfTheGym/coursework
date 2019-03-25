@@ -8,7 +8,7 @@
 
 #include <Common.h>
 
-#include <Entity/IObject.h>
+#include <Entity/INameable.h>
 
 #include <Texture/Texture2D.h>
 
@@ -20,7 +20,7 @@
 using UInt = unsigned int;
 
 
-class Node : public IObject
+class Node : public INameable
 {
 public:
 	using Indices = std::vector<UInt>;
@@ -44,7 +44,7 @@ public:
     Node& operator = (Node&& node);
 
 
-	//IObject
+	//INameable
     virtual const String& toString() const override;
 
 
@@ -62,7 +62,7 @@ private:
 };
 
 
-class Mesh : public IObject
+class Mesh : public INameable
 {
 public:
 	using VAB = VertexArrayBuffer;
@@ -86,7 +86,7 @@ public:
     Mesh& operator = (Mesh&& mesh);
 
 
-	//IObject
+	//INameable
     virtual const String& toString() const override;
 
 
@@ -104,7 +104,7 @@ private:
 };
 
 
-class Material : public IObject
+class Material : public INameable
 {
 public:
 	using Textures = std::vector<Texture2D>;
@@ -128,7 +128,7 @@ public:
 	Material& operator = (Material&& material);
 
 
-	//IObject
+	//INameable
 	virtual const String& toString() const override;
 
 
@@ -143,7 +143,7 @@ private:
 };
 
 
-class Model : public IObject
+class Model : public INameable
 {
 public:
     using Meshes = std::vector<Mesh>;
@@ -179,7 +179,7 @@ public:
     Model& operator = (Model&& model);
 
 
-	//IObject
+	//INameable
     virtual const String& toString() const override;
 
 

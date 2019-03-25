@@ -186,7 +186,7 @@
   <ItemGroup>
     <ClInclude Include="src\Camera\Camera.h" />
     <ClInclude Include="src\Common.h" />
-    <ClInclude Include="src\Entity\IObject.h" />
+    <ClInclude Include="src\Entity\INameable.h" />
     <ClInclude Include="src\Entity\ITimeVarying.h" />
     <ClInclude Include="src\Model\Builders\AssimpBuilder.h" />
     <ClInclude Include="src\Model\Builders\CustomBuilders.h" />

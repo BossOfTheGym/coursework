@@ -39,7 +39,7 @@ Mesh& Mesh::operator = (Mesh&& mesh)
 }
 
 
-//IObject
+//INameable
 const String& Mesh::toString() const
 {
     return mName;

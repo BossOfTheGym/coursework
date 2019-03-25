@@ -34,7 +34,7 @@ Material& Material::operator = (Material&& material)
 }
 
 
-//IObject
+//INameable
 const String& Material::toString() const
 {
 	return mName;

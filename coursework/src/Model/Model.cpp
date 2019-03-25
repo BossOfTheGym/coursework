@@ -51,7 +51,7 @@ Model& Model::operator = (Model&& model)
 }
 
 
-//IObject
+//INameable
 const String& Model::toString() const
 {
     return mName;

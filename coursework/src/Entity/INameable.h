@@ -3,7 +3,7 @@
 #include <Common.h>
 
 
-class IObject
+class INameable
 {
 public:
     virtual const String& toString() const = 0;

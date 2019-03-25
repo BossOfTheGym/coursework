@@ -27,13 +27,9 @@ public:
 
 
 public:
-	static Node buildFromAssimp(const aiNode* node, const std::map<const aiNode*, UInt>& nodeMapping);
-
-	static Node buildFromData();
-
-
-public:
 	Node();
+
+	Node(Indices&& children, Indices&& meshes, String&& name);
 
     Node(const Node& node) = delete;
 
@@ -71,15 +67,11 @@ class Mesh : public IObject
 public:
 	using VAB = VertexArrayBuffer;
 
-	
-public:
-	static Mesh buildFromAssimp(const aiMesh* mesh);
-
-	static Mesh buildFromData();
-
 
 public:
 	Mesh();
+
+	Mesh(VAB&& vertexBuffer, UInt&& materialIndex, String&& name);
 
     Mesh(const Mesh& mesh) = delete;
 
@@ -119,13 +111,9 @@ public:
 
 
 public:
-	static Material buildFromAssimp(const aiMaterial* material, const String& name);
-
-	static Material buildFromData();
-
-
-public:
 	Material();
+
+	Material(Textures&& diffuse, String&& name);
 
 	Material(const Material& material) = delete;
 
@@ -166,15 +154,17 @@ public:
 
 	using Transformations = std::vector<Mat4>;
 
-        
-public:
-	static Model buildFromAssimp(const String& location, const String& name);
-
-	static Model buildFromData();
-
 
 public:
 	Model();
+
+	Model(
+		Meshes&& meshes
+		, Nodes&& nodes
+		, Transformations&& nodesTransformations
+		, Materials&& materials
+		, String&& name
+	);
 
     Model(const Model& model) = delete;
 

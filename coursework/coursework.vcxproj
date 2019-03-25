@@ -163,7 +163,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera\Camera.cpp" />
-    <ClCompile Include="src\Holder\ShaderHolder.cpp" />
     <ClCompile Include="src\ImGui\imgui.cpp" />
     <ClCompile Include="src\ImGui\imgui_demo.cpp" />
     <ClCompile Include="src\ImGui\imgui_draw.cpp" />
@@ -171,6 +170,8 @@
     <ClCompile Include="src\ImGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Model\Builders\AssimpBuilder.cpp" />
+    <ClCompile Include="src\Model\Builders\CustomBuilders.cpp" />
     <ClCompile Include="src\Model\Material.cpp" />
     <ClCompile Include="src\Model\Mesh.cpp" />
     <ClCompile Include="src\Model\Model.cpp" />
@@ -185,7 +186,8 @@
     <ClInclude Include="src\Common.h" />
     <ClInclude Include="src\Entity\IObject.h" />
     <ClInclude Include="src\Entity\ITimeVarying.h" />
-    <ClInclude Include="src\Holder\ShaderHolder.h" />
+    <ClInclude Include="src\Model\Builders\AssimpBuilder.h" />
+    <ClInclude Include="src\Model\Builders\CustomBuilders.h" />
     <ClInclude Include="src\Model\Model.h" />
     <ClInclude Include="src\Model\VertexArrayBuffer.h" />
     <ClInclude Include="src\Shader\Shader.h" />

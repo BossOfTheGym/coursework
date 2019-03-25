@@ -9,6 +9,8 @@
 
 #include <Model/Model.h>
 #include <Model/VertexArrayBuffer.h>
+#include <Model/Builders/AssimpBuilder.h>
+#include <Model/Builders/CustomBuilders.h>
 
 
 #include <imgui.h>
@@ -276,17 +278,20 @@ ShaderProgram createSimpleProgram(std::map<String, Shader>& shadersHolder)
 }
 
 
+
 //globals
 GLFWwindow* window;
 std::map<String, Shader> shaders;
-Texture2D earth;
 VertexArrayBuffer icosahedron;
 Model satellite;
+Model earth;
+Model box;
+
 
 ShaderProgram planetProgram;
 GLint planetModel;
 GLint planetView;
-GLint planetProjection;
+GLint planetProj;
 GLint planetLightPos;
 GLint planetLightColor;
 GLint planetInner;
@@ -456,19 +461,72 @@ void renderAssimpModel(const Model& model, const Mat4& matModel, const Mat4& mat
 
 
 
+void renderPlanetMesh(const Model& model, const UInt& index)
+{
+	const auto& vab = model.meshes()[index].vab();
+
+	vab.bindArray();
+	glDrawArrays(GL_PATCHES, 0, vab.elements());
+}
+
+void renderPlanetNode(const Model& model, const UInt& index, const Mat4& mat)
+{
+	const auto& nodes = model.nodes();
+	const auto& transforms = model.transformations();
+
+	auto currentTransform = mat * transforms[index];
+
+	const auto& node = nodes[index];
+	for (UInt i = 0; i < node.children().size(); i++)
+	{
+		renderPlanetNode(model, node.children()[i], currentTransform);
+	}
+
+	simpleProgram.setUniformMat4(simpleModel, currentTransform);
+	for(UInt i = 0; i < node.meshes().size(); i++)
+	{
+		renderPlanetMesh(model, i);
+	}
+}
+
+void renderPlanetModel(const Model& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
+{
+	planetProgram.use();
+
+	planetProgram.setUniform1f(planetInner, 1.0f);
+	planetProgram.setUniform1f(planetOuter, 1.0f);
+	planetProgram.setUniformVec3(planetLightPos, vecLightPos);
+	planetProgram.setUniformVec3(planetLightColor, vecLightColor);
+	planetProgram.setUniformMat4(planetView, matView);
+	planetProgram.setUniformMat4(planetProj, matProj);
+
+	renderPlanetNode(model, 0, matModel);
+}
+
+
 void initGlobals()
 {
 	window  = std::move(createWindow());
 	shaders = std::move(loadShaders());
-	earth   = std::move(loadEarth());
 	icosahedron = std::move(createIcosahedron());
-	satellite = std::move(Model::buildFromAssimp("assets/textures/Satellite/10477_Satellite_v1_L3.obj", "satellite"));
+
+	AssimpBuilder assimpBuilder;
+	assimpBuilder.readFile("assets/textures/Satellite/10477_Satellite_v1_L3.obj");
+	satellite = std::move(assimpBuilder.imported());
 	
+	PlanetBuilder planetBuilder;
+	planetBuilder.build(3, "assets/textures/earth/earthmap1k.jpg", "Earth");
+	earth = std::move(planetBuilder.model());
+
+	BoxBuilder boxBuilder;
+	boxBuilder.build("box");
+	box = std::move(boxBuilder.model());
+
 
 	planetProgram = createPlanetProgram(shaders);
 	planetModel      = planetProgram.getUniformLocation("model");
 	planetView       = planetProgram.getUniformLocation("view");
-	planetProjection = planetProgram.getUniformLocation("projection");
+	planetProj = planetProgram.getUniformLocation("projection");
 	planetLightPos   = planetProgram.getUniformLocation("lightPos");
 	planetLightColor = planetProgram.getUniformLocation("lightColor");
 
@@ -516,8 +574,8 @@ void featureTest()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
 
     glViewport(0, 0, WIDTH, HEIGHT);
 
@@ -526,7 +584,7 @@ void featureTest()
 
     //loop params
     glm::mat4 matProj = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 500.0f);
-    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f));
+    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
 
     glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(0.3f));
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.02f), glm::vec3(1.0f, 0.0f, 1.0f));
@@ -553,13 +611,19 @@ void featureTest()
         //prepare
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 		//test
-		auto satModel = matModel;
-		satModel[3] = Vec4(-4.0, 0.0, 5.0, 1.0);
-		renderAssimpModel(satellite, satModel, camera.mat(), matProj);
+		auto testMat = Mat4(1.0f);
+
+		testMat[3] = Vec4(0.0, 0.0, 0.0, 1.0);
+		renderAssimpModel(satellite, testMat, camera.mat(), matProj);
  
+		testMat[3] = Vec4(0.0, 0.0, 0.0, 1.0);
+		renderAssimpModel(box, testMat, camera.mat(), matProj);
+
+
 		//planet
-		//<missing>
+		renderPlanetModel(earth, matModel, camera.mat(), matProj);
 
         //sat
 		satelliteProgram.use();
@@ -569,8 +633,10 @@ void featureTest()
 		satelliteProgram.setUniformVec3(satelliteLightColor, vecLightColor);
 		satelliteProgram.setUniformMat4(satelliteProjection, matProj);
 		satelliteProgram.setUniformMat4(satelliteView, camera.mat());
+
         auto m = second;
         m[3] = Vec4(r1, 1.0f);
+
 		planetProgram.setUniformMat4(satelliteModel, m);
 		satelliteProgram.setUniformVec3(satelliteColor, Vec3(1.0f, 0.0, 0.0));
 
@@ -584,6 +650,7 @@ void featureTest()
 
 		icosahedron.bindArray();
 		glDrawArrays(GL_PATCHES, 0, icosahedron.elements());
+
 
 
         //update

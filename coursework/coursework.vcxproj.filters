@@ -72,9 +72,6 @@
     <ClCompile Include="src\Render\PlanetRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Render\SatelliteRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -116,10 +113,10 @@
     <ClInclude Include="src\Render\SatelliteRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Render\Renderer.h">
+    <ClInclude Include="src\Render\PlanetRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Render\PlanetRenderer.h">
+    <ClInclude Include="src\Render\IRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

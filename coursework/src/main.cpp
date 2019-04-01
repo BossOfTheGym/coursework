@@ -259,10 +259,7 @@ SatelliteShared sat2;
 PlanetShared earth;
 
 bool fill = false;
-
-float innerTess;
-float outerTess;
-float deltaTess;
+bool f;
 
 double prevX;
 double prevY;
@@ -415,10 +412,6 @@ void initGlobals()
 
 
 	fill = false;
-
-	innerTess = 10.0f;
-	outerTess = 10.0f;
-	deltaTess = 0.2f;
 
 	prevX = WIDTH / 2;
 	prevY = HEIGHT / 2;

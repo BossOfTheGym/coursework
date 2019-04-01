@@ -1,27 +1,24 @@
 #pragma once
 
-
-#include <Common.h>
-
 #include "IRenderer.h"
 
 
-class SatelliteRenderer : public IRenderer
+class SimpleRenderer : public IRenderer
 {
 public:
-	SatelliteRenderer(const ShaderProgramShared& programShared);
+	SimpleRenderer(const ShaderProgramShared& programShared);
 
-	SatelliteRenderer(const SatelliteRenderer& renderer) = default;
+	SimpleRenderer(const SimpleRenderer& renderer) = default;
 
-	SatelliteRenderer(SatelliteRenderer&& rendrer) = default;
-
-
-	~SatelliteRenderer() = default;
+	SimpleRenderer(SimpleRenderer&& rendrer) = default;
 
 
-	SatelliteRenderer& operator = (const SatelliteRenderer& renderer) = default;
+	~SimpleRenderer() = default;
 
-	SatelliteRenderer& operator = (SatelliteRenderer&& rendrer) = default;
+
+	SimpleRenderer& operator = (const SimpleRenderer& renderer) = default;
+
+	SimpleRenderer& operator = (SimpleRenderer&& rendrer) = default;
 
 
 
@@ -49,5 +46,5 @@ private:
 	GLint uModel;
 	GLint uView;
 	GLint uProj;
-	GLint uColor;
 };
+	

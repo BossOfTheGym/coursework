@@ -1,7 +1,8 @@
-#include "SatelliteRenderer.h"
+#include "SimpleRenderer.h"
 
-SatelliteRenderer::SatelliteRenderer(const ShaderProgramShared& shared)
-	: mProgramShared(shared)
+
+SimpleRenderer::SimpleRenderer(const ShaderProgramShared& programShared)
+	: mProgramShared(programShared)
 {
 	if (mProgramShared)
 	{
@@ -10,17 +11,14 @@ SatelliteRenderer::SatelliteRenderer(const ShaderProgramShared& shared)
 }
 
 
-void SatelliteRenderer::setRequiredStates()
+void SimpleRenderer::setRequiredStates()
 {
 	mProgramShared->use();	
-	mProgramShared->setUniformVec3(uColor, Vec3(1.0f));
 }
 
 
-void SatelliteRenderer::renderComponent(const GraphicsComponentWeak& component, const View& view)
+void SimpleRenderer::renderComponent(const GraphicsComponentWeak& component, const View& view)
 {
-	//TODO : check if object has color attrib
-
 	if (auto sharedGraphics = component.lock())
 	{
 		const auto& model = *(sharedGraphics->mModelPtr);
@@ -36,12 +34,12 @@ void SatelliteRenderer::renderComponent(const GraphicsComponentWeak& component, 
 	}
 }
 
-void SatelliteRenderer::renderModel(const Model& model, const Mat4& transformation)
+void SimpleRenderer::renderModel(const Model& model, const Mat4& transformation)
 {
 	renderNode(model, 0, transformation);
 }
 
-void SatelliteRenderer::renderNode(const Model& model, UInt index, const Mat4& currentTransform)
+void SimpleRenderer::renderNode(const Model& model, UInt index, const Mat4& currentTransform)
 {
 	const auto& node     = model.nodes()[index];
 
@@ -64,25 +62,24 @@ void SatelliteRenderer::renderNode(const Model& model, UInt index, const Mat4& c
 	}
 }
 
-void SatelliteRenderer::renderMesh(const Model& model, UInt index)
+void SimpleRenderer::renderMesh(const Model& model, UInt index)
 {
 	const auto& mesh = model.meshes()[index];
 	const auto& vab = mesh.vab();
 
 	vab.bindArray();
-	glDrawArrays(GL_PATCHES, 0, vab.elements());
+	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
 }
 
-void SatelliteRenderer::restoreStates()
+void SimpleRenderer::restoreStates()
 {
 	//restore, no need
 }
 
 
-void SatelliteRenderer::setUniforms()
+void SimpleRenderer::setUniforms()
 {
 	uModel = mProgramShared->getUniformLocation("model");
 	uView  = mProgramShared->getUniformLocation("view");
 	uProj  = mProgramShared->getUniformLocation("proj");
-	uColor = mProgramShared->getUniformLocation("color");
 }

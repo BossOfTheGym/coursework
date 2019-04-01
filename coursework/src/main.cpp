@@ -1,27 +1,22 @@
-#include <Common.h>
-
-#include <Camera/Camera.h>
+#include <Objects/View.h>
 
 #include <Shader/Shader.h>
 #include <Shader/ShaderProgram.h>
-
-#include <Texture/Texture2D.h>
 
 #include <Model/Model.h>
 #include <Model/VertexArrayBuffer.h>
 #include <Model/Builders/AssimpBuilder.h>
 #include <Model/Builders/CustomBuilders.h>
 
+#include <Components.h>
+#include <Objects/Objects.h>
+#include <Render/Renderers.h>
+
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <GLFW/glfw3.h>
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 
 const int WIDTH  = 1200;
@@ -31,6 +26,7 @@ const int HEIGHT = 900;
 using namespace std::chrono;
 
 
+//create context for OpenGL and input
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 //
 void posCallback(GLFWwindow* window, double xPos, double yPos);
@@ -48,9 +44,7 @@ GLFWwindow* createWindow()
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     win = glfwCreateWindow(WIDTH, HEIGHT, "PINGAS PROD", nullptr, nullptr);
 
@@ -66,260 +60,204 @@ GLFWwindow* createWindow()
 }
 
 
-
-void pushVertex(std::vector<float>& data, const Vec3& vertex, const Vec3& color, const Vec2& tex = Vec2())
-{
-    data.push_back(vertex.x);
-    data.push_back(vertex.y);
-    data.push_back(vertex.z);
-
-    data.push_back(color.x);
-    data.push_back(color.y);
-    data.push_back(color.z);
-
-    data.push_back(tex.s);
-    data.push_back(tex.t);
-}
-
-auto getIcosahedron(int split = 0)
-{
-    const int PENTAGON_SIDES = 5;
-
-    const float HALF_ANGLE = PI / PENTAGON_SIDES;
-    const float ANGLE      = 2 * HALF_ANGLE;
-    const float SIN_HALF   = sin(HALF_ANGLE);
-
-    const float ICOSAHEDRON_SIDE = sqrt(4 * pow(SIN_HALF, 2) - 1.0f) / SIN_HALF;
-    const float PYRAMID_HEIGHT   = pow(ICOSAHEDRON_SIDE, 2) / 2;
-    const float RADIUS           = ICOSAHEDRON_SIDE / (2 * SIN_HALF);
-    const float HEIGHT_ANGLE = atan((1.0f - PYRAMID_HEIGHT) / RADIUS);
-
-    const float A   = ICOSAHEDRON_SIDE;
-    const float H   = PYRAMID_HEIGHT;
-    const float R   = RADIUS;
-    const float PHI = HEIGHT_ANGLE;
-
-    const int N = PENTAGON_SIDES;
-
-
-    //init icosahedron verteces
-	int faces = 20;
-	int elements = 3 * faces;
-
-    glm::vec3 top    = glm::vec3(0.0f, 0.0f, +1.0f);
-    glm::vec3 bottom = glm::vec3(0.0f, 0.0f, -1.0f);
-
-    glm::vec3    topRing[N];
-    glm::vec3 bottomRing[N];
-
-    //tex coords
-    glm::vec2 topTex    = glm::vec2(0.5f, 1.0f);
-    glm::vec2 bottomTex = glm::vec2(0.5f, 0.0f);
-
-    glm::vec2 topRingTex[N];
-    glm::vec2 bottomRingTex[N];
-
-
-    float angle;
-    for (int i = 0; i < N; i++) 
-    {
-        angle = ANGLE * i;
-        topRing[i]    = glm::vec3(R * cos(angle), R * sin(angle), 1.0f - H);
-        topRingTex[i] = glm::vec2(angle / PI_2, 2 * PHI / PI + 0.5f);
-
-        angle = ANGLE * i + HALF_ANGLE;
-        bottomRing[i]    = glm::vec3(R * cos(angle), R * sin(angle), H - 1.0f);
-        bottomRingTex[i] = glm::vec2(angle / PI_2, -2 * PHI / PI + 0.5f);
-    }
-
-
-    //assemble triangles
-    std::vector<float> icosahedron;
-    for (int curr = 0; curr < N; curr++)
-    {
-        int prev = (curr + N - 1) % N;
-        int next = (curr + N + 1) % N;
-
-        //top + topRing[i] + topRing[i + 1]
-        pushVertex(icosahedron, top          , glm::vec3(1.0f, 0.0f, 0.0f), topTex);
-        pushVertex(icosahedron, topRing[curr], glm::vec3(0.0f, 1.0f, 0.0f), topRingTex[curr]);
-        pushVertex(icosahedron, topRing[next], glm::vec3(0.0f, 1.0f, 0.0f), topRingTex[next]);
-
-        //bottom + bottomRing[i] + bottomRing[i + 1]
-        pushVertex(icosahedron, bottom          , glm::vec3(0.0f, 0.0f, 1.0f), bottomTex);
-        pushVertex(icosahedron, bottomRing[next], glm::vec3(0.0f, 1.0f, 0.0f), bottomRingTex[next]);
-        pushVertex(icosahedron, bottomRing[curr], glm::vec3(0.0f, 1.0f, 0.0f), bottomRingTex[curr]);
-
-        //bottomRing[i] + topRing[i] + topRing[i + 1]
-        pushVertex(icosahedron, bottomRing[curr], glm::vec3(1.0f, 0.0f, 0.0f), bottomRingTex[curr]);
-        pushVertex(icosahedron, topRing[next]   , glm::vec3(0.0f, 1.0f, 0.0f), topRingTex[next]);
-        pushVertex(icosahedron, topRing[curr]   , glm::vec3(0.0f, 1.0f, 0.0f), topRingTex[curr]);
-
-        //topRing[i] + bottomRing[i] + bottomRing[i - 1]
-        pushVertex(icosahedron, topRing[curr]   , glm::vec3(0.0f, 0.0f, 1.0f), topRingTex[curr]);
-        pushVertex(icosahedron, bottomRing[prev], glm::vec3(0.0f, 1.0f, 0.0f), bottomRingTex[prev]);
-        pushVertex(icosahedron, bottomRing[curr], glm::vec3(0.0f, 1.0f, 0.0f), bottomRingTex[curr]);
-    }
-
-	return std::make_tuple(elements, icosahedron);
-}
-
-auto createIcosahedron()
-{
-	auto[elements, data] = std::move(getIcosahedron());
-
-    VertexArrayBuffer ico(elements, static_cast<GLsizei>(data.size()), data.data());
-
-    ico.bindArray();
-    ico.setAttribPointer(0, 3, GL_FLOAT, 8 * sizeof(float), (void *)(0));
-    ico.setAttribPointer(1, 3, GL_FLOAT, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-    ico.setAttribPointer(2, 2, GL_FLOAT, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-    
-    return ico;
-}
-
-
-
-std::map<String, Shader> loadShaders()
+//load shaders from assets
+void loadShaders(std::map<String, ShaderShared>& shadersStorage)
 {    
-    std::map<String, Shader> shaders;
+    shadersStorage["assets/shaders/sphere.vs"]  = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/sphere.vs"));
+    shadersStorage["assets/shaders/sphere.tcs"] = ShaderShared(new Shader(Shader::TessControl, "assets/shaders/sphere.tcs"));
+    shadersStorage["assets/shaders/sphere.tes"] = ShaderShared(new Shader(Shader::TessEvaluation, "assets/shaders/sphere.tes"));
+    shadersStorage["assets/shaders/sphere.gs"]  = ShaderShared(new Shader(Shader::Geometry, "assets/shaders/sphere.gs"));
+    shadersStorage["assets/shaders/sphere.fs"]  = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/sphere.fs"));
 
-    shaders["assets/shaders/sphere.vs"] = std::move(Shader(Shader::Vertex, "assets/shaders/sphere.vs"));
-    shaders["assets/shaders/sphere.tcs"] = std::move(Shader(Shader::TessControl, "assets/shaders/sphere.tcs"));
-    shaders["assets/shaders/sphere.tes"] = std::move(Shader(Shader::TessEvaluation, "assets/shaders/sphere.tes"));
-    shaders["assets/shaders/sphere.gs"] = std::move(Shader(Shader::Geometry, "assets/shaders/sphere.gs"));
-    shaders["assets/shaders/sphere.fs"] = std::move(Shader(Shader::Fragment, "assets/shaders/sphere.fs"));
+    shadersStorage["assets/shaders/satellite.fs"] = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/satellite.fs"));
 
-    shaders["assets/shaders/satellite.fs"] = std::move(Shader(Shader::Fragment, "assets/shaders/satellite.fs"));
+	shadersStorage["assets/shaders/simple.vs"] = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/simple.vs"));
+	shadersStorage["assets/shaders/simple.fs"] = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/simple.fs"));
 
-	shaders["assets/shaders/simple.vs"] = std::move(Shader(Shader::Vertex, "assets/shaders/simple.vs"));
-	shaders["assets/shaders/simple.fs"] = std::move(Shader(Shader::Fragment, "assets/shaders/simple.fs"));
-
-    for (const auto&[location, shader] : shaders)
+    for (const auto&[location, shader] : shadersStorage)
     {
-        if (!shader.compiled())
+        if (!(shader->compiled()))
         {
             std::cerr << "FAILED TO COMPILE SHADER: " << location << std::endl;
-            std::cerr << shader.infoLog();
+            std::cerr << shader->infoLog();
         }
     }
-
-    return shaders;
 }
 
 
-Texture2D loadEarth()
+//load all models from assets + custom
+void loadModels(std::map<String, ModelShared>& modelsStorage)
 {
-    Texture2D earthTex("assets/textures/earth/earthmap1k.jpg");
-    earthTex.bind();
-    earthTex.texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP);
-    earthTex.texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP);
-    earthTex.texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    earthTex.texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    return earthTex;
+	AssimpBuilder assimpBuilder;
+	//assimpBuilder.readFile("assets/textures/Satellite/10477_Satellite_v1_L3.obj");
+
+	//modelsStorage["satellite"] = ModelShared(new Model(std::move(assimpBuilder.imported())));
+
+
+	PlanetBuilder planetBuilder;
+	planetBuilder.build(3, "assets/textures/earth/earthmap1k.jpg", "Earth");
+
+	modelsStorage["earth"] = ModelShared(new Model(std::move(planetBuilder.model())));
+
+
+	BoxBuilder boxBuilder;
+	boxBuilder.build("box");
+
+	modelsStorage["box"] = ModelShared(new Model(std::move(boxBuilder.model())));
 }
 
 
-
-ShaderProgram createPlanetProgram(std::map<String, Shader>& shadersHolder)
+//assemble shader programs
+ShaderProgramShared createPlanetProgram(std::map<String, ShaderShared>& shadersStorage)
 {
-	std::cout << "Building planet program" << std::endl;
+    ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Planet"));
+    program->attachShader(*shadersStorage["assets/shaders/sphere.vs"]);
+    program->attachShader(*shadersStorage["assets/shaders/sphere.tcs"]);
+    program->attachShader(*shadersStorage["assets/shaders/sphere.tes"]);
+    program->attachShader(*shadersStorage["assets/shaders/sphere.gs"]);
+    program->attachShader(*shadersStorage["assets/shaders/sphere.fs"]);
 
-    ShaderProgram program("Planet");
-    program.attachShader(shadersHolder["assets/shaders/sphere.vs"]);
-    program.attachShader(shadersHolder["assets/shaders/sphere.tcs"]);
-    program.attachShader(shadersHolder["assets/shaders/sphere.tes"]);
-    program.attachShader(shadersHolder["assets/shaders/sphere.gs"]);
-    program.attachShader(shadersHolder["assets/shaders/sphere.fs"]);
-
-    program.link();
-    if (!program.linked())
+    program->link();
+    if (!(program->linked()))
     {
-        std::cerr << program.infoLog();
+        std::cerr << program->infoLog();
     }
 
     return program;
 }
 
-ShaderProgram createSatelliteProgram(std::map<String, Shader>& shadersHolder)
+ShaderProgramShared createSatelliteProgram(std::map<String, ShaderShared>& shadersStorage)
 {
-	std::cout << "Building satellite program" << std::endl;
+    ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Satellite"));
+    program->attachShader(*shadersStorage["assets/shaders/sphere.vs"]);
+    program->attachShader(*shadersStorage["assets/shaders/sphere.tcs"]);
+    program->attachShader(*shadersStorage["assets/shaders/sphere.tes"]);
+    program->attachShader(*shadersStorage["assets/shaders/satellite.fs"]);
 
-    ShaderProgram program("Satellite");
-    program.attachShader(shadersHolder["assets/shaders/sphere.vs"]);
-    program.attachShader(shadersHolder["assets/shaders/sphere.tcs"]);
-    program.attachShader(shadersHolder["assets/shaders/sphere.tes"]);
-    program.attachShader(shadersHolder["assets/shaders/satellite.fs"]);
-
-    program.link();
-    if (!program.linked())
+    program->link();
+    if (!(program->linked()))
     {
-        std::cerr << program.infoLog();
+        std::cerr << program->infoLog();
     }
 
     return program;
 }
 
-ShaderProgram createSimpleProgram(std::map<String, Shader>& shadersHolder)
+ShaderProgramShared createSimpleProgram(std::map<String, ShaderShared>& shadersHolder)
 {
-	std::cout << "Building model program" << std::endl;
+	ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Simple"));
+	program->attachShader(*shadersHolder["assets/shaders/simple.vs"]);
+	program->attachShader(*shadersHolder["assets/shaders/simple.fs"]);
 
-	ShaderProgram program("Simple");
-	program.attachShader(shadersHolder["assets/shaders/simple.vs"]);
-	program.attachShader(shadersHolder["assets/shaders/simple.fs"]);
-
-	program.link();
-	if (!program.linked())
+	program->link();
+	if (!(program->linked()))
 	{
-		std::cerr << program.infoLog();
+		std::cerr << program->infoLog();
 	}
 
 	return program;
 }
 
+void createShaderPrograms(
+	  std::map<String, ShaderProgramShared>& programStorage
+	, std::map<String, ShaderShared>& shadersStorage
+)
+{
+	programStorage["satellite"] = createSatelliteProgram(shadersStorage);
+	programStorage["planet"]    = createPlanetProgram(shadersStorage);
+	programStorage["simple"]    = createSimpleProgram(shadersStorage);
+}
+
+
+//assemble renderers
+void createRenderers(
+	  std::map<String, IRendererShared>& renderersStorage
+	, std::map<String, ShaderProgramShared>& programsStorage
+)
+{
+	renderersStorage["satellite"] = IRendererShared(new SatelliteRenderer(programsStorage["satellite"]));
+	renderersStorage["planet"]     = IRendererShared(new PlanetRenderer(programsStorage["planet"]));
+	renderersStorage["simple"]     = IRendererShared(new SimpleRenderer(programsStorage["simple"]));
+}
+
+
+
+//object factories
+IObjectShared createSatellite(
+	  const ModelShared& model
+	, const Vec3& color = Vec3(1.0f)
+	, const Mat4& mat = Mat4(1.0f)
+	, const Vec3& pos = Vec3()
+	, const Vec3& vel = Vec3()
+)
+{
+	SatelliteShared satellite = std::make_shared<Satellite>();
+
+
+	satellite->mPhysics  = PhysicsComponentShared(
+		new PhysicsComponent(nullptr, mat, pos, vel, Vec3())
+	);
+
+	satellite->mGraphics = GraphicsComponentShared(
+		new GraphicsComponent(
+			nullptr
+			, model
+			, satellite->mPhysics
+		)
+	);
+
+	satellite->mSatellite = SatelliteComponentShared(
+		new SatelliteComponent(nullptr, color)
+	);
+
+
+	return satellite;
+}
+
+IObjectShared createPlanet(
+	  const ModelShared& model
+	, float mass
+	, const Mat4& mat = Mat4(1.0f)
+	, const Vec3& pos = Vec3()
+	, const Vec3& vel = Vec3()
+	, const Vec3& angularMomentum = Vec3()
+)
+{
+	PlanetShared planet = std::make_shared<Planet>();
+
+
+	planet->mPhysics  = PhysicsComponentShared(
+		new PhysicsComponent(nullptr, mat, pos, vel, angularMomentum)
+		);
+	planet->mPhysics->mass = mass;
+
+	planet->mGraphics = GraphicsComponentShared(
+		new GraphicsComponent(
+			nullptr
+			, model
+			, planet->mPhysics
+		)
+	);
+
+
+	return planet;
+}
 
 
 //globals
 GLFWwindow* window;
-std::map<String, Shader> shaders;
-VertexArrayBuffer icosahedron;
-Model satellite;
-Model earth;
-Model box;
 
+std::map<String, ShaderShared>        shaders;
+std::map<String, ModelShared>         models;
+std::map<String, ShaderProgramShared> programs;
+std::map<String, IRendererShared>     renderers;
+std::map<String, IObjectShared>       objects;
 
-ShaderProgram planetProgram;
-GLint planetModel;
-GLint planetView;
-GLint planetProj;
-GLint planetLightPos;
-GLint planetLightColor;
-GLint planetInner;
-GLint planetOuter;
+View view;
 
-
-ShaderProgram satelliteProgram;
-GLint satelliteModel;
-GLint satelliteView;
-GLint satelliteProjection;
-GLint satelliteLightPos;
-GLint satelliteLightColor;
-GLint satelliteColor;
-GLint satelliteInner;
-GLint satelliteOuter;
-
-
-ShaderProgram simpleProgram;
-GLint simpleModel;
-GLint simpleView;
-GLint simpleProj;
-
-
-Camera camera;
-
-Vec3 vecLightPos   = Vec3(50.0f, 50.0f, 0.0f);
-Vec3 vecLightColor = Vec3(1.0f);
-
+SatelliteShared sat1;
+SatelliteShared sat2;
+PlanetShared earth;
 
 bool fill = false;
 
@@ -329,6 +267,10 @@ float deltaTess;
 
 double prevX;
 double prevY;
+
+uint64_t t0;
+uint64_t t1;
+uint64_t delta;
 
 
 //main
@@ -349,25 +291,25 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         case (GLFW_KEY_W):
         {
 
-            camera.travelView(0.3f, Camera::Z);
+            view.travelView(0.3f, View::Z);
 
             break;
         }
         case (GLFW_KEY_S):
         {
-            camera.travelView(-0.3f, Camera::Z);
+            view.travelView(-0.3f, View::Z);
 
             break;
         }
 		case (GLFW_KEY_A):
 		{
-			camera.travelView(0.3f, Camera::X);
+			view.travelView(0.3f, View::X);
 
 			break;
 		}
 		case (GLFW_KEY_D):
 		{
-			camera.travelView(-0.3f, Camera::X);
+			view.travelView(-0.3f, View::X);
 
 			break;
 		}
@@ -386,22 +328,22 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
 {
     if (prevX != -1 && prevY != -1)
     {
-		Camera::Axis axis1;
-		Camera::Axis axis2;
+		View::Axis axis1;
+		View::Axis axis2;
 
 		if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		{
-			axis1 = Camera::Z;
-			axis2 = Camera::X;
+			axis1 = View::Z;
+			axis2 = View::X;
 		}
 		else
 		{
-			axis1 = Camera::Y;
-			axis2 = Camera::X;
+			axis1 = View::Y;
+			axis2 = View::X;
 		}
 
-		camera.rotate(static_cast<float>(xPos - prevX), axis1);
-		camera.rotate(static_cast<float>(yPos - prevY), axis2);
+		view.rotate(static_cast<float>(xPos - prevX), axis1);
+		view.rotate(static_cast<float>(yPos - prevY), axis2);
     }
     prevX = xPos;
     prevY = yPos;
@@ -416,144 +358,55 @@ void errorCallback(int error, const char* msg)
 }
 
 
-void renderAssimpMesh(const Model& model, const UInt& index)
-{
-	const auto& vab = model.meshes()[index].vab();
-
-	vab.bindArray();
-	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
-}
-
-void renderAssimpNode(const Model& model, const UInt& index, const Mat4& mat)
-{
-	const auto& nodes = model.nodes();
-	const auto& transforms = model.transformations();
-
-	auto currentTransform = mat * transforms[index];
-
-	const auto& node = nodes[index];
-	for (UInt i = 0; i < node.children().size(); i++)
-	{
-		renderAssimpNode(model, node.children()[i], currentTransform);
-	}
-
-	simpleProgram.setUniformMat4(simpleModel, currentTransform);
-	for(UInt i = 0; i < node.meshes().size(); i++)
-	{
-		renderAssimpMesh(model, i);
-	}
-}
-
-void renderAssimpModel(const Model& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
-{
-	GLint mode[2];
-	glGetIntegerv(GL_POLYGON_MODE, mode);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	simpleProgram.use();
-	simpleProgram.setUniformMat4(simpleView, matView);
-	simpleProgram.setUniformMat4(simpleProj, matProj);
-	renderAssimpNode(model, 0, matModel);
-
-	glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
-}
-
-
-
-void renderPlanetMesh(const Model& model, const UInt& index)
-{
-	const auto& vab = model.meshes()[index].vab();
-
-	vab.bindArray();
-	glDrawArrays(GL_PATCHES, 0, vab.elements());
-}
-
-void renderPlanetNode(const Model& model, const UInt& index, const Mat4& mat)
-{
-	const auto& nodes = model.nodes();
-	const auto& transforms = model.transformations();
-
-	auto currentTransform = mat * transforms[index];
-
-	const auto& node = nodes[index];
-	for (UInt i = 0; i < node.children().size(); i++)
-	{
-		renderPlanetNode(model, node.children()[i], currentTransform);
-	}
-
-	simpleProgram.setUniformMat4(simpleModel, currentTransform);
-	for(UInt i = 0; i < node.meshes().size(); i++)
-	{
-		renderPlanetMesh(model, i);
-	}
-}
-
-void renderPlanetModel(const Model& model, const Mat4& matModel, const Mat4& matView, const Mat4& matProj)
-{
-	planetProgram.use();
-
-	planetProgram.setUniform1f(planetInner, 1.0f);
-	planetProgram.setUniform1f(planetOuter, 1.0f);
-	planetProgram.setUniformVec3(planetLightPos, vecLightPos);
-	planetProgram.setUniformVec3(planetLightColor, vecLightColor);
-	planetProgram.setUniformMat4(planetView, matView);
-	planetProgram.setUniformMat4(planetProj, matProj);
-
-	renderPlanetNode(model, 0, matModel);
-}
-
-
 void initGlobals()
 {
 	window  = std::move(createWindow());
-	shaders = std::move(loadShaders());
-	icosahedron = std::move(createIcosahedron());
-
-	AssimpBuilder assimpBuilder;
-	assimpBuilder.readFile("assets/textures/Satellite/10477_Satellite_v1_L3.obj");
-	satellite = std::move(assimpBuilder.imported());
 	
-	PlanetBuilder planetBuilder;
-	planetBuilder.build(3, "assets/textures/earth/earthmap1k.jpg", "Earth");
-	earth = std::move(planetBuilder.model());
 
-	BoxBuilder boxBuilder;
-	boxBuilder.build("box");
-	box = std::move(boxBuilder.model());
+	loadShaders(shaders);
+	loadModels(models);
+	createShaderPrograms(programs, shaders);
+	createRenderers(renderers, programs);
+	
 
-
-	planetProgram = createPlanetProgram(shaders);
-	planetModel      = planetProgram.getUniformLocation("model");
-	planetView       = planetProgram.getUniformLocation("view");
-	planetProj = planetProgram.getUniformLocation("projection");
-	planetLightPos   = planetProgram.getUniformLocation("lightPos");
-	planetLightColor = planetProgram.getUniformLocation("lightColor");
-
-	planetInner = planetProgram.getUniformLocation("inner");
-	planetOuter = planetProgram.getUniformLocation("outer");
+	Vec3 pos  = Vec3(0.0f, 30.0f, 0.0f);
+	Vec3 look = Vec3(0.0f);
+	Vec3 up   = Vec3(0.0f, 0.0f, 1.0f);
+	view = View(
+		  glm::lookAt(pos, look, up)
+		, glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 500.0f)
+		, pos
+	);
 
 
-	satelliteProgram = createSatelliteProgram(shaders);
-	satelliteModel      = satelliteProgram.getUniformLocation("model");
-	satelliteView       = satelliteProgram.getUniformLocation("view");
-	satelliteProjection = satelliteProgram.getUniformLocation("projection");
-	satelliteLightPos   = satelliteProgram.getUniformLocation("lightPos");
-	satelliteLightColor = satelliteProgram.getUniformLocation("lightColor");
-
-	satelliteColor = satelliteProgram.getUniformLocation("color");
-
-	satelliteInner = satelliteProgram.getUniformLocation("inner");
-	satelliteOuter = satelliteProgram.getUniformLocation("outer");
-
-
-	simpleProgram = createSimpleProgram(shaders);
-	simpleModel = simpleProgram.getUniformLocation("model");
-	simpleView  = simpleProgram.getUniformLocation("view");
-	simpleProj  = simpleProgram.getUniformLocation("proj");
-
-
-	camera = Camera(glm::lookAt(glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)), Vec3(0.0f, 0.0f, 30.0f));
+	sat1 = std::dynamic_pointer_cast<Satellite>(
+		createSatellite(
+			  models["box"]
+			, Vec3(1.0f, 0.0f, 1.0f)
+			, glm::scale(Mat4(1.0f), Vec3(0.2f))
+			, Vec3(-6.0f, 0.0f, 0.0f)
+			, Vec3(0.0f, 0.0f, 18.0f)
+		)
+	);
+	sat2 = std::dynamic_pointer_cast<Satellite>(
+		createSatellite(
+			  models["box"]
+			, Vec3(1.0f, 0.0f, 1.0f)
+			, glm::scale(Mat4(1.0f), Vec3(0.2f))
+			, Vec3(6.0f, 0.0f, 0.0f)
+			, Vec3(0.0f, 0.0f, -18.0f)
+		)
+	);
+	earth = std::dynamic_pointer_cast<Planet>(
+		createPlanet(
+			  models["earth"]
+			, 2000.0f
+			, glm::scale(Mat4(1.0f), Vec3(2.0f))
+			, Vec3(0.0f)
+			, Vec3(0.0f)
+			, Vec3(0.0f)
+		)
+	);
 
 
 	fill = false;
@@ -564,140 +417,64 @@ void initGlobals()
 
 	prevX = WIDTH / 2;
 	prevY = HEIGHT / 2;
+
+	t0 = glfwGetTimerValue();
+	t1 = 0;
+	delta = 0;
 }
 
-void featureTest()
+
+
+//main loop
+void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_step)
 {
-	initGlobals();
+	auto& mat = sat->mPhysics->mMat;
+	auto& r   = sat->mPhysics->mPosition;
+	auto& v   = sat->mPhysics->mVelocity;
 
-    //setups
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
-
-    glViewport(0, 0, WIDTH, HEIGHT);
-
-    glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+	auto& r0 = planet->mPhysics->mPosition;
+	auto& M  = planet->mPhysics->mass;
 
 
-    //loop params
-    glm::mat4 matProj = glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 500.0f);
-    glm::mat4 matModel = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
+	auto dr   = r - r0;
+	auto temp = v;
 
-    glm::mat4 second = glm::scale(glm::mat4(1.0f), glm::vec3(0.3f));
-    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.02f), glm::vec3(1.0f, 0.0f, 1.0f));
+	auto dt = time_step / 1000000.0f;
 
-
-    //orbit
-    glm::vec3 r1(0.0f, 7.0f, 0.0f);
-    glm::vec3 v1(16.0f, 0.0f, 0.0f);	
-
-	glm::vec3 r2(7.0f, 0.0f, 7.0f);
-	glm::vec3 v2(-5.0f, 12.0f, -5.0f);
-
-    const float GM = 2000.0;
-
-    double t0;
-    double t1;
-    double delta;
-
-    t0 = glfwGetTime();
-	glfwShowWindow(window);
-    glfwSetCursorPos(window, prevX, prevY);
-    while (!glfwWindowShouldClose(window))
-    {
-        //prepare
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	r += dt * temp;
+	v += dt * (-M / glm::dot(dr, dr)) * glm::normalize(dr);
 
 
-		//test
-		auto testMat = Mat4(1.0f);
+	mat[3] = Vec4(r, 1.0f);
+}
 
-		testMat[3] = Vec4(0.0, 0.0, 0.0, 1.0);
-		renderAssimpModel(satellite, testMat, camera.mat(), matProj);
- 
-		testMat[3] = Vec4(0.0, 0.0, 0.0, 1.0);
-		renderAssimpModel(box, testMat, camera.mat(), matProj);
+void updatePhysics()
+{
+	static const uint64_t time_step = 3000;
+	static const uint64_t max_count = 5;
 
+	t1 = glfwGetTimerValue();
+	delta += (t1 - t0) / 10;
+	
+	if (delta > max_count * time_step)
+	{
+		delta = time_step;
+	}
 
-		//planet
-		renderPlanetModel(earth, matModel, camera.mat(), matProj);
+	while (delta > time_step)
+	{
+		delta -= time_step;
 
-        //sat
-		satelliteProgram.use();
-		satelliteProgram.setUniform1f(satelliteInner, innerTess);
-		satelliteProgram.setUniform1f(satelliteOuter, outerTess);
-		satelliteProgram.setUniformVec3(satelliteLightPos, vecLightPos);
-		satelliteProgram.setUniformVec3(satelliteLightColor, vecLightColor);
-		satelliteProgram.setUniformMat4(satelliteProjection, matProj);
-		satelliteProgram.setUniformMat4(satelliteView, camera.mat());
+		updateSatPlanet(sat1, earth, time_step);
+		updateSatPlanet(sat2, earth, time_step);
+	}
 
-        auto m = second;
-        m[3] = Vec4(r1, 1.0f);
-
-		planetProgram.setUniformMat4(satelliteModel, m);
-		satelliteProgram.setUniformVec3(satelliteColor, Vec3(1.0f, 0.0, 0.0));
-
-		icosahedron.bindArray();
-        glDrawArrays(GL_PATCHES, 0, icosahedron.elements());
-
-		m = second;
-		m[3] = Vec4(r2, 1.0f);
-		planetProgram.setUniformMat4(satelliteModel, m);
-		satelliteProgram.setUniformVec3(satelliteColor, Vec3(0.0f, 0.0, 1.0));
-
-		icosahedron.bindArray();
-		glDrawArrays(GL_PATCHES, 0, icosahedron.elements());
-
-
-
-        //update
-        matModel = rotation * matModel;
-        second   = rotation * second;
-
-
-        //delta
-        t1 = glfwGetTime();
-        delta = (t1 - t0);
-        t0 = t1;
-
-        float dt = static_cast<float>(delta / 10);
-
-        auto vj = v1;
-        v1 -= dt * GM / glm::dot(r1, r1) * glm::normalize(r1);
-        r1 += dt * vj;
-
-		vj = v2;
-		v2 -= dt * GM / glm::dot(r2, r2) * glm::normalize(r2);
-		r2 += dt * vj;
-
-
-        std::this_thread::sleep_for(10ms);
-
-        //swap buffers
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    glfwDestroyWindow(window);
-    glfwTerminate();
+	t0 = t1;
 }
 
 
 
-//test gui
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
-bool show_demo_window = true;
-bool show_another_window = false;
-ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-
-void initGui(GLFWwindow* guiWindow)
+void initGui()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -705,56 +482,17 @@ void initGui(GLFWwindow* guiWindow)
 
 	ImGui::StyleColorsDark();
 
-	ImGui_ImplGlfw_InitForOpenGL(guiWindow, true);
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 430 core");
 }
 
-
-void renderEnvironmentGui()
-{
-	ImGui::Text("Environment options");
-
-	ImGui::Text("Integration method");
-	ImGui::Text("Time speed");
-	ImGui::Text("Scale");
-}
-
-void renderPlanetGui()
-{
-	ImGui::Text("Planet options");
-
-	ImGui::Separator();
-	
-	static double mass = 0.0;
-	ImGui::InputDouble("Mass", &mass);
-	ImGui::Text("Rotation");
-}
-
-void renderSatellite1Gui()
-{
-	ImGui::Text("Satellite1 options");
-
-	//Orbit params
-	ImGui::Text("angle1");
-	ImGui::Text("angle2");
-	ImGui::Text("angle3");
-	ImGui::Text("e");
-	ImGui::Text("a");
-	ImGui::Text("");
-
-	//Ivp
-	ImGui::Text("");
-	ImGui::Text("");
-}
-
-void renderSatellite2Gui()
-{
-	ImGui::Text("Satellite2 options");
-}
-
-
 void renderGui()
 {
+	static bool show_demo_window = true;
+	static bool show_another_window = false;
+	static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -794,63 +532,12 @@ void renderGui()
 		ImGui::End();
 	}
 
-	//my gui
-	ImGui::Begin("My gui");
-	const char* objects[4] = {"Environment", "Planet", "Satellite1", "Satellite2"};
-	static int current = 0;
-	if(ImGui::BeginCombo("", objects[current], ImGuiComboFlags_NoArrowButton))
-	{
-		for (int i = 0; i < 4; i++)
-		{
-			bool selected = objects[current] == objects[i];
-			if(ImGui::Selectable(objects[i], selected))
-			{
-				current = i;
-			}
-			if(selected)
-			{
-				ImGui::SetItemDefaultFocus();
-			}
-		}
-		ImGui::EndCombo();
-	}
-	ImGui::Separator();
-	//render selected option
-	switch(current)
-	{
-		case 0:
-		{
-			renderEnvironmentGui();
-			break;
-		}
-		case 1:
-		{
-			renderPlanetGui();
-			break;
-		}
-		case 2:
-		{
-			renderSatellite1Gui();
-			break;
-		}
-		case 3:
-		{
-			renderSatellite2Gui();
-			break;
-		}
-
-	}
-	ImGui::Button("AAA");
-	ImGui::End();
-	//end my gui
 	ImGui::Render();
-
-	glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-	glClear(GL_COLOR_BUFFER_BIT);
-
+	glfwMakeContextCurrent(window);
+	//glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+	glClear(GL_DEPTH_BUFFER_BIT);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
-
 
 void destroyGui()
 {
@@ -859,26 +546,55 @@ void destroyGui()
 	ImGui::DestroyContext();
 }
 
-
-void testGui()
+void render()
 {
-    auto guiWindow = createWindow();
+	glfwMakeContextCurrent(window);
 
-    initGui(guiWindow);
+	auto& simple = renderers["simple"];
+	simple->setRequiredStates();
+	simple->renderComponent(sat1->mGraphics, view);
+	simple->renderComponent(sat2->mGraphics, view);
 
-	glfwShowWindow(guiWindow);
-    while (!glfwWindowShouldClose(guiWindow))
+	auto& planet = renderers["planet"];
+	planet->setRequiredStates();
+	planet->renderComponent(earth->mGraphics, view);
+}
+
+
+void featureTest()
+{
+	initGlobals();
+	initGui();
+
+    //setups
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glViewport(0, 0, WIDTH, HEIGHT);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	
+
+
+	glfwShowWindow(window);
+	glfwMakeContextCurrent(window);
+    glfwSetCursorPos(window, prevX, prevY);
+    while (!glfwWindowShouldClose(window))
     {
-        glfwPollEvents();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderGui();
+		glfwPollEvents();
 
-        glfwSwapBuffers(guiWindow);
+		updatePhysics();
+
+		render();
+		renderGui();
+
+		glfwSwapBuffers(window);
     }
 
-    destroyGui();
-
-    glfwDestroyWindow(guiWindow);
+	destroyGui();
+    glfwDestroyWindow(window);
     glfwTerminate();
 }
 
@@ -887,9 +603,6 @@ void testGui()
 int main(int argc, char* argv[])
 {
     featureTest();
-
-	//testGui();
-
 
     return EXIT_SUCCESS;
 }

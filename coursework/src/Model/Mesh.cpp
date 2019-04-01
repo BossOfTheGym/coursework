@@ -4,7 +4,7 @@
 //constructors & destructors
 Mesh::Mesh()
 	: mName("")
-	, mMaterialIndex(VAB::INVALID)
+	, mMaterialIndex(-1)
 	, mVertexBuffer()
 {}
 
@@ -39,14 +39,12 @@ Mesh& Mesh::operator = (Mesh&& mesh)
 }
 
 
-//INameable
-const String& Mesh::toString() const
+const String& Mesh::name() const
 {
     return mName;
 }
 
 
-//IMesh
 const Mesh::VAB& Mesh::vab() const
 {
     return mVertexBuffer;

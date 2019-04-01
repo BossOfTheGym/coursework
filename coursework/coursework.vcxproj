@@ -18,6 +18,64 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Common.h" />
+    <ClInclude Include="src\Components.h" />
+    <ClInclude Include="src\Component\IComponent.h" />
+    <ClInclude Include="src\Entity\ITimeVarying.h" />
+    <ClInclude Include="src\Graphics\GraphicsComponent.h" />
+    <ClInclude Include="src\Model\Builders\AssimpBuilder.h" />
+    <ClInclude Include="src\Model\Builders\CustomBuilders.h" />
+    <ClInclude Include="src\Model\Model.h" />
+    <ClInclude Include="src\Model\VertexArrayBuffer.h" />
+    <ClInclude Include="src\Objects\IObject.h" />
+    <ClInclude Include="src\Objects\Object.h" />
+    <ClInclude Include="src\Objects\Objects.h" />
+    <ClInclude Include="src\Objects\Planet.h" />
+    <ClInclude Include="src\Objects\PlanetComponent.h" />
+    <ClInclude Include="src\Objects\Satellite.h" />
+    <ClInclude Include="src\Objects\SatelliteComponent.h" />
+    <ClInclude Include="src\Objects\View.h" />
+    <ClInclude Include="src\Physics\PhysicsComponent.h" />
+    <ClInclude Include="src\Render\IRenderer.h" />
+    <ClInclude Include="src\Render\PlanetRenderer.h" />
+    <ClInclude Include="src\Render\Renderers.h" />
+    <ClInclude Include="src\Render\SatelliteRenderer.h" />
+    <ClInclude Include="src\Render\SimpleRenderer.h" />
+    <ClInclude Include="src\Shader\Shader.h" />
+    <ClInclude Include="src\Shader\ShaderProgram.h" />
+    <ClInclude Include="src\Texture\Texture2D.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Component\IComponent.cpp" />
+    <ClCompile Include="src\Graphics\GraphicsComponent.cpp" />
+    <ClCompile Include="src\ImGui\imgui.cpp" />
+    <ClCompile Include="src\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="src\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="src\ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Model\Builders\AssimpBuilder.cpp" />
+    <ClCompile Include="src\Model\Builders\CustomBuilders.cpp" />
+    <ClCompile Include="src\Model\Material.cpp" />
+    <ClCompile Include="src\Model\Mesh.cpp" />
+    <ClCompile Include="src\Model\Model.cpp" />
+    <ClCompile Include="src\Model\Node.cpp" />
+    <ClCompile Include="src\Model\VertexArrayBuffer.cpp" />
+    <ClCompile Include="src\Objects\Planet.cpp" />
+    <ClCompile Include="src\Objects\PlanetComponent.cpp" />
+    <ClCompile Include="src\Objects\Satellite.cpp" />
+    <ClCompile Include="src\Objects\SatelliteComponent.cpp" />
+    <ClCompile Include="src\Objects\View.cpp" />
+    <ClCompile Include="src\Physics\PhysicsComponent.cpp" />
+    <ClCompile Include="src\Render\PlanetRenderer.cpp" />
+    <ClCompile Include="src\Render\SatelliteRenderer.cpp" />
+    <ClCompile Include="src\Render\SimpleRenderer.cpp" />
+    <ClCompile Include="src\Shader\Shader.cpp" />
+    <ClCompile Include="src\Shader\ShaderProgram.cpp" />
+    <ClCompile Include="src\Texture\Texture2D.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{1DBEFC56-F956-4903-8B1A-96C9BA2606AB}</ProjectGuid>
@@ -161,44 +219,6 @@
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;FreeImage.lib;assimp-vc140-mt.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="src\Camera\Camera.cpp" />
-    <ClCompile Include="src\ImGui\imgui.cpp" />
-    <ClCompile Include="src\ImGui\imgui_demo.cpp" />
-    <ClCompile Include="src\ImGui\imgui_draw.cpp" />
-    <ClCompile Include="src\ImGui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="src\ImGui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="src\ImGui\imgui_widgets.cpp" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Model\Builders\AssimpBuilder.cpp" />
-    <ClCompile Include="src\Model\Builders\CustomBuilders.cpp" />
-    <ClCompile Include="src\Model\Material.cpp" />
-    <ClCompile Include="src\Model\Mesh.cpp" />
-    <ClCompile Include="src\Model\Model.cpp" />
-    <ClCompile Include="src\Model\Node.cpp" />
-    <ClCompile Include="src\Model\VertexArrayBuffer.cpp" />
-    <ClCompile Include="src\Render\PlanetRenderer.cpp" />
-    <ClCompile Include="src\Render\SatelliteRenderer.cpp" />
-    <ClCompile Include="src\Shader\Shader.cpp" />
-    <ClCompile Include="src\Shader\ShaderProgram.cpp" />
-    <ClCompile Include="src\Texture\Texture2D.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\Camera\Camera.h" />
-    <ClInclude Include="src\Common.h" />
-    <ClInclude Include="src\Entity\INameable.h" />
-    <ClInclude Include="src\Entity\ITimeVarying.h" />
-    <ClInclude Include="src\Model\Builders\AssimpBuilder.h" />
-    <ClInclude Include="src\Model\Builders\CustomBuilders.h" />
-    <ClInclude Include="src\Model\Model.h" />
-    <ClInclude Include="src\Model\VertexArrayBuffer.h" />
-    <ClInclude Include="src\Render\IRenderer.h" />
-    <ClInclude Include="src\Render\PlanetRenderer.h" />
-    <ClInclude Include="src\Render\SatelliteRenderer.h" />
-    <ClInclude Include="src\Shader\Shader.h" />
-    <ClInclude Include="src\Shader\ShaderProgram.h" />
-    <ClInclude Include="src\Texture\Texture2D.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -72,3 +72,7 @@ private:
     Type mType;
 };
 
+
+//aliases
+using ShaderShared = std::shared_ptr<Shader>;
+using ShaderWeak = std::weak_ptr<Shader>;

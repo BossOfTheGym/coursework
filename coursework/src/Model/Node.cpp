@@ -39,12 +39,10 @@ Node& Node::operator = (Node&& node)
 }
 
 
-//INameable
-const String& Node::toString() const
+const String& Node::name() const
 {
-    return mName;
+	return mName;
 }
-
 
 //Node
 const Node::Indices& Node::children() const

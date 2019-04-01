@@ -48,7 +48,7 @@ namespace
 	{
 		using Indices = Node::Indices;
 
-		String name = "";
+		String name("");
 		Indices children;
 		Indices meshes;
 
@@ -347,7 +347,7 @@ namespace
 
 
 	
-	auto loadMaterial(const aiMaterial* material, const String& name)
+	auto loadMaterial(const aiMaterial* material)
 	{
 		using Textures = Material::Textures;
 
@@ -363,7 +363,7 @@ namespace
 			}
 		}
 
-		return Material(std::move(diffuse), String(name));
+		return Material(std::move(diffuse));
 	}
 
 
@@ -401,7 +401,7 @@ namespace
 		nodes.resize(count);
 		nodesTransformations.resize(count);
 
-
+		
 		//fill nodes data
 		std::function<void(UInt&, NodeMapping&, const aiNode*)> fillNodes
 			= [&] (UInt& label, NodeMapping& mapping, const aiNode* node) -> void
@@ -458,7 +458,7 @@ namespace
 			materials.resize(scene->mNumMaterials);
 			for (UInt i = 0; i < scene->mNumMaterials; i++)
 			{
-				materials[i] = std::move(loadMaterial(scene->mMaterials[i], std::to_string(i)));
+				materials[i] = std::move(loadMaterial(scene->mMaterials[i]));
 			}
 		}	
 
@@ -477,7 +477,6 @@ void AssimpBuilder::readFile(const String& location)
 
 	const aiScene* scene = mImporter.ReadFile(location, mImportFlags);
 
-	String name;
 	Nodes nodes;
 	Transformations nodesTransformations;
 	Meshes meshes;
@@ -485,9 +484,6 @@ void AssimpBuilder::readFile(const String& location)
 
 	if (scene)
 	{
-		//name
-		name = location;
-
 		//nodes data
 		std::tie(nodes, nodesTransformations) = std::move(loadNodes(scene));
 
@@ -508,7 +504,6 @@ void AssimpBuilder::readFile(const String& location)
 			, std::move(nodes)
 			, std::move(nodesTransformations)
 			, std::move(materials)
-			, std::move(name)
 		)
 	);
 }

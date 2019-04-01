@@ -154,7 +154,7 @@ namespace
 	
 
 
-	auto buildMaterial(const String& diffuseLocation, const String& name)
+	auto buildMaterial(const String& diffuseLocation)
 	{
 		using Textures = Material::Textures;
 
@@ -170,7 +170,7 @@ namespace
 		diffuse[0].texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
-		return Material(std::move(diffuse), String(name));
+		return Material(std::move(diffuse));
 	}
 }
 
@@ -193,7 +193,7 @@ void PlanetBuilder::build(
 	meshes[0] = std::move(buildSphereMesh(triangleSplit, name));
 
 	Materials materials(1);
-	materials[0] = std::move(buildMaterial(diffuseLocation, name));
+	materials[0] = std::move(buildMaterial(diffuseLocation));
 
 	Transformations transformations(1);
 	transformations[0] = std::move(buildIdentityTransform());
@@ -204,7 +204,6 @@ void PlanetBuilder::build(
 			, std::move(nodes)
 			, std::move(transformations)
 			, std::move(materials)
-			, String(name)
 		)
 	);
 }
@@ -323,7 +322,6 @@ void BoxBuilder::build(const String& name)
 			, std::move(nodes)
 			, std::move(transformations)
 			, std::move(materials)
-			, String(name)
 		)
 	);
 }

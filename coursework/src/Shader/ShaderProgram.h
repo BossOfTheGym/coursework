@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Shader.h"
+#include <Common.h>
+
+#include <Shader/Shader.h>
 
 
 class ShaderProgram
@@ -83,3 +85,8 @@ private:
 
     String mName;
 };
+
+
+//aliases
+using ShaderProgramShared = std::shared_ptr<ShaderProgram>;
+using ShaderProgramWeak = std::weak_ptr<ShaderProgram>;

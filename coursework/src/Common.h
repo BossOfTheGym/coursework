@@ -18,6 +18,8 @@
 
 #include <GL/glew.h>
 
+#include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -27,6 +29,9 @@ const float PI   = static_cast<float>(acos(-1.0));
 const float PI_2 = static_cast<float>(2 * PI);
 
 const GLuint EMPTY  = 0;
+
+
+using UInt = unsigned int;
 
 using Vec4 = glm::vec4;
 using Mat4 = glm::mat4;

@@ -7,7 +7,6 @@ Model::Model()
 	, mNodes()
 	, mNodesTransformations()
 	, mMaterials()
-	, mName("")
 {}
 
 Model::Model(
@@ -15,13 +14,11 @@ Model::Model(
 	, Nodes&& nodes
 	, Transformations&& nodesTransformations
 	, Materials&& materials
-	, String&& name
 )
 	: mMeshes(std::move(meshes))
 	, mNodes(std::move(nodes))
 	, mNodesTransformations(std::move(nodesTransformations))
 	, mMaterials(std::move(materials))
-	, mName(std::move(name))
 {}
 
 Model::Model(Model&& model)
@@ -43,18 +40,9 @@ Model& Model::operator = (Model&& model)
 		std::swap(mNodes, model.mNodes);
 		std::swap(mNodesTransformations, model.mNodesTransformations);		
 		std::swap(mMaterials, model.mMaterials);
-		
-		std::swap(mName, model.mName);
     }
 
     return *this;
-}
-
-
-//INameable
-const String& Model::toString() const
-{
-    return mName;
 }
 
 

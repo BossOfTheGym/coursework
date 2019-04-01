@@ -8,19 +8,11 @@
 
 #include <Common.h>
 
-#include <Entity/INameable.h>
-
 #include <Texture/Texture2D.h>
-
-#include <Shader/ShaderProgram.h>
-
 #include <Model/VertexArrayBuffer.h>
 
 
-using UInt = unsigned int;
-
-
-class Node : public INameable
+class Node
 {
 public:
 	using Indices = std::vector<UInt>;
@@ -44,14 +36,12 @@ public:
     Node& operator = (Node&& node);
 
 
-	//INameable
-    virtual const String& toString() const override;
-
-
 	//Node
     const Indices& children() const;
 
     const Indices& meshes() const;
+
+	const String& name() const;
 
 
 private:
@@ -62,7 +52,7 @@ private:
 };
 
 
-class Mesh : public INameable
+class Mesh
 {
 public:
 	using VAB = VertexArrayBuffer;
@@ -86,14 +76,12 @@ public:
     Mesh& operator = (Mesh&& mesh);
 
 
-	//INameable
-    virtual const String& toString() const override;
-
-
 	//Mesh
 	const VAB& vab() const;
 
 	const UInt& material() const;
+
+	const String& name() const;
 
 
 private:
@@ -104,7 +92,7 @@ private:
 };
 
 
-class Material : public INameable
+class Material
 {
 public:
 	using Textures = std::vector<Texture2D>;
@@ -113,7 +101,7 @@ public:
 public:
 	Material();
 
-	Material(Textures&& diffuse, String&& name);
+	Material(Textures&& diffuse);
 
 	Material(const Material& material) = delete;
 
@@ -128,22 +116,16 @@ public:
 	Material& operator = (Material&& material);
 
 
-	//INameable
-	virtual const String& toString() const override;
-
-
 	//Material
 	const Textures& diffuse() const;
 
 
 private:
 	Textures mDiffuse;
-
-	String mName;
 };
 
 
-class Model : public INameable
+class Model
 {
 public:
     using Meshes = std::vector<Mesh>;
@@ -163,7 +145,6 @@ public:
 		, Nodes&& nodes
 		, Transformations&& nodesTransformations
 		, Materials&& materials
-		, String&& name
 	);
 
     Model(const Model& model) = delete;
@@ -177,10 +158,6 @@ public:
     Model& operator = (const Model& model) = delete;
 
     Model& operator = (Model&& model);
-
-
-	//INameable
-    virtual const String& toString() const override;
 
 
 	//Model
@@ -198,6 +175,9 @@ private:
 	Nodes mNodes;
 	Transformations mNodesTransformations;
 	Materials mMaterials;
-
-	String mName;
 };
+
+
+//aliases
+using ModelShared = std::shared_ptr<Model>;
+using ModelWeak = std::weak_ptr<Model>;

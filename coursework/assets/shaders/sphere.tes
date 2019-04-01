@@ -14,9 +14,7 @@ out vec3 tesColor;
 
 uniform mat4 model;
 uniform mat4 view;
-uniform mat4 projection;
-
-uniform mat4 invTransModel;
+uniform mat4 proj;
 
 
 void main()
@@ -32,7 +30,7 @@ void main()
 	tesModelPos = vec4(normalize(p0 + p1 + p2), 1.0f);
 	tesWorldPos = model * tesModelPos;
 	tesNormal = normalize((inverse(transpose(model)) * vec4(tesModelPos.xyz, 0.0)).xyz);
-	gl_Position = projection * view * tesWorldPos;
+	gl_Position = proj * view * tesWorldPos;
 
 
 	p0 = gl_TessCoord.x * tcsColor[0];

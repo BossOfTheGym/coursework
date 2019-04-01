@@ -4,12 +4,10 @@
 //constructors & destructor
 Material::Material()	
 	: mDiffuse()
-	, mName("")
 {}
 
-Material::Material(Textures&& diffuse, String&& name)
+Material::Material(Textures&& diffuse)
 	: mDiffuse(std::move(diffuse))
-	, mName(std::move(name))
 {}
 
 Material::Material(Material&& material)
@@ -33,12 +31,6 @@ Material& Material::operator = (Material&& material)
 	return *this;
 }
 
-
-//INameable
-const String& Material::toString() const
-{
-	return mName;
-}
 
 
 //Material

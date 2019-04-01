@@ -20,9 +20,9 @@ public:
 
 
 public:
-	View(const View& camera) = default;
+	View(const View& view) = default;
 
-	View(View&& camera) = default;
+	View(View&& view) = default;
 
 	View(
 		const Mat4& view = Mat4(1.0f)
@@ -32,9 +32,9 @@ public:
 	);
 
 
-	View& operator = (const View& camera) = default;
+	View& operator = (const View& view) = default;
 
-	View& operator = (View&& camera) = default;
+	View& operator = (View&& view) = default;
 
 
 	//TODO
@@ -71,6 +71,10 @@ private:
 
 
 private:
+	float pitch;// y
+	float roll;  // x
+
+
 	Mat4 mView;
 	Mat4 mProj;
 

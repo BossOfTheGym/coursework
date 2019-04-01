@@ -20,9 +20,9 @@ void main()
 {
     //texel obtainment
     vec3 spherePos = normalize(geoModelPos.xyz);
-    vec2 circlePos = normalize(spherePos.xy);
+    vec2 circlePos = normalize(spherePos.xz);
 
-    float latitude  = acos(spherePos.z);
+    float latitude  = acos(spherePos.y);
     float longitude = acos(circlePos.x);
     if (circlePos.y < 0.0f)
     {
@@ -31,7 +31,7 @@ void main()
 
     vec2 texCoord;
     texCoord.s = clamp(longitude / PI_2, 0.0f, 1.0f);
-	texCoord.t = clamp(1.0f - latitude / PI   , 0.0f, 1.0f);
+	texCoord.t = clamp(1.0f - latitude / PI, 0.0f, 1.0f);
     vec4 tex = texture(mapMain, texCoord);
 
 

@@ -28,9 +28,7 @@ using namespace std::chrono;
 
 //create context for OpenGL and input
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-//
 void posCallback(GLFWwindow* window, double xPos, double yPos);
-//
 void errorCallback(int error, const char* description);
 
 GLFWwindow* createWindow()
@@ -292,25 +290,25 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         case (GLFW_KEY_W):
         {
 
-            view.travelView(0.3f, View::Z);
+            view.travelView(0.1f, View::Z);
 
             break;
         }
         case (GLFW_KEY_S):
         {
-            view.travelView(-0.3f, View::Z);
+            view.travelView(-0.1f, View::Z);
 
             break;
         }
 		case (GLFW_KEY_A):
 		{
-			view.travelView(0.3f, View::X);
+			view.travelView(0.1f, View::X);
 
 			break;
 		}
 		case (GLFW_KEY_D):
 		{
-			view.travelView(-0.3f, View::X);
+			view.travelView(-0.1f, View::X);
 
 			break;
 		}
@@ -451,18 +449,18 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_s
 
 void updatePhysics()
 {
-	static const uint64_t time_step = 3000;
+	static const uint64_t time_step = 10;
 	static const uint64_t max_count = 5;
-
+	
 	t1 = glfwGetTimerValue();
-	delta += (t1 - t0) / 10;
+	delta += (t1 - t0) / 30;
 	
 	if (delta > max_count * time_step)
 	{
-		delta = time_step;
+		delta = max_count * time_step;
 	}
 
-	while (delta > time_step)
+	while (delta >= time_step)
 	{
 		delta -= time_step;
 
@@ -487,7 +485,7 @@ void initGui()
 	ImGui_ImplOpenGL3_Init("#version 430 core");
 }
 
-void renderGui()
+void testGui()
 {
 	static bool show_demo_window = true;
 	static bool show_another_window = false;
@@ -501,28 +499,6 @@ void renderGui()
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
 
-	{
-		static float f = 0.0f;
-		static int counter = 0;
-
-		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-		ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-		ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-		ImGui::Checkbox("Another Window", &show_another_window);
-
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::End();
-	}
-
 
 	if (show_another_window)
 	{
@@ -534,10 +510,33 @@ void renderGui()
 	}
 
 	ImGui::Render();
-	glfwMakeContextCurrent(window);
-	//glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void systemOptions()
+{
+
+}
+
+void planetOptions()
+{
+
+}
+
+void satelliteOptions()
+{
+
+}
+
+void myGui()
+{
+
+}
+
+void renderGui()
+{
+	testGui();
 }
 
 void destroyGui()
@@ -567,11 +566,12 @@ void featureTest()
 	initGlobals();
 	initGui();
 
+
     //setups
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
     glViewport(0, 0, WIDTH, HEIGHT);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	
@@ -580,6 +580,7 @@ void featureTest()
 	glfwShowWindow(window);
 	glfwMakeContextCurrent(window);
     glfwSetCursorPos(window, prevX, prevY);
+	t0 = glfwGetTimerValue();
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

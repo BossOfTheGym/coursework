@@ -89,8 +89,8 @@ namespace
 
 
 		//init icosahedron verteces
-		glm::vec3 top    = glm::vec3(0.0f, 0.0f, +1.0f);
-		glm::vec3 bottom = glm::vec3(0.0f, 0.0f, -1.0f);
+		glm::vec3 top    = glm::vec3(0.0f, +1.0f, 0.0f);
+		glm::vec3 bottom = glm::vec3(0.0f, -1.0f, 0.0f);
 
 		glm::vec3    topRing[N];
 		glm::vec3 bottomRing[N];
@@ -100,10 +100,10 @@ namespace
 		for (int i = 0; i < N; i++) 
 		{
 			angle = ANGLE * i;
-			topRing[i] = glm::vec3(R * cos(angle), R * sin(angle), 1.0f - H);
+			topRing[i] = glm::vec3(R * cos(angle), 1.0f - H, R * sin(angle));
 
 			angle = ANGLE * i + HALF_ANGLE;
-			bottomRing[i] = glm::vec3(R * cos(angle), R * sin(angle), H - 1.0f);	
+			bottomRing[i] = glm::vec3(R * cos(angle), H - 1.0f, R * sin(angle));	
 		}
 
 

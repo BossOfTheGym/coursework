@@ -244,26 +244,33 @@ IObjectShared createPlanet(
 
 
 //globals
+//context
 GLFWwindow* window;
 
+//objects
 std::map<String, ShaderShared>        shaders;
 std::map<String, ModelShared>         models;
 std::map<String, ShaderProgramShared> programs;
 std::map<String, IRendererShared>     renderers;
 std::map<String, IObjectShared>       objects;
 
-View view;
-
+//cached
 SatelliteShared sat1;
 SatelliteShared sat2;
 PlanetShared earth;
 
-bool fill = false;
-bool f;
+//view
+View view;
 
+//flags
+bool fill;
+bool stopped;
+
+//screen pos
 double prevX;
 double prevY;
 
+//time stepping
 uint64_t t0;
 uint64_t t1;
 uint64_t delta;
@@ -345,8 +352,8 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
 		axis2 = View::X;
 	}
 
-	view.rotateView(static_cast<float>(xPos - prevX), axis1);
-	view.rotateView(static_cast<float>(yPos - prevY), axis2);*/
+	view.rotateView(static_cast<float>(xPos - prevX) / WIDTH, axis1);
+	view.rotateView(static_cast<float>(yPos - prevY) / HEIGHT, axis2);*/
     prevX = xPos;
     prevY = yPos;
 }
@@ -371,7 +378,7 @@ void initGlobals()
 	createRenderers(renderers, programs);
 	
 
-	Vec3 pos  = Vec3(0.0f, 30.0f, 0.0f);
+	Vec3 pos  = Vec3(0.0f, 10.0f, 0.0f);
 	Vec3 look = Vec3(0.0f);
 	Vec3 up   = Vec3(0.0f, 0.0f, 1.0f);
 	view = View(
@@ -411,7 +418,8 @@ void initGlobals()
 	);
 
 
-	fill = false;
+	fill    = false;
+	stopped = true;
 
 	prevX = WIDTH / 2;
 	prevY = HEIGHT / 2;
@@ -520,7 +528,7 @@ void systemOptions()
 
 void planetOptions()
 {
-
+	//rotation
 }
 
 void satelliteOptions()
@@ -569,12 +577,11 @@ void featureTest()
     //setups
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     glViewport(0, 0, WIDTH, HEIGHT);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	
-
 
 	glfwShowWindow(window);
 	glfwMakeContextCurrent(window);
@@ -586,7 +593,10 @@ void featureTest()
 
 		glfwPollEvents();
 
-		//updatePhysics();
+		if (!stopped)
+		{
+			updatePhysics();
+		}
 
 		render();
 		renderGui();
@@ -599,7 +609,7 @@ void featureTest()
     glfwTerminate();
 }
 
-
+ 
 
 int main(int argc, char* argv[])
 {

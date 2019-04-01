@@ -27,7 +27,9 @@ View::View(
 	, mPitch(0.0)
 	, mRoll(0.0)
 	, mSensivity(sensitivity)
-{}
+{
+	updateAxes();
+}
 
 
 

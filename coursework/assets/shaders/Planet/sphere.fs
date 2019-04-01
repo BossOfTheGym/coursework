@@ -19,27 +19,30 @@ const float PI_2 = 2 * PI;
 void main()
 {
     //texel obtainment
-    vec3 spherePos = normalize(geoModelPos.xyz);
-    vec2 circlePos = normalize(spherePos.xz);
+    vec3 normalized = normalize(geoModelPos.xyz);
+	
+	float x = normalized.x;
+	float y = normalized.y;
+	float z = normalized.z;
+	float r = sqrt(x * x + z * z);
 
-    float latitude  = acos(spherePos.y);
-    float longitude = acos(circlePos.x);
-    if (circlePos.y < 0.0f)
+	vec3 circle = vec3(x / r, 0, z / r);
+	
+
+    float latitude  = acos(y);
+    float longitude = acos(circle.x);
+    if (circle.z > 0.0)
     {
     	longitude = 2 * PI - longitude;
     }
+    vec4 tex = texture(mapMain, vec2(longitude / PI_2, 1.0 - latitude / PI));
 
-    vec2 texCoord;
-    texCoord.s = clamp(longitude / PI_2, 0.0f, 1.0f);
-	texCoord.t = clamp(1.0f - latitude / PI, 0.0f, 1.0f);
-    vec4 tex = texture(mapMain, texCoord);
+	
+	if(abs(geoGomo[0]) < 0.02 || abs(geoGomo[1]) < 0.02 || abs(geoGomo[2]) < 0.02)
+	{
+		tex = vec4(vec3(0.0), 1.0);
+	}
 
-
-	//edge
-	//if(abs(geoGomo[0]) < 0.02f || abs(geoGomo[1]) < 0.02f || abs(geoGomo[2]) < 0.02f)
-	//{
-	//	tex = vec4(0.0);
-	//}
 
 	//result
     FragColor = tex;

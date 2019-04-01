@@ -115,16 +115,16 @@ namespace
 			int next = (curr + N + 1) % N;
 
 			//top + topRing[i] + topRing[i + 1]
-			pushSplitedTriangles(data, top, topRing[curr], topRing[next], split);
+			pushSplitedTriangles(data, top, topRing[next], topRing[curr], split);
 
 			//bottom + bottomRing[i] + bottomRing[i + 1]
-			pushSplitedTriangles(data, bottom, bottomRing[next], bottomRing[curr], split);
+			pushSplitedTriangles(data, bottom, bottomRing[curr], bottomRing[next], split);
 
 			//bottomRing[i] + topRing[i] + topRing[i + 1]
-			pushSplitedTriangles(data, bottomRing[curr], topRing[next], topRing[curr], split);;
+			pushSplitedTriangles(data, bottomRing[curr], topRing[curr], topRing[next], split);;
 
 			//topRing[i] + bottomRing[i] + bottomRing[i - 1]
-			pushSplitedTriangles(data, topRing[curr], bottomRing[prev], bottomRing[curr], split);
+			pushSplitedTriangles(data, topRing[curr], bottomRing[curr], bottomRing[prev], split);
 		}
 
 		return std::make_tuple(static_cast<UInt>(data.size() / 3), std::move(data));

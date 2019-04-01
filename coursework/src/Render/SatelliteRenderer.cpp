@@ -13,7 +13,7 @@ SatelliteRenderer::SatelliteRenderer(const ShaderProgramShared& shared)
 void SatelliteRenderer::setRequiredStates()
 {
 	mProgramShared->use();	
-	mProgramShared->setUniformVec3(uColor, Vec3(1.0f));
+	mProgramShared->setUniformVec3(uColor, Vec3(1.0f, 0.0f, 0.0f));
 }
 
 
@@ -70,7 +70,7 @@ void SatelliteRenderer::renderMesh(const Model& model, UInt index)
 	const auto& vab = mesh.vab();
 
 	vab.bindArray();
-	glDrawArrays(GL_PATCHES, 0, vab.elements());
+	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
 }
 
 void SatelliteRenderer::restoreStates()
@@ -85,4 +85,4 @@ void SatelliteRenderer::setUniforms()
 	uView  = mProgramShared->getUniformLocation("view");
 	uProj  = mProgramShared->getUniformLocation("proj");
 	uColor = mProgramShared->getUniformLocation("color");
-}
+ }

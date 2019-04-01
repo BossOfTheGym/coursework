@@ -231,7 +231,7 @@ namespace
 	auto box()
 	{
 		static const Vec3 BOX_VERTICES[8] = {
-			Vec3(-1.0f, -1.0f, -1.0f)
+			  Vec3(-1.0f, -1.0f, -1.0f)
 			, Vec3(-1.0f, -1.0f, +1.0f)
 			, Vec3(-1.0f, +1.0f, -1.0f)
 			, Vec3(-1.0f, +1.0f, +1.0f)
@@ -241,25 +241,35 @@ namespace
 			, Vec3(+1.0f, +1.0f, +1.0f)
 		};
 
-		static const int INDICES[12][3] = {
-			  1, 3, 2
-			, 2, 0, 1
-
-			, 0, 2, 6
-			, 6, 4, 0
-
-			, 4, 6, 7
-			, 7, 5, 4
-
-			, 5, 7, 3//
-			, 3, 1, 5
-
-			, 7, 6, 2
-			, 2, 3, 7
-
-			, 4, 5, 1
-			, 1, 0, 4
+		static const Vec3 NORMALS[6] = {
+			  Vec3(-1.0f, +0.0f, +0.0f)
+			, Vec3(+0.0f, +0.0f, -1.0f)
+			, Vec3(+1.0f, +0.0f, +0.0f)
+			, Vec3(+0.0f, +0.0f, +1.0f)
+			, Vec3(+0.0f, +1.0f, +0.0f)
+			, Vec3(+0.0f, -1.0f, +0.0f)
 		};
+
+		static const int INDICES[12][4] = {
+			  1, 3, 2, 0
+			, 2, 0, 1, 0
+
+			, 0, 2, 6, 1
+			, 6, 4, 0, 1
+
+			, 4, 6, 7, 2
+			, 7, 5, 4, 2
+
+			, 5, 7, 3, 3
+			, 3, 1, 5, 3
+
+			, 7, 6, 2, 4
+			, 2, 3, 7, 4
+
+			, 4, 5, 1, 5
+			, 1, 0, 4, 5
+		};
+
 
 		std::vector<float> data;
 		for (int i = 0; i < 12; i++)
@@ -269,7 +279,15 @@ namespace
 			pushVertex(data, BOX_VERTICES[INDICES[i][2]]);
 		}
 
-		return std::make_tuple(static_cast<UInt>((data.size() / 3)), std::move(data));
+		std::vector<float> normals;
+		for (int i = 0; i < 12; i++)
+		{
+			pushVertex(normals, NORMALS[INDICES[i][3]]);
+			pushVertex(normals, NORMALS[INDICES[i][3]]);
+			pushVertex(normals, NORMALS[INDICES[i][3]]);
+		}
+
+		return std::make_tuple(static_cast<UInt>((data.size() / 3)), std::move(data), std::move(normals));
 	}
 
 	auto buildBoxMesh(const String& name)
@@ -277,18 +295,27 @@ namespace
 		using VAB = Mesh::VAB;
 
 
-		auto[elements, data] = std::move(box());
+		auto[elements, data, normals] = std::move(box());
 
 		VAB vertexBuffer = VAB(
 			elements
-			, static_cast<GLsizei>(data.size())
-			, data.data()
+			, static_cast<GLsizei>(data.size() + normals.size())
+			, nullptr
 		);
+
+		int offset = 0;
 		vertexBuffer.bindArray();
-		vertexBuffer.setAttribPointer(VAB::VERTEX, 3, GL_FLOAT, 3 * sizeof(float), 0);
+
+		vertexBuffer.setAttribPointer(VAB::VERTEX, 3, GL_FLOAT, 3 * sizeof(float), (const void*)offset);
+		vertexBuffer.subData(offset, data.size() * sizeof(float), data.data());
+
+		offset += data.size() * sizeof(float);
+
+		vertexBuffer.setAttribPointer(VAB::NORMAL, 3, GL_FLOAT, 3 * sizeof(float), (const void*)offset);
+		vertexBuffer.subData(offset, normals.size() * sizeof(float), normals.data());
+		
 
 		UInt materialIndex = 0;
-
 
 		return Mesh(
 			std::move(vertexBuffer)

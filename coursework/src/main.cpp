@@ -63,16 +63,18 @@ GLFWwindow* createWindow()
 //load shaders from assets
 void loadShaders(std::map<String, ShaderShared>& shadersStorage)
 {    
-    shadersStorage["assets/shaders/sphere.vs"]  = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/sphere.vs"));
-    shadersStorage["assets/shaders/sphere.tcs"] = ShaderShared(new Shader(Shader::TessControl, "assets/shaders/sphere.tcs"));
-    shadersStorage["assets/shaders/sphere.tes"] = ShaderShared(new Shader(Shader::TessEvaluation, "assets/shaders/sphere.tes"));
-    shadersStorage["assets/shaders/sphere.gs"]  = ShaderShared(new Shader(Shader::Geometry, "assets/shaders/sphere.gs"));
-    shadersStorage["assets/shaders/sphere.fs"]  = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/sphere.fs"));
+    shadersStorage["planet.vs"]  = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/Planet/sphere.vs"));
+    shadersStorage["planet.tcs"] = ShaderShared(new Shader(Shader::TessControl, "assets/shaders/Planet/sphere.tcs"));
+    shadersStorage["planet.tes"] = ShaderShared(new Shader(Shader::TessEvaluation, "assets/shaders/Planet/sphere.tes"));
+    shadersStorage["planet.gs"]  = ShaderShared(new Shader(Shader::Geometry, "assets/shaders/Planet/sphere.gs"));
+    shadersStorage["planet.fs"]  = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/Planet/sphere.fs"));
 
-    shadersStorage["assets/shaders/satellite.fs"] = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/satellite.fs"));
+	shadersStorage["satellite.vs"] = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/Satellite/satellite.vs"));
+	shadersStorage["satellite.gs"] = ShaderShared(new Shader(Shader::Geometry, "assets/shaders/Satellite/satellite.gs"));
+    shadersStorage["satellite.fs"] = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/Satellite/satellite.fs"));
 
-	shadersStorage["assets/shaders/simple.vs"] = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/simple.vs"));
-	shadersStorage["assets/shaders/simple.fs"] = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/simple.fs"));
+	shadersStorage["simple.vs"] = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/Simple/simple.vs"));
+	shadersStorage["simple.fs"] = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/Simple/simple.fs"));
 
     for (const auto&[location, shader] : shadersStorage)
     {
@@ -111,11 +113,11 @@ void loadModels(std::map<String, ModelShared>& modelsStorage)
 ShaderProgramShared createPlanetProgram(std::map<String, ShaderShared>& shadersStorage)
 {
     ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Planet"));
-    program->attachShader(*shadersStorage["assets/shaders/sphere.vs"]);
-    program->attachShader(*shadersStorage["assets/shaders/sphere.tcs"]);
-    program->attachShader(*shadersStorage["assets/shaders/sphere.tes"]);
-    program->attachShader(*shadersStorage["assets/shaders/sphere.gs"]);
-    program->attachShader(*shadersStorage["assets/shaders/sphere.fs"]);
+    program->attachShader(*shadersStorage["planet.vs"]);
+    program->attachShader(*shadersStorage["planet.tcs"]);
+    program->attachShader(*shadersStorage["planet.tes"]);
+    program->attachShader(*shadersStorage["planet.gs"]);
+    program->attachShader(*shadersStorage["planet.fs"]);
 
     program->link();
     if (!(program->linked()))
@@ -129,10 +131,9 @@ ShaderProgramShared createPlanetProgram(std::map<String, ShaderShared>& shadersS
 ShaderProgramShared createSatelliteProgram(std::map<String, ShaderShared>& shadersStorage)
 {
     ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Satellite"));
-    program->attachShader(*shadersStorage["assets/shaders/sphere.vs"]);
-    program->attachShader(*shadersStorage["assets/shaders/sphere.tcs"]);
-    program->attachShader(*shadersStorage["assets/shaders/sphere.tes"]);
-    program->attachShader(*shadersStorage["assets/shaders/satellite.fs"]);
+	program->attachShader(*shadersStorage["satellite.vs"]);
+	program->attachShader(*shadersStorage["satellite.gs"]);
+    program->attachShader(*shadersStorage["satellite.fs"]);
 
     program->link();
     if (!(program->linked()))
@@ -146,8 +147,8 @@ ShaderProgramShared createSatelliteProgram(std::map<String, ShaderShared>& shade
 ShaderProgramShared createSimpleProgram(std::map<String, ShaderShared>& shadersHolder)
 {
 	ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Simple"));
-	program->attachShader(*shadersHolder["assets/shaders/simple.vs"]);
-	program->attachShader(*shadersHolder["assets/shaders/simple.fs"]);
+	program->attachShader(*shadersHolder["simple.vs"]);
+	program->attachShader(*shadersHolder["simple.fs"]);
 
 	program->link();
 	if (!(program->linked()))
@@ -176,8 +177,8 @@ void createRenderers(
 )
 {
 	renderersStorage["satellite"] = IRendererShared(new SatelliteRenderer(programsStorage["satellite"]));
-	renderersStorage["planet"]     = IRendererShared(new PlanetRenderer(programsStorage["planet"]));
-	renderersStorage["simple"]     = IRendererShared(new SimpleRenderer(programsStorage["simple"]));
+	renderersStorage["planet"]    = IRendererShared(new PlanetRenderer(programsStorage["planet"]));
+	renderersStorage["simple"]    = IRendererShared(new SimpleRenderer(programsStorage["simple"]));
 }
 
 
@@ -550,10 +551,10 @@ void render()
 {
 	glfwMakeContextCurrent(window);
 
-	auto& simple = renderers["simple"];
-	simple->setRequiredStates();
-	simple->renderComponent(sat1->mGraphics, view);
-	simple->renderComponent(sat2->mGraphics, view);
+	auto& satellite = renderers["satellite"];
+	satellite->setRequiredStates();
+	satellite->renderComponent(sat1->mGraphics, view);
+	satellite->renderComponent(sat2->mGraphics, view);
 
 	auto& planet = renderers["planet"];
 	planet->setRequiredStates();

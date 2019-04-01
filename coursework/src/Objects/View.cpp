@@ -4,66 +4,118 @@
 //statics
 const float View::DELTA_THRESHOLD = 0.0001f;
 
-const int View::DEFAULT_SENSITIVITY = 200;
+const float View::DEFAULT_SENSITIVITY = 0.25f;
+
+const float View::PITCH_MAX = 2 * PI;
+const float View::PITCH_MIN = 0;
+
+const float View::ROLL_MAX = +PI / 2;
+const float View::ROLL_MIN = -PI / 2;
 
 
 //constructor
 View::View(
-	const Mat4& view
+	  const Mat4& axes
 	, const Mat4& proj
 	, const Vec3& pos
-	, int sensitivity
+	, float sensitivity
 ) 
-	: mView(view)
+	: mView(axes)
+	, mAxes(axes)
 	, mProj(proj)
 	, mPos(pos)
+	, mPitch(0.0)
+	, mRoll(0.0)
 	, mSensivity(sensitivity)
 {}
 
 
+
 //core
-
-
-void View::rotate(float delta, Axis axis)
+void View::lookAround(float pitch, float roll)
 {
-	static Axis cycled[5] = {X, Y, Z, X, Y};
+	mPitch += pitch / mSensivity;
+	mRoll  += roll / mSensivity;
 
-	delta /= mSensivity;
-
-	if (abs(delta) > DELTA_THRESHOLD)
+	if (mPitch > PITCH_MAX)
 	{
-		//rot(alpha) * vec
-		//[1, 0] & [0, 1]
-		//[cos(a) -sin(a)]
-		//[sin(a)  cos(a)]
-		float cosDelta = cos(delta);
-		float sinDelta = sin(delta);
+		mPitch = PITCH_MIN;
+	}
+	if (mPitch < PITCH_MIN)
+	{
+		mPitch = PITCH_MAX;
+	}
+	if (mRoll > ROLL_MAX)
+	{
+		mRoll = ROLL_MIN;
+	}
+	if (mRoll < ROLL_MIN)
+	{
+		mRoll = ROLL_MAX;
+	}
 
-		Axis axis1 = cycled[axis + 1];
-		Axis axis2 = cycled[axis + 2];
+	mView = mAxes;
+	rotateView(mPitch, Y);
+	rotateView(mRoll,  X);
+}
 
-		Vec3 newAxis1;
-		Vec3 newAxis2;
 
-		newAxis1[0] = cosDelta * mView[0][axis1] - sinDelta * mView[0][axis2];
-		newAxis1[1] = cosDelta * mView[1][axis1] - sinDelta * mView[1][axis2];
-		newAxis1[2] = cosDelta * mView[2][axis1] - sinDelta * mView[2][axis2];
+namespace
+{
+	void rotateMat(Mat4& mat, float delta, View::Axis axis)
+	{
+		static View::Axis cycled[5] = {View::X, View::Y, View::Z, View::X, View::Y};
 
-		newAxis2[0] = sinDelta * mView[0][axis1] + cosDelta * mView[0][axis2];
-		newAxis2[1] = sinDelta * mView[1][axis1] + cosDelta * mView[1][axis2];
-		newAxis2[2] = sinDelta * mView[2][axis1] + cosDelta * mView[2][axis2];
+		if (abs(delta) > View::DELTA_THRESHOLD)
+		{
+			//rot(alpha) * vec
+			//[1, 0] & [0, 1]
+			//[cos(a) -sin(a)]
+			//[sin(a)  cos(a)]
+			float cosDelta = cos(delta);
+			float sinDelta = sin(delta);
 
-		mView[0][axis1] = newAxis1[0];
-		mView[1][axis1] = newAxis1[1];
-		mView[2][axis1] = newAxis1[2];
+			View::Axis axis1 = cycled[axis + 1];
+			View::Axis axis2 = cycled[axis + 2];
 
-		mView[0][axis2] = newAxis2[0];
-		mView[1][axis2] = newAxis2[1];
-		mView[2][axis2] = newAxis2[2];
+			Vec3 newAxis1;
+			Vec3 newAxis2;
 
-		updateView();
+			newAxis1[0] = cosDelta * mat[0][axis1] - sinDelta * mat[0][axis2];
+			newAxis1[1] = cosDelta * mat[1][axis1] - sinDelta * mat[1][axis2];
+			newAxis1[2] = cosDelta * mat[2][axis1] - sinDelta * mat[2][axis2];
+
+			newAxis2[0] = sinDelta * mat[0][axis1] + cosDelta * mat[0][axis2];
+			newAxis2[1] = sinDelta * mat[1][axis1] + cosDelta * mat[1][axis2];
+			newAxis2[2] = sinDelta * mat[2][axis1] + cosDelta * mat[2][axis2];
+
+			mat[0][axis1] = newAxis1[0];
+			mat[1][axis1] = newAxis1[1];
+			mat[2][axis1] = newAxis1[2];
+
+			mat[0][axis2] = newAxis2[0];
+			mat[1][axis2] = newAxis2[1];
+			mat[2][axis2] = newAxis2[2];
+		}
 	}
 }
+
+void View::rotateAxes(float angle, Axis axis)
+{
+	mAxes = mView;
+
+	rotateMat(mAxes, angle, axis);
+
+	updateAxes();
+}
+
+void View::rotateView(float angle, Axis axis)
+{
+	rotateMat(mView, angle, axis);
+
+	updateView();
+}
+
 
 void View::travelView(float distance, Axis axis)
 {
@@ -94,6 +146,11 @@ void View::setPos(const Vec3& pos)
 }
 
 
+const Mat4& View::axes() const
+{
+	return mAxes;
+}
+
 const Mat4& View::view() const
 {
 	return mView;
@@ -110,12 +167,12 @@ const Vec3& View::pos() const
 }
 
 
-int& View::sensivity()
+float& View::sensivity()
 {
 	return mSensivity;
 }
 
-const int& View::sensivity() const
+const float& View::sensivity() const
 {
 	return mSensivity;
 }
@@ -128,4 +185,14 @@ void View::updateView()
 	mView[3] -= mView[1] * mPos[1];
 	mView[3] -= mView[2] * mPos[2];
 	mView[3][3] = 1.0f;
+}
+
+void View::updateAxes()
+{
+	mPitch = 0.0f;
+	mRoll  = 0.0f;
+
+	mView = mAxes;
+
+	updateView();
 }

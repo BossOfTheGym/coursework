@@ -325,25 +325,31 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void posCallback(GLFWwindow* window, double xPos, double yPos)
 {
-    if (prevX != -1 && prevY != -1)
-    {
-		View::Axis axis1;
-		View::Axis axis2;
+	if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		view.rotateAxes((xPos - prevX) / WIDTH, View::Z);
+	}
+	else
+	{
+		view.lookAround((xPos - prevX) / WIDTH, (yPos - prevY) / HEIGHT);
+	}
 
-		if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-		{
-			axis1 = View::Z;
-			axis2 = View::X;
-		}
-		else
-		{
-			axis1 = View::Y;
-			axis2 = View::X;
-		}
+	/*View::Axis axis1;
+	View::Axis axis2;
 
-		view.rotate(static_cast<float>(xPos - prevX), axis1);
-		view.rotate(static_cast<float>(yPos - prevY), axis2);
-    }
+	if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		axis1 = View::Z;
+		axis2 = View::X;
+	}
+	else
+	{
+		axis1 = View::Y;
+		axis2 = View::X;
+	}
+
+	view.rotateView(static_cast<float>(xPos - prevX), axis1);
+	view.rotateView(static_cast<float>(yPos - prevY), axis2);*/
     prevX = xPos;
     prevY = yPos;
 }
@@ -587,7 +593,7 @@ void featureTest()
 
 		glfwPollEvents();
 
-		updatePhysics();
+		//updatePhysics();
 
 		render();
 		renderGui();

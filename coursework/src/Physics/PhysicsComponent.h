@@ -16,6 +16,7 @@ public:
 		, const Vec3& position = Vec3()
 		, const Vec3& velocity = Vec3()
 		, const Vec3& angularMomentum = Vec3()
+		, float mass = 0.0f
 	);
 
 	PhysicsComponent(const PhysicsComponent& comp) = default;
@@ -40,7 +41,7 @@ public:
 	Vec3 mVelocity;
 	Vec3 mAngularMomentum;
 
-	float mass;
+	float mMass;
 };
 
 

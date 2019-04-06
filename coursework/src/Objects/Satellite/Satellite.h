@@ -3,14 +3,24 @@
 
 #include "../IObject.h"
 #include "SatelliteComponent.h"
+#include "OrbitComponent.h"
 
 #include <Physics/PhysicsComponent.h>
 #include <Graphics/GraphicsComponent.h>
+#include <Objects/NameComponent.h>
+
 
 struct Satellite : public IObject
 {
 public:
-	Satellite() = default;
+	Satellite(
+		IComponent* parent = nullptr
+		, const GraphicsComponentShared&  graphics  = nullptr
+		, const PhysicsComponentShared&   physics   = nullptr
+		, const SatelliteComponentShared& satellite = nullptr
+		, const OrbitComponentShared&     orbit     = nullptr
+		, const NameComponentShared&      name      = nullptr
+	);
 
 	Satellite(const Satellite& sat) = default;
 
@@ -36,6 +46,8 @@ public:
 	GraphicsComponentShared  mGraphics;
 	PhysicsComponentShared   mPhysics;
 	SatelliteComponentShared mSatellite;
+	OrbitComponentShared     mOrbit;
+	NameComponentShared      mName;
 };
 
 

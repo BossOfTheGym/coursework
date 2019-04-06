@@ -9,7 +9,10 @@
 struct NameComponent : public IComponent
 {
 public:
-	NameComponent(IComponent* parent = nullptr);
+	NameComponent(
+		IComponent* parent = nullptr
+		, const String& name = ""
+	);
 
 	NameComponent(const NameComponent& comp) = default;
 
@@ -31,3 +34,8 @@ public:
 public:
 	String mName;
 };
+
+
+//alias
+using NameComponentShared = std::shared_ptr<NameComponent>;
+using NameComponentWeak   = std::weak_ptr<NameComponent>;

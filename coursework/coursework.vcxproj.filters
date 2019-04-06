@@ -30,9 +30,6 @@
     <ClInclude Include="src\Objects\IObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Objects\Object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Objects\Objects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -90,19 +87,13 @@
     <ClInclude Include="src\Objects\Planet\PlanetComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Objects\Satellite\Bicycle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Objects\Satellite\Satellite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Objects\Satellite\SatelliteComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Objects\Satellite\ThreeImpulses.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Objects\Satellite\RendezvousComponents.h">
+    <ClInclude Include="src\Objects\Satellite\OrbitComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -179,16 +170,10 @@
     <ClCompile Include="src\Objects\View.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Objects\NameComponent.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Objects\Planet\Planet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Objects\Planet\PlanetComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Objects\Satellite\Bicycle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Objects\Satellite\Satellite.cpp">
@@ -197,10 +182,13 @@
     <ClCompile Include="src\Objects\Satellite\SatelliteComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Objects\Satellite\ThreeImpulses.cpp">
+    <ClCompile Include="src\Objects\Satellite\OrbitComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Objects\Satellite\RendezvousComponents.cpp">
+    <ClCompile Include="src\Objects\IObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Objects\NameComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

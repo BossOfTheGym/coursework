@@ -8,7 +8,8 @@
 #include <Model/Builders/AssimpBuilder.h>
 #include <Model/Builders/CustomBuilders.h>
 
-#include <Components.h>
+#include <Physics/PhysicsComponent.h>
+#include <Graphics/GraphicsComponent.h>
 #include <Objects/Objects.h>
 #include <Render/Renderers.h>
 
@@ -184,23 +185,25 @@ void createRenderers(
 //object factories
 IObjectShared createSatellite(
 	  const ModelShared& model
+	, float mass
 	, const Vec3& color = Vec3(1.0f)
 	, const Mat4& mat = Mat4(1.0f)
 	, const Vec3& pos = Vec3()
 	, const Vec3& vel = Vec3()
 	, const String& name = ""
+	, const PhysicsComponentWeak& planet = PhysicsComponentShared(nullptr)
 )
 {
 	SatelliteShared satellite = std::make_shared<Satellite>();
 
 
 	satellite->mPhysics  = PhysicsComponentShared(
-		new PhysicsComponent(nullptr, mat, pos, vel, Vec3())
+		new PhysicsComponent(satellite.get(), mat, pos, vel, Vec3(), mass)
 	);
 
 	satellite->mGraphics = GraphicsComponentShared(
 		new GraphicsComponent(
-			nullptr
+			satellite.get()
 			, model
 			, satellite->mPhysics
 		)
@@ -208,6 +211,18 @@ IObjectShared createSatellite(
 
 	satellite->mSatellite = SatelliteComponentShared(
 		new SatelliteComponent(nullptr, color)
+	);
+
+	satellite->mName = NameComponentShared(
+		new NameComponent(satellite.get(), name)
+	);
+
+	satellite->mOrbit = OrbitComponentShared(
+		new OrbitComponent(
+			satellite.get()
+			, planet
+			, satellite->mPhysics
+		)
 	);
 
 
@@ -228,9 +243,8 @@ IObjectShared createPlanet(
 
 
 	planet->mPhysics  = PhysicsComponentShared(
-		new PhysicsComponent(nullptr, mat, pos, vel, angularMomentum)
+		new PhysicsComponent(nullptr, mat, pos, vel, angularMomentum, mass)
 		);
-	planet->mPhysics->mass = mass;
 
 	planet->mGraphics = GraphicsComponentShared(
 		new GraphicsComponent(
@@ -368,15 +382,16 @@ void errorCallback(int error, const char* msg)
 //init all globals
 void initGlobals()
 {
+	//context
 	window  = std::move(createWindow());
 	
-
+	//resources
 	loadShaders(shaders);
 	loadModels(models);
 	createShaderPrograms(programs, shaders);
 	createRenderers(renderers, programs);
 	
-
+	//view
 	Vec3 pos  = Vec3(0.0f, 30.0f, 0.0f);
 	Vec3 look = Vec3(0.0f);
 	Vec3 up   = Vec3(0.0f, 0.0f, 1.0f);
@@ -386,28 +401,10 @@ void initGlobals()
 		, pos
 	);
 
-
-	sat1 = std::dynamic_pointer_cast<Satellite>(
-		createSatellite(
-			  models["box"]
-			, Vec3(1.0f, 0.0f, 1.0f)
-			, glm::scale(Mat4(1.0f), Vec3(0.2f))
-			, Vec3(-6.0f, 0.0f, 0.0f)
-			, Vec3(0.0f, 0.0f, 18.0f)
-		)
-	);
-	sat2 = std::dynamic_pointer_cast<Satellite>(
-		createSatellite(
-			  models["box"]
-			, Vec3(1.0f, 0.0f, 1.0f)
-			, glm::scale(Mat4(1.0f), Vec3(0.2f))
-			, Vec3(6.0f, 0.0f, 0.0f)
-			, Vec3(0.0f, 0.0f, -18.0f)
-		)
-	);
+	//planet
 	earth = std::dynamic_pointer_cast<Planet>(
 		createPlanet(
-			  models["earth"]
+			models["earth"]
 			, 2000.0f
 			, glm::scale(Mat4(1.0f), Vec3(2.0f))
 			, Vec3(0.0f)
@@ -416,7 +413,35 @@ void initGlobals()
 		)
 	);
 
+	//satellites
+	sat1 = std::dynamic_pointer_cast<Satellite>(
+		createSatellite(
+			  models["box"]
+			, 1.0f
+			, Vec3(1.0f, 0.0f, 1.0f)
+			, glm::scale(Mat4(1.0f), Vec3(0.2f))
+			, Vec3(-6.0f, 0.0f, 0.0f)
+			, Vec3(0.0f, 0.0f, 18.0f)
+			, "satellite 1"
+			, earth->mPhysics
+		)
+	);
 
+	sat2 = std::dynamic_pointer_cast<Satellite>(
+		createSatellite(
+			  models["box"]
+			, 1.0f
+			, Vec3(1.0f, 0.0f, 1.0f)
+			, glm::scale(Mat4(1.0f), Vec3(0.2f))
+			, Vec3(6.0f, 0.0f, 0.0f)
+			, Vec3(0.0f, 0.0f, -18.0f)
+			, "satellite 2"
+			, earth->mPhysics
+		)
+	);
+	
+
+	//loop states
 	fill    = false;
 	stopped = false;
 	menuOpened = false;
@@ -439,7 +464,7 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_s
 	auto& v   = sat->mPhysics->mVelocity;
 
 	auto& r0 = planet->mPhysics->mPosition;
-	auto& M  = planet->mPhysics->mass;
+	auto& M  = planet->mPhysics->mMass;
 
 
 	auto dr   = r - r0;
@@ -686,7 +711,7 @@ void renderGui()
 
 	testGui();
 
-	myGui();
+	//myGui();
 
 
 	ImGui::Render();
@@ -747,7 +772,7 @@ void featureTest()
 		}
 
 		render();
-		//renderGui();
+		renderGui();
 
 		glfwSwapBuffers(window);
     }

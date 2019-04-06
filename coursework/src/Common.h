@@ -7,6 +7,7 @@
 #include <utility>
 #include <thread>
 #include <memory>
+#include <limits>
 
 #include <filesystem>
 #include <functional>
@@ -27,6 +28,8 @@
 
 const float PI   = static_cast<float>(acos(-1.0));
 const float PI_2 = static_cast<float>(2 * PI);
+
+const float G = 1.0f;
 
 const GLuint EMPTY  = 0;
 

@@ -5,11 +5,13 @@
 
 #include <Physics/PhysicsComponent.h>
 #include <Graphics/GraphicsComponent.h>
+#include <Objects/NameComponent.h>
+
 
 struct Planet : public IObject
 {
 public:
-	Planet() = default;
+	Planet(IComponent* parent = nullptr, const NameComponentShared& = nullptr);
 
 	Planet(const Planet& planet) = default;
 
@@ -33,6 +35,7 @@ public:
 public:
 	GraphicsComponentShared mGraphics;
 	PhysicsComponentShared mPhysics;
+	NameComponentShared mName;
 };
 
 

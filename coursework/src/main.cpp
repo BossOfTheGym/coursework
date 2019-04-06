@@ -44,7 +44,7 @@ GLFWwindow* createWindow()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
 
-    win = glfwCreateWindow(WIDTH, HEIGHT, "PINGAS PROD", nullptr, nullptr);
+    win = glfwCreateWindow(WIDTH, HEIGHT, "Rendezvous", nullptr, nullptr);
 
     glfwSetKeyCallback(win, keyCallback);
     glfwSetCursorPosCallback(win, posCallback);
@@ -188,6 +188,7 @@ IObjectShared createSatellite(
 	, const Mat4& mat = Mat4(1.0f)
 	, const Vec3& pos = Vec3()
 	, const Vec3& vel = Vec3()
+	, const String& name = ""
 )
 {
 	SatelliteShared satellite = std::make_shared<Satellite>();
@@ -220,6 +221,7 @@ IObjectShared createPlanet(
 	, const Vec3& pos = Vec3()
 	, const Vec3& vel = Vec3()
 	, const Vec3& angularMomentum = Vec3()
+	, const String& name = ""
 )
 {
 	PlanetShared planet = std::make_shared<Planet>();
@@ -244,6 +246,7 @@ IObjectShared createPlanet(
 
 
 //globals
+
 //context
 GLFWwindow* window;
 
@@ -263,8 +266,9 @@ PlanetShared earth;
 View view;
 
 //flags
-bool fill;
-bool stopped;
+bool fill;          // wireframe mode
+bool stopped;       // enable / disable physics update
+bool menuOpened;    // if opened disable input
 
 //screen pos
 double prevX;
@@ -276,9 +280,14 @@ uint64_t t1;
 uint64_t delta;
 
 
-//main
+//callbacks
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+	if(!menuOpened)
+	{
+		return;
+	}
+
     switch (key)
     {
         case (GLFW_KEY_C):
@@ -329,6 +338,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void posCallback(GLFWwindow* window, double xPos, double yPos)
 {
+	if (!menuOpened)
+	{
+		return;
+	}
+
 	if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 	{
 		view.rotateAxes((xPos - prevX) / WIDTH, View::Z);
@@ -338,22 +352,6 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
 		view.lookAround((xPos - prevX) / WIDTH, (yPos - prevY) / HEIGHT);
 	}
 
-	/*View::Axis axis1;
-	View::Axis axis2;
-
-	if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-	{
-		axis1 = View::Z;
-		axis2 = View::X;
-	}
-	else
-	{
-		axis1 = View::Y;
-		axis2 = View::X;
-	}
-
-	view.rotateView(static_cast<float>(xPos - prevX) / WIDTH, axis1);
-	view.rotateView(static_cast<float>(yPos - prevY) / HEIGHT, axis2);*/
     prevX = xPos;
     prevY = yPos;
 }
@@ -367,6 +365,7 @@ void errorCallback(int error, const char* msg)
 }
 
 
+//init all globals
 void initGlobals()
 {
 	window  = std::move(createWindow());
@@ -378,7 +377,7 @@ void initGlobals()
 	createRenderers(renderers, programs);
 	
 
-	Vec3 pos  = Vec3(0.0f, 10.0f, 0.0f);
+	Vec3 pos  = Vec3(0.0f, 30.0f, 0.0f);
 	Vec3 look = Vec3(0.0f);
 	Vec3 up   = Vec3(0.0f, 0.0f, 1.0f);
 	view = View(
@@ -419,7 +418,8 @@ void initGlobals()
 
 
 	fill    = false;
-	stopped = true;
+	stopped = false;
+	menuOpened = false;
 
 	prevX = WIDTH / 2;
 	prevY = HEIGHT / 2;
@@ -457,10 +457,10 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_s
 void updatePhysics()
 {
 	static const uint64_t time_step = 10;
-	static const uint64_t max_count = 5;
-	
+	static const uint64_t max_count = 5;	
+
 	t1 = glfwGetTimerValue();
-	delta += (t1 - t0) / 30;
+	delta += (t1 - t0) / 50;
 	
 	if (delta > max_count * time_step)
 	{
@@ -499,10 +499,6 @@ void testGui()
 	static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
 
@@ -515,35 +511,187 @@ void testGui()
 			show_another_window = false;
 		ImGui::End();
 	}
-
-	ImGui::Render();
-	glClear(GL_DEPTH_BUFFER_BIT);
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void systemOptions()
 {
+	if (ImGui::CollapsingHeader("System parameters"))
+	{
+		//integrator
 
+
+		//time step
+	}
 }
 
 void planetOptions()
 {
-	//rotation
+	if (ImGui::CollapsingHeader("Planet parameters"))
+	{
+
+	}
 }
 
-void satelliteOptions()
-{
 
+void satellitesOptions()
+{
+	if (ImGui::CollapsingHeader("Satellites parameters"))
+	{
+		//names
+		static const char* names[] = {"none", "satellite1", "satellite2"};
+		static const char* selector = names[0];
+		static int selected = 0;
+
+		//flags : single flag
+		int flags = ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_HeightRegular;
+
+		//show all satellites
+		ImGui::Text("Satellites:");
+		if (ImGui::BeginCombo("##1", selector, flags))
+		{
+			for (int n = 0; n < IM_ARRAYSIZE(names); n++)
+			{
+				bool is_selected = (selector == names[n]);
+				if (ImGui::Selectable(names[n], is_selected))
+				{
+					selector = names[n];
+					selected = n;
+				}
+				if (is_selected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}   
+			}
+
+			ImGui::EndCombo();
+		}
+
+		ImGui::Separator();
+
+		//show satellite parameters
+		if (selected)
+		{
+			static float r[4] = { 0.10f, 0.20f, 0.30f, 0.44f };
+			ImGui::InputFloat3("r", r);
+
+			static float v[4] = { 0.10f, 0.20f, 0.30f, 0.44f };
+			ImGui::InputFloat3("v", v);
+
+			ImGui::Text("ecentricity = ");
+
+			ImGui::Text("state: <state>");
+
+			ImGui::Text("Rendezvous target:");
+
+ 			static const char* target = names[0];
+			static int targetId = 0;
+			if (ImGui::BeginCombo("##2", target, flags))
+			{
+				for (int n = 0; n < selected; n++)
+				{
+					bool is_selected = (selector == names[n]);
+					if (ImGui::Selectable(names[n], is_selected))
+					{
+						target = names[n];
+						targetId = n;
+					}
+					if (is_selected)
+					{
+						ImGui::SetItemDefaultFocus();
+					}   
+				}
+				for (int n = selected + 1; n < IM_ARRAYSIZE(names); n++)
+				{
+					bool is_selected = (selector == names[n]);
+					if (ImGui::Selectable(names[n], is_selected))
+					{
+						target = names[n];
+						targetId = n;
+					}
+					if (is_selected)
+					{
+						ImGui::SetItemDefaultFocus();
+					}   
+				}
+
+				ImGui::EndCombo();
+			}
+
+			if (targetId)
+			{
+				ImGui::Text("Rendezvous method:");
+
+				static const char* methods[] = {"three impulses", "bicycle"};
+				static const char* method = methods[0];
+				static int methodId = 0;
+
+				if (ImGui::BeginCombo("##3", method, flags))
+				{
+					for (int n = 0; n < IM_ARRAYSIZE(methods); n++)
+					{
+						bool is_selected = (method == methods[n]);
+						if (ImGui::Selectable(methods[n], is_selected))
+						{
+							method   = methods[n];
+							methodId = n;
+						}
+						if (is_selected)
+						{
+							ImGui::SetItemDefaultFocus();
+						}   
+					}
+
+					ImGui::EndCombo();
+				}
+			}
+			else
+			{
+
+			}
+		}
+		else
+		{
+			ImGui::Text("Nothing selected");
+		}
+	}
 }
 
 void myGui()
 {
+	ImGui::SetNextWindowPos({10, 10}, ImGuiCond_Once);
+	ImGui::Begin(
+		"Options"
+		, nullptr
+		, ImGuiWindowFlags_MenuBar 
+		| ImGuiWindowFlags_NoMove 
+		| ImGuiWindowFlags_NoNav 
+		| ImGuiWindowFlags_NoResize
+	);
+	
+	systemOptions();
 
+	planetOptions();
+
+	satellitesOptions();
+
+	ImGui::End();
 }
 
 void renderGui()
 {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+
 	testGui();
+
+	myGui();
+
+
+	ImGui::Render();
+	glClear(GL_DEPTH_BUFFER_BIT);
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void destroyGui()
@@ -599,7 +747,7 @@ void featureTest()
 		}
 
 		render();
-		renderGui();
+		//renderGui();
 
 		glfwSwapBuffers(window);
     }

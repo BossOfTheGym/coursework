@@ -5,7 +5,7 @@
 
 #include <Entity/ITimeVarying.h>
 
-#include <Components.h>
+#include <Component/IComponent.h>
 
 
 struct IObject : public IComponent, public ITimeVarying

@@ -3,5 +3,5 @@
 
 #include "IObject.h"
 
-#include "Satellite.h"
-#include "Planet.h"
+#include "Satellite/Satellite.h"
+#include "Planet/Planet.h"

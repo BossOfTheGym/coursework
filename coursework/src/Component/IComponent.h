@@ -19,7 +19,7 @@ public:
 	IComponent(IComponent&& comp) = default;
 
 
-	~IComponent() = default;
+	virtual ~IComponent() = default;
 
 
 	IComponent& operator = (const IComponent& comp) = default;

@@ -92,8 +92,8 @@ void OrbitComponent::updateOrbit()
 	mRA = lan;
 
 	//10, 11
-	auto ev = 1.0f / mMu * ((dot(vv, vv) - mMu / r) * r - r * vr * vv);
-	auto e = length(ev);
+	auto ev = cross(vv, cv) / mMu - rv / r;
+	auto e  = length(ev);
 	mE = e;
 
 	//12.
@@ -120,7 +120,7 @@ void OrbitComponent::updateSpecificParams()
 	if (mE < 1.0f) // process elliptic only
 	{
 		mA  = 2.0f * mP / (1.0f - mE * mE);
-		mEA = atan(sqrt((1.0f - mE) / (1.0f + mE)) * tan(mTA / 2));
+		mEA = 2.0f * atan(sqrt((1.0f - mE) / (1.0f + mE)) * tan(mTA / 2));
 
 		auto n = pow(mA, 3.0f / 2.0f) / sqrt(mMu);
 

@@ -6,25 +6,23 @@
 #include <Physics/PhysicsComponent.h>
 
 #include "../../IObject.h"
+#include "../Satellite.h"
 
+struct Satellite;
 
-#include "State.h"
-#include "Floating.h"
-#include "CloseProximity.h"
-#include "FarProximity.h"
-#include "Waiting.h"
 
 
 //state machine
 //always has default state : Floating
-struct RendezvousControl : public IComponent, public ITimeVarying
+struct RendezvousControl : public IComponent
 {
 public:
-	using StateStack = std::vector<StateShared>;
-
 
 public:
-	RendezvousControl(IComponent* parent = nullptr);
+	RendezvousControl(
+		IComponent* parent = nullptr
+		, const SatelliteWeak& target = SatelliteShared(nullptr)
+	);
 
 	RendezvousControl(const RendezvousControl& comp) = default;
 
@@ -42,23 +40,17 @@ public:
 public:
 	virtual const Type& componentType() const override;
 
-	virtual void update(float t, float dt) override;
+
+public:
+	void pushCommand();
+
+	void popCommand();
+
+	void peekCommand();
+
+	void clear();
 
 
 public:
-	const State& peekState();
-
-	void pushState(const StateShared& state);
-
-	void popState();
-
-	void clearStack();
-
-
-
-public:
-	PhysicsComponentWeak mTarget;
-
-private:
-	StateStack mStates;
+	SatelliteWeak mTarget;
 };

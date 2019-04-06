@@ -34,6 +34,7 @@
     <ClInclude Include="src\Objects\Planet\Planet.h" />
     <ClInclude Include="src\Objects\Planet\PlanetComponent.h" />
     <ClInclude Include="src\Objects\Satellite\OrbitComponent.h" />
+    <ClInclude Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.h" />
     <ClInclude Include="src\Objects\Satellite\Satellite.h" />
     <ClInclude Include="src\Objects\Satellite\SatelliteComponent.h" />
     <ClInclude Include="src\Objects\View.h" />
@@ -69,6 +70,7 @@
     <ClCompile Include="src\Objects\Planet\Planet.cpp" />
     <ClCompile Include="src\Objects\Planet\PlanetComponent.cpp" />
     <ClCompile Include="src\Objects\Satellite\OrbitComponent.cpp" />
+    <ClCompile Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.cpp" />
     <ClCompile Include="src\Objects\Satellite\Satellite.cpp" />
     <ClCompile Include="src\Objects\Satellite\SatelliteComponent.cpp" />
     <ClCompile Include="src\Objects\View.cpp" />

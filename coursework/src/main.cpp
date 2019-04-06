@@ -32,7 +32,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 void posCallback(GLFWwindow* window, double xPos, double yPos);
 void errorCallback(int error, const char* description);
 
-GLFWwindow* createWindow()
+GLFWwindow* createContext()
 {
     auto glfwErr = glfwInit();
 
@@ -383,7 +383,7 @@ void errorCallback(int error, const char* msg)
 void initGlobals()
 {
 	//context
-	window  = std::move(createWindow());
+	window  = std::move(createContext());
 	
 	//resources
 	loadShaders(shaders);
@@ -405,7 +405,7 @@ void initGlobals()
 	earth = std::dynamic_pointer_cast<Planet>(
 		createPlanet(
 			models["earth"]
-			, 2000.0f
+			, 3000.0f
 			, glm::scale(Mat4(1.0f), Vec3(4.0f))
 			, Vec3(0.0f)
 			, Vec3(0.0f)
@@ -421,7 +421,7 @@ void initGlobals()
 			, Vec3(1.0f, 0.0f, 0.0f)
 			, glm::scale(Mat4(1.0f), Vec3(0.1f))
 			, Vec3(-10.0f, 0.0f, 0.0f)
-			, Vec3(0.0f, 0.0f, 18.0f)
+			, Vec3(0.0f, 0.0f, 17.32045f)
 			, "satellite 1"
 			, earth->mPhysics
 		)
@@ -434,7 +434,7 @@ void initGlobals()
 			, Vec3(0.0f, 0.0f, 1.0f)
 			, glm::scale(Mat4(1.0f), Vec3(0.1f))
 			, Vec3(10.0f, 0.0f, 0.0f)
-			, Vec3(0.0f, 0.0f, -18.0f)
+			, Vec3(0.0f, 0.0f, -17.32045f)
 			, "satellite 2"
 			, earth->mPhysics
 		)
@@ -719,15 +719,6 @@ void render()
 	{
 		renderer->render(view);
 	}
-
-	/*auto& satellite = renderers["satellite"];
-	satellite->setRequiredStates();
-	satellite->renderComponent(sat1->mGraphics, view);
-	satellite->renderComponent(sat2->mGraphics, view);
-
-	auto& planet = renderers["planet"];
-	planet->setRequiredStates();
-	planet->renderComponent(earth->mGraphics, view);*/
 }
 
 

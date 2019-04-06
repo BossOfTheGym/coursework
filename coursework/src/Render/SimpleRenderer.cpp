@@ -3,11 +3,13 @@
 
 SimpleRenderer::SimpleRenderer(const ShaderProgramShared& programShared)
 	: mProgramShared(programShared)
+	, mList()
 {
 	if (mProgramShared)
 	{
 		setUniforms();
 	}
+	mList.reserve(10);
 }
 
 
@@ -16,6 +18,30 @@ void SimpleRenderer::setRequiredStates()
 	mProgramShared->use();	
 }
 
+void SimpleRenderer::addToList(const IObjectWeak& obj)
+{
+	mList.push_back(obj);
+}
+
+void SimpleRenderer::render(const View& view)
+{
+	setRequiredStates();
+
+	for (auto& obj : mList)
+	{
+		renderObject(obj, view);
+	}
+
+	restoreStates();
+}
+
+void SimpleRenderer::renderObject(const IObjectWeak& obj, const View& view)
+{
+	if (auto objPtr = obj.lock())
+	{
+		//here my logic crashes
+	}
+}
 
 void SimpleRenderer::renderComponent(const GraphicsComponentWeak& component, const View& view)
 {

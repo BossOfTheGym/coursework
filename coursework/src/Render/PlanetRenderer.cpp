@@ -3,8 +3,13 @@
 
 PlanetRenderer::PlanetRenderer(const ShaderProgramShared& sharedProgram)
 	: mProgramShared(sharedProgram)
+	, mList()
 {
-	setUniforms();
+	if (sharedProgram)
+	{
+		setUniforms();
+	}
+	mList.reserve(10);
 }
 
 
@@ -12,6 +17,31 @@ void PlanetRenderer::setRequiredStates()
 {
 	//set required states
 	mProgramShared->use();
+}
+
+void PlanetRenderer::addToList(const IObjectWeak& obj)
+{
+	mList.push_back(obj);
+}
+
+void PlanetRenderer::render(const View& view)
+{
+	setRequiredStates();
+
+	for (auto& obj : mList)
+	{
+		renderObject(obj, view);
+	}
+
+	restoreStates();
+}
+
+void PlanetRenderer::renderObject(const IObjectWeak& obj, const View& view)
+{
+	if (auto objPtr = std::dynamic_pointer_cast<Planet>(obj.lock()))
+	{
+		renderComponent(objPtr->mGraphics, view);
+	}
 }
 
 void PlanetRenderer::renderComponent(const GraphicsComponentWeak& component, const View& view)

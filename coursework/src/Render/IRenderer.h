@@ -6,6 +6,7 @@
 #include <Shader/ShaderProgram.h>
 
 #include <Objects/View.h>
+#include <Objects/IObject.h>
 
 #include <Graphics/GraphicsComponent.h>
 
@@ -14,6 +15,18 @@ class IRenderer
 {
 public:
 	virtual void setRequiredStates() = 0;
+
+	//add object to render list
+	virtual void addToList(const IObjectWeak& obj) = 0;
+
+	//render all objects
+	virtual void render(const View& view) = 0;
+
+
+	virtual void renderObject(
+		const IObjectWeak& obj
+		, const View& view
+	) = 0;
 
 
     virtual void renderComponent(
@@ -40,6 +53,7 @@ public:
 
 	virtual void restoreStates() = 0;
 };
+
 
 //aliases
 using IRendererShared = std::shared_ptr<IRenderer>;

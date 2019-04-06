@@ -1,9 +1,9 @@
 #pragma once
 
+#include "IRenderer.h"
 
 #include <Common.h>
-
-#include "IRenderer.h"
+#include <Objects/Planet/Planet.h>
 
 
 class PlanetRenderer : public IRenderer
@@ -27,6 +27,12 @@ public:
 
 	virtual void setRequiredStates() override;
 
+	virtual void addToList(const IObjectWeak& obj) override;
+
+	virtual void render(const View& view) override;
+
+	virtual void renderObject(const IObjectWeak& obj, const View& view) override;
+
 	virtual void renderComponent(const GraphicsComponentWeak& component, const View& view) override;
 
 	virtual void renderModel(const Model& model, const Mat4& data) override;
@@ -43,6 +49,8 @@ private:
 
 
 private:
+	std::vector<IObjectWeak> mList;
+
 	ShaderProgramShared mProgramShared;
 
 	//uniforms

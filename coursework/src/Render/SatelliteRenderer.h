@@ -1,12 +1,13 @@
 #pragma once
 
-
-#include <Common.h>
-
 #include "IRenderer.h"
 
+#include <Common.h>
+#include <Objects/Satellite/Satellite.h>
 
-class SatelliteRenderer : public IRenderer
+
+class SatelliteRenderer :
+	public IRenderer
 {
 public:
 	SatelliteRenderer(const ShaderProgramShared& programShared);
@@ -27,6 +28,12 @@ public:
 
 	virtual void setRequiredStates() override;
 
+	virtual void addToList(const IObjectWeak& obj) override;
+
+	virtual void render(const View& view) override;
+
+	virtual void renderObject(const IObjectWeak& obj, const View& view) override;
+
 	virtual void renderComponent(const GraphicsComponentWeak& component, const View& view) override;
 
 	virtual void renderModel(const Model& model, const Mat4& transformation) override;
@@ -43,6 +50,8 @@ private:
 
 
 private:
+	std::vector<IObjectWeak> mList;
+
 	ShaderProgramShared mProgramShared;
 
 	//uniforms

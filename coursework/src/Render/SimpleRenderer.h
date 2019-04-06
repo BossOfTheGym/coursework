@@ -1,5 +1,8 @@
 #pragma once
 
+\
+#include <Common.h>
+
 #include "IRenderer.h"
 
 
@@ -24,6 +27,12 @@ public:
 
 	virtual void setRequiredStates() override;
 
+	virtual void addToList(const IObjectWeak& obj) override;
+
+	virtual void render(const View& view) override;
+
+	virtual void renderObject(const IObjectWeak& obj, const View& view) override;
+
 	virtual void renderComponent(const GraphicsComponentWeak& component, const View& view) override;
 
 	virtual void renderModel(const Model& model, const Mat4& transformation) override;
@@ -40,6 +49,8 @@ private:
 
 
 private:
+	std::vector<IObjectWeak> mList;
+
 	ShaderProgramShared mProgramShared;
 
 	//uniforms

@@ -2,25 +2,51 @@
 
 SatelliteRenderer::SatelliteRenderer(const ShaderProgramShared& shared)
 	: mProgramShared(shared)
+	, mList()
 {
 	if (mProgramShared)
 	{
 		setUniforms();
 	}
+	mList.reserve(10);
 }
 
 
 void SatelliteRenderer::setRequiredStates()
 {
 	mProgramShared->use();	
-	mProgramShared->setUniformVec3(uColor, Vec3(1.0f, 0.0f, 0.0f));
+	mProgramShared->setUniformVec3(uColor, Vec3(1.0f, 1.0f, 1.0f));
 }
 
+void SatelliteRenderer::addToList(const IObjectWeak& obj)
+{
+	mList.push_back(obj);
+}
+
+void SatelliteRenderer::render(const View& view)
+{
+	setRequiredStates();
+
+	for (auto& obj : mList)
+	{
+		renderObject(obj, view);
+	}
+
+	restoreStates();
+}
+
+void SatelliteRenderer::renderObject(const IObjectWeak& obj, const View& view)
+{
+	if(auto objPtr = std::dynamic_pointer_cast<Satellite>(obj.lock()))
+	{
+		mProgramShared->setUniformVec3(uColor, objPtr->mSatellite->mColor);
+
+		renderComponent(objPtr->mGraphics, view);
+	}
+}
 
 void SatelliteRenderer::renderComponent(const GraphicsComponentWeak& component, const View& view)
 {
-	//TODO : check if object has color attrib
-
 	if (auto sharedGraphics = component.lock())
 	{
 		const auto& model = *(sharedGraphics->mModelPtr);

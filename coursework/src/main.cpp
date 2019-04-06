@@ -297,7 +297,7 @@ uint64_t delta;
 //callbacks
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if(!menuOpened)
+	if(menuOpened)
 	{
 		return;
 	}
@@ -352,7 +352,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void posCallback(GLFWwindow* window, double xPos, double yPos)
 {
-	if (!menuOpened)
+	if (menuOpened)
 	{
 		return;
 	}
@@ -406,7 +406,7 @@ void initGlobals()
 		createPlanet(
 			models["earth"]
 			, 2000.0f
-			, glm::scale(Mat4(1.0f), Vec3(2.0f))
+			, glm::scale(Mat4(1.0f), Vec3(4.0f))
 			, Vec3(0.0f)
 			, Vec3(0.0f)
 			, Vec3(0.0f)
@@ -418,9 +418,9 @@ void initGlobals()
 		createSatellite(
 			  models["box"]
 			, 1.0f
-			, Vec3(1.0f, 0.0f, 1.0f)
-			, glm::scale(Mat4(1.0f), Vec3(0.2f))
-			, Vec3(-6.0f, 0.0f, 0.0f)
+			, Vec3(1.0f, 0.0f, 0.0f)
+			, glm::scale(Mat4(1.0f), Vec3(0.1f))
+			, Vec3(-10.0f, 0.0f, 0.0f)
 			, Vec3(0.0f, 0.0f, 18.0f)
 			, "satellite 1"
 			, earth->mPhysics
@@ -431,9 +431,9 @@ void initGlobals()
 		createSatellite(
 			  models["box"]
 			, 1.0f
-			, Vec3(1.0f, 0.0f, 1.0f)
-			, glm::scale(Mat4(1.0f), Vec3(0.2f))
-			, Vec3(6.0f, 0.0f, 0.0f)
+			, Vec3(0.0f, 0.0f, 1.0f)
+			, glm::scale(Mat4(1.0f), Vec3(0.1f))
+			, Vec3(10.0f, 0.0f, 0.0f)
 			, Vec3(0.0f, 0.0f, -18.0f)
 			, "satellite 2"
 			, earth->mPhysics
@@ -441,10 +441,17 @@ void initGlobals()
 	);
 	
 
+	//render lists
+	renderers["satellite"]->addToList(sat1);
+	renderers["satellite"]->addToList(sat2);
+
+	renderers["planet"]->addToList(earth);
+
+
 	//loop states
 	fill    = false;
 	stopped = false;
-	menuOpened = false;
+	menuOpened = true;
 
 	prevX = WIDTH / 2;
 	prevY = HEIGHT / 2;
@@ -481,11 +488,11 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_s
 
 void updatePhysics()
 {
-	static const uint64_t time_step = 10;
+	static const uint64_t time_step = 50;
 	static const uint64_t max_count = 5;	
 
 	t1 = glfwGetTimerValue();
-	delta += (t1 - t0) / 50;
+	delta += (t1 - t0) / 10;
 	
 	if (delta > max_count * time_step)
 	{
@@ -503,6 +510,13 @@ void updatePhysics()
 	t0 = t1;
 }
 
+void updateObjects()
+{
+	earth->update(0.0f, 0.0f);
+
+	sat1->update(0.0f, 0.0f);
+	sat2->update(0.0f, 0.0f);
+}
 
 
 void initGui()
@@ -542,10 +556,11 @@ void systemOptions()
 {
 	if (ImGui::CollapsingHeader("System parameters"))
 	{
-		//integrator
+		//integrator(combo)
 
+		//time warp(slider)
 
-		//time step
+		//time step(slider)
 	}
 }
 
@@ -553,39 +568,81 @@ void planetOptions()
 {
 	if (ImGui::CollapsingHeader("Planet parameters"))
 	{
+		//rotation
 
+		//mass
+
+		//size
+
+		//pos
 	}
 }
 
+
+void showSatelliteParameters(SatelliteShared& sat)
+{
+	if (sat->mName)
+	{
+		auto& name = *(sat->mName);
+
+		ImGui ::Text("Name: %s\n", name.mName.c_str());
+	}
+
+	if (sat->mOrbit)
+	{
+		auto& orbit = *(sat->mOrbit);
+
+		ImGui::Text("Main");
+		ImGui::Text("Specific ang. momentum : %f", orbit.mC);
+		ImGui::Text("Inclination            : %f", orbit.mI);
+		ImGui::Text("Right ascension        : %f", orbit.mRA);
+		ImGui::Text("Eccentricity           : %f", orbit.mE);
+		ImGui::Text("Argument of perigee    : %f", orbit.mAP);
+		ImGui::Text("True anomaly           : %f", orbit.mTA);
+
+		ImGui::Text("\nSpec");
+		ImGui::Text("Orbit period      : %f", orbit.mOT);
+		ImGui::Text("Apoapsis          : %f", orbit.mA);
+		ImGui::Text("Eccentric anomaly : %f", orbit.mEA);
+		ImGui::Text("Time              : %f\n", orbit.mT);
+	}
+}
 
 void satellitesOptions()
 {
 	if (ImGui::CollapsingHeader("Satellites parameters"))
 	{
 		//names
-		static const char* names[] = {"none", "satellite1", "satellite2"};
-		static const char* selector = names[0];
-		static int selected = 0;
+		static String current = "";
 
 		//flags : single flag
 		int flags = ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_HeightRegular;
 
 		//show all satellites
 		ImGui::Text("Satellites:");
-		if (ImGui::BeginCombo("##1", selector, flags))
+		if (ImGui::BeginCombo("##1", current.c_str(), flags))
 		{
-			for (int n = 0; n < IM_ARRAYSIZE(names); n++)
+			bool selected = false;
+
+			//hardcoded for only 2 satellites
+			auto& name1 = sat1->mName->mName;
+			if (current == name1)
 			{
-				bool is_selected = (selector == names[n]);
-				if (ImGui::Selectable(names[n], is_selected))
-				{
-					selector = names[n];
-					selected = n;
-				}
-				if (is_selected)
-				{
-					ImGui::SetItemDefaultFocus();
-				}   
+				selected = true;
+			}
+			if (ImGui::Selectable(name1.c_str(), selected))
+			{
+				current = name1;
+			}
+
+			auto& name2 = sat2->mName->mName;
+			if (current == name2)
+			{
+				selected = true;
+			}
+			if (ImGui::Selectable(name2.c_str(), selected))
+			{
+				current = name2;
 			}
 
 			ImGui::EndCombo();
@@ -594,85 +651,13 @@ void satellitesOptions()
 		ImGui::Separator();
 
 		//show satellite parameters
-		if (selected)
+		if (current == sat1->mName->mName)
 		{
-			static float r[4] = { 0.10f, 0.20f, 0.30f, 0.44f };
-			ImGui::InputFloat3("r", r);
-
-			static float v[4] = { 0.10f, 0.20f, 0.30f, 0.44f };
-			ImGui::InputFloat3("v", v);
-
-			ImGui::Text("ecentricity = ");
-
-			ImGui::Text("state: <state>");
-
-			ImGui::Text("Rendezvous target:");
-
- 			static const char* target = names[0];
-			static int targetId = 0;
-			if (ImGui::BeginCombo("##2", target, flags))
-			{
-				for (int n = 0; n < selected; n++)
-				{
-					bool is_selected = (selector == names[n]);
-					if (ImGui::Selectable(names[n], is_selected))
-					{
-						target = names[n];
-						targetId = n;
-					}
-					if (is_selected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}   
-				}
-				for (int n = selected + 1; n < IM_ARRAYSIZE(names); n++)
-				{
-					bool is_selected = (selector == names[n]);
-					if (ImGui::Selectable(names[n], is_selected))
-					{
-						target = names[n];
-						targetId = n;
-					}
-					if (is_selected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}   
-				}
-
-				ImGui::EndCombo();
-			}
-
-			if (targetId)
-			{
-				ImGui::Text("Rendezvous method:");
-
-				static const char* methods[] = {"three impulses", "bicycle"};
-				static const char* method = methods[0];
-				static int methodId = 0;
-
-				if (ImGui::BeginCombo("##3", method, flags))
-				{
-					for (int n = 0; n < IM_ARRAYSIZE(methods); n++)
-					{
-						bool is_selected = (method == methods[n]);
-						if (ImGui::Selectable(methods[n], is_selected))
-						{
-							method   = methods[n];
-							methodId = n;
-						}
-						if (is_selected)
-						{
-							ImGui::SetItemDefaultFocus();
-						}   
-					}
-
-					ImGui::EndCombo();
-				}
-			}
-			else
-			{
-
-			}
+			showSatelliteParameters(sat1);
+		}
+		else if (current == sat2->mName->mName)
+		{
+			showSatelliteParameters(sat2);
 		}
 		else
 		{
@@ -711,7 +696,7 @@ void renderGui()
 
 	testGui();
 
-	//myGui();
+	myGui();
 
 
 	ImGui::Render();
@@ -730,14 +715,19 @@ void render()
 {
 	glfwMakeContextCurrent(window);
 
-	auto& satellite = renderers["satellite"];
+	for (auto&[name, renderer] : renderers)
+	{
+		renderer->render(view);
+	}
+
+	/*auto& satellite = renderers["satellite"];
 	satellite->setRequiredStates();
 	satellite->renderComponent(sat1->mGraphics, view);
 	satellite->renderComponent(sat2->mGraphics, view);
 
 	auto& planet = renderers["planet"];
 	planet->setRequiredStates();
-	planet->renderComponent(earth->mGraphics, view);
+	planet->renderComponent(earth->mGraphics, view);*/
 }
 
 
@@ -759,6 +749,8 @@ void featureTest()
 	glfwShowWindow(window);
 	glfwMakeContextCurrent(window);
     glfwSetCursorPos(window, prevX, prevY);
+	glfwSwapInterval(1);
+
 	t0 = glfwGetTimerValue();
     while (!glfwWindowShouldClose(window))
     {
@@ -768,6 +760,7 @@ void featureTest()
 
 		if (!stopped)
 		{
+			updateObjects();
 			updatePhysics();
 		}
 

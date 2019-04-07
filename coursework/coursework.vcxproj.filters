@@ -99,6 +99,12 @@
     <ClInclude Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Objects\Satellite\Rendezvous\Commands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Objects\Satellite\Rendezvous\LambertSolver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -195,6 +201,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Objects\Satellite\Rendezvous\Commands.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Objects\Satellite\Rendezvous\LambertSolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

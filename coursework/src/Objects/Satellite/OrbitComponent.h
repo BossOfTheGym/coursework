@@ -7,7 +7,7 @@
 #include <Physics/PhysicsComponent.h>
 
 
-struct OrbitComponent : public IComponent
+struct OrbitComponent : public IComponent, public ITimeVarying
 {
 public:
 	OrbitComponent(
@@ -37,6 +37,9 @@ public:
 public:
 	void updateOrbit();
 
+	virtual void update(float t, float dt) override;
+
+
 private:
 	void updateSpecificParams();
 
@@ -47,21 +50,24 @@ public:
 	PhysicsComponentWeak mSatellitePhys;
 
 	//main
-	float mC;   // specific Angular Momentum(c lowercase)
-	float mI;   // Inclination(i lowercase)
-	float mRA;  // right ascension of the Ascending Node(omega uppercase)
-	float mE;   // Eccentricity(e lowercase)
-	float mAP;  // Argument of Periapsis(omega lowercase)
-	float mTA;  // True Anomaly(theta lowercase)
+	float mC;   // specific Angular Momentum(length)
+	float mI;   // Inclination
+	float mRA;  // right ascension of the Ascending Node
+	float mE;   // Eccentricity
+	float mAP;  // Argument of Periapsis
+	float mTA;  // True Anomaly
 
 	//misc
-	float mP;   // semi-latus rectum(p lowercase)
+	Vec3 mCv;   // specific Angular Momentum(vector)
+
+	float mH;   // energy integral
+	float mP;   // semi-latus rectum
 	float mMu;  // mu param
 
 	//specific
 	float mOT;  // Orbit Period
 	float mA;   // apoapsis
-	float mEA;  // Eccentric Anomaly(e uppercase)
+	float mEA;  // Eccentric Anomaly
 	float mT;   // time since periapsis	
 };
 

@@ -13,6 +13,10 @@
 #include <Objects/Objects.h>
 #include <Render/Renderers.h>
 
+#include <Objects/Satellite/Rendezvous/LambertSolver.h>
+
+#include <Numerics/Ivp/RungeKutta.h>
+
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -292,6 +296,21 @@ double prevY;
 uint64_t t0;
 uint64_t t1;
 uint64_t delta;
+uint64_t maxUpdates;
+
+uint64_t timeStep;
+uint64_t stepMin;
+uint64_t stepMax;
+
+uint64_t rawDivisor;
+uint64_t rawMin;
+uint64_t rawMax;
+
+uint64_t accum;
+
+float divisor;
+float divMin;
+float divMax;
 
 
 //callbacks
@@ -456,9 +475,22 @@ void initGlobals()
 	prevX = WIDTH / 2;
 	prevY = HEIGHT / 2;
 
+	//time step
 	t0 = glfwGetTimerValue();
 	t1 = 0;
 	delta = 0;
+	accum = 0;
+	rawDivisor = 10;
+	rawMin     = 10;
+	rawMax     = 50;
+	timeStep = 50;
+	stepMin  = 10;
+	stepMax  = 60;
+	maxUpdates = 10;	
+
+	divisor = 1000000.0f;
+	divMin = 10000.0f;
+	divMax = 1000000.0f;
 }
 
 
@@ -466,45 +498,69 @@ void initGlobals()
 //main loop
 void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_step)
 {
+	using glm::dot;
+	using glm::length;
+
+	using StateVec = Num::Arg::VecN<float, 6>;
+	using Methods  = Num::Ivp::Methods;
+	using Solver   = Num::Ivp::RungeKuttaExplicit<6, float, StateVec>;
+
 	auto& mat = sat->mPhysics->mMat;
-	auto& r   = sat->mPhysics->mPosition;
-	auto& v   = sat->mPhysics->mVelocity;
+	auto& r = sat->mPhysics->mPosition;
+	auto& v = sat->mPhysics->mVelocity;
 
 	auto& r0 = planet->mPhysics->mPosition;
-	auto& M  = planet->mPhysics->mMass;
+	auto  mu = G * planet->mPhysics->mMass;
+
+	auto dr = r - r0;
+	 
+
+	Solver solver;
+	auto force = [&] (float t, const StateVec& vec) -> StateVec
+	{
+		Vec3 rv = Vec3(vec[0], vec[1], vec[2]);
+		Vec3 vv = Vec3(vec[3], vec[4], vec[5]);
+
+		auto r = length(rv);
+
+		Vec3 newV = -mu / (r * r) * (rv / r);
+
+		return StateVec{vv[0], vv[1], vv[2], newV[0], newV[1], newV[2]};
+	};
+
+	StateVec curr{dr[0], dr[1], dr[2], v[0], v[1], v[2]};
+	StateVec next = solver.solve(
+		  force
+		, Methods::classic4<float>
+		, accum / divisor
+		, curr
+		, time_step / divisor
+	).second;
 
 
-	auto dr   = r - r0;
-	auto temp = v;
-
-	auto dt = time_step / 1000000.0f;
-
-	r += dt * temp;
-	v += dt * (-M / glm::dot(dr, dr)) * glm::normalize(dr);
-
-
+	//update
+	r = Vec3(next[0] + r0[0], next[1] + r0[1], next[2] + r0[2]);
+	v = Vec3(next[3], next[4], next[5]);
 	mat[3] = Vec4(r, 1.0f);
 }
 
 void updatePhysics()
 {
-	static const uint64_t time_step = 50;
-	static const uint64_t max_count = 5;	
-
 	t1 = glfwGetTimerValue();
-	delta += (t1 - t0) / 10;
+	delta += (t1 - t0) / rawDivisor;
 	
-	if (delta > max_count * time_step)
+	if (delta > maxUpdates * timeStep)
 	{
-		delta = max_count * time_step;
+		delta = maxUpdates * timeStep;
+		accum += delta;
 	}
 
-	while (delta >= time_step)
+	while (delta >= timeStep)
 	{
-		delta -= time_step;
+		delta -= timeStep;
 
-		updateSatPlanet(sat1, earth, time_step);
-		updateSatPlanet(sat2, earth, time_step);
+		updateSatPlanet(sat1, earth, timeStep);
+		updateSatPlanet(sat2, earth, timeStep);
 	}
 
 	t0 = t1;
@@ -552,10 +608,17 @@ void testGui()
 	}
 }
 
+
 void systemOptions()
 {
 	if (ImGui::CollapsingHeader("System parameters"))
 	{
+		ImGui::Text("Time raw: %llu", accum);
+		ImGui::Text("Time    : %f"  , accum / divisor);
+		
+		ImGui::SliderScalar("Divisor    : ", ImGuiDataType_Float, &divisor, &divMin, &divMax);
+		ImGui::SliderScalar("Raw Divisor: ", ImGuiDataType_S64, &rawDivisor, &rawMin, &rawMax);
+		ImGui::SliderScalar("Time step  : ", ImGuiDataType_S64, &timeStep, &stepMin, &stepMax);
 		//integrator(combo)
 
 		//time warp(slider)
@@ -585,26 +648,29 @@ void showSatelliteParameters(SatelliteShared& sat)
 	{
 		auto& name = *(sat->mName);
 
-		ImGui ::Text("Name: %s\n", name.mName.c_str());
+		ImGui::Text("Name: %s", name.mName.c_str());
+		ImGui::Text("");
 	}
 
 	if (sat->mOrbit)
 	{
 		auto& orbit = *(sat->mOrbit);
 
-		ImGui::Text("Main");
+		ImGui::Text("Main:");
 		ImGui::Text("Specific ang. momentum : %f", orbit.mC);
 		ImGui::Text("Inclination            : %f", orbit.mI);
 		ImGui::Text("Right ascension        : %f", orbit.mRA);
 		ImGui::Text("Eccentricity           : %f", orbit.mE);
 		ImGui::Text("Argument of perigee    : %f", orbit.mAP);
 		ImGui::Text("True anomaly           : %f", orbit.mTA);
+		ImGui::Text("");	
 
-		ImGui::Text("\nSpec");
+		ImGui::Text("Spec: ");
 		ImGui::Text("Orbit period      : %f", orbit.mOT);
 		ImGui::Text("Apoapsis          : %f", orbit.mA);
 		ImGui::Text("Eccentric anomaly : %f", orbit.mEA);
-		ImGui::Text("Time              : %f\n", orbit.mT);
+		ImGui::Text("Time              : %f", orbit.mT);
+		ImGui::Text("");
 	}
 }
 
@@ -669,6 +735,8 @@ void satellitesOptions()
 void myGui()
 {
 	ImGui::SetNextWindowPos({10, 10}, ImGuiCond_Once);
+	ImGui::SetNextWindowSizeConstraints({200, 400}, {400, 800}, nullptr, nullptr);
+
 	ImGui::Begin(
 		"Options"
 		, nullptr
@@ -676,6 +744,7 @@ void myGui()
 		| ImGuiWindowFlags_NoMove 
 		| ImGuiWindowFlags_NoNav 
 		| ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_AlwaysAutoResize
 	);
 	
 	systemOptions();
@@ -770,6 +839,33 @@ void featureTest()
 
 int main(int argc, char* argv[])
 {
+	////test
+	//Vec3 rv1 = Vec3(-10.0f, 0.0f, 0.0f);
+	//Vec3 rv2 = Vec3(+10.0f, 0.0f, 0.0f);
+	//float t1 = 0.0f;
+	//float t2 = 6.0f;
+	//float mu = 3000.0f;
+
+	//using glm::dot;
+	//using glm::length;
+
+	//auto r1 = length(rv1);
+	//auto r2 = length(rv2);
+
+	//auto cosTransfer = dot(rv1 / r1, rv2 / r2);
+	//auto cosHalf = sqrt((cosTransfer + 1) / 2);
+
+	//auto rho   = sqrt(2 * r1 * r2) / (r1 + r2) * cosHalf;
+	//auto sigma = sqrt(mu) / pow(r1 + r2, 1.5f) * (t2 - t1);
+
+	//float um = sqrt(1.0f - sqrt(2) * abs(rho));
+	//float e0 = pow(PI / (2.0f / 3 * pow(um, 3) + sigma - rho * um), 1.0f / 3) * um;
+	//float x0 = 4 * pow(PI - e0, 2);
+
+	//float x = solveLambertProblem(rv1, t1, rv2, t2, mu, x0);
+
+
+
     featureTest();
 
     return EXIT_SUCCESS;

@@ -292,50 +292,5 @@ namespace Num
                 return {arg0 + h, val0 + h * sum};
             }
         };
-
-
-
-        //unified for both Scalar & System
-		template<
-			int SYSTEM_ORDER
-			, class Argument
-			, class Value = Argument
-			, class Tableau = ButcherTableau<Argument, 2>
-			, template<class Scalar, int SIZE> class VectorType = Arg::VecN
-			, template<class Scalar, int COLS, int ROWS> class MatrixType = Arg::MatNxM
-			, template<class Scalar, int N> class SolverType = Equ::NeutonSystem
-		>
-        class RungeKuttaImplicit
-        {
-        public:
-			using FunctionType = Utils::TwoArgument<Argument, Value>;
-			using FunctionType = Utils::TwoArgument<Argument, Value>;
-
-			using NextNode = Node<Argument, Value>;
-
-			using Solver = SolverType<Argument, SYSTEM_ORDER * Tableau::ORDER>;
-
-
-			RungeKuttaImplicit() : m_solver()
-			{}
-
-
-			NextNode solve(
-				const FunctionType& func
-				, const Tableau& tableau
-				, const Argument& arg0
-				, const Value& val0
-				, const Argument& h
-			)
-			{
-				m_solver.reset();
-
-
-			}
-
-
-		private:
-			Solver m_solver;
-        };
     }
 }

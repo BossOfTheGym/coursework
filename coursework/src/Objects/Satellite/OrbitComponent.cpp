@@ -33,6 +33,10 @@ const IComponent::Type& OrbitComponent::componentType() const
 	return type;
 }
 
+void OrbitComponent::update(float t, float dt)
+{
+	updateOrbit();
+}
 
 void OrbitComponent::updateOrbit()
 {
@@ -65,6 +69,7 @@ void OrbitComponent::updateOrbit()
 	//2.
 	auto vv = v0;
 	auto v = length(v0);
+	mH = dot(vv, vv) - 2 * mMu / r;
 
 	//3.
 	auto vr = dot(rv / r, vv);
@@ -72,8 +77,9 @@ void OrbitComponent::updateOrbit()
 	//4, 5
 	auto cv = cross(rv, vv);
 	auto c = length(cv);
-	mC = c;
-	mP = dot(cv, cv) / mMu;
+	mC  = c;
+	mCv = cv;
+	mP  = dot(cv, cv) / mMu;
 
 	//6.
 	auto i = acos(cv.z / c);
@@ -119,7 +125,7 @@ void OrbitComponent::updateSpecificParams()
 {
 	if (mE < 1.0f) // process elliptic only
 	{
-		mA  = 2.0f * mP / (1.0f - mE * mE);
+		mA  = mP / (1.0f - mE * mE);
 		mEA = 2.0f * atan(sqrt((1.0f - mE) / (1.0f + mE)) * tan(mTA / 2));
 
 		auto n = pow(mA, 3.0f / 2.0f) / sqrt(mMu);

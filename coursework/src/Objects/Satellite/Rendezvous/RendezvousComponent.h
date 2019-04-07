@@ -8,13 +8,15 @@
 #include "../../IObject.h"
 #include "../Satellite.h"
 
+
+//forward decl
 struct Satellite;
 
 
 
 //state machine
 //always has default state : Floating
-struct RendezvousControl : public IComponent
+struct RendezvousControl : public IComponent, public ITimeVarying
 {
 public:
 
@@ -39,6 +41,8 @@ public:
 	
 public:
 	virtual const Type& componentType() const override;
+
+	virtual void update(float t, float dt) override;
 
 
 public:

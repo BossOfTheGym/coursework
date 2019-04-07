@@ -24,8 +24,8 @@
 
 
 
-const int WIDTH  = 1200;
-const int HEIGHT = 900;
+const int WIDTH  = 1500;
+const int HEIGHT = 1000;
  
 
 using namespace std::chrono;
@@ -35,6 +35,7 @@ using namespace std::chrono;
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void posCallback(GLFWwindow* window, double xPos, double yPos);
 void errorCallback(int error, const char* description);
+void resizeCallback();
 
 GLFWwindow* createContext()
 {
@@ -48,6 +49,7 @@ GLFWwindow* createContext()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     win = glfwCreateWindow(WIDTH, HEIGHT, "Rendezvous", nullptr, nullptr);
 
@@ -806,6 +808,10 @@ void featureTest()
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	
 
+	GLFWmonitor* primary = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(primary);
+
+	glfwSetWindowPos(window, mode->width / 2 - WIDTH / 2, mode->height / 2 - HEIGHT / 2);
 	glfwShowWindow(window);
 	glfwMakeContextCurrent(window);
     glfwSetCursorPos(window, prevX, prevY);

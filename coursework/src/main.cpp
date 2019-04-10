@@ -1,20 +1,7 @@
 #include <Objects/View.h>
 
-#include <Shader/Shader.h>
-#include <Shader/ShaderProgram.h>
-
-#include <Model/Model.h>
-#include <Model/VertexArrayBuffer.h>
-#include <Model/Builders/AssimpBuilder.h>
-#include <Model/Builders/CustomBuilders.h>
-
-#include <Physics/PhysicsComponent.h>
-#include <Graphics/GraphicsComponent.h>
-#include <Objects/Objects.h>
-#include <Render/Renderers.h>
-
-#include <Objects/Satellite/Rendezvous/LambertSolver.h>
-
+#include <Resources.h>
+#include <Factories.h>
 #include <Numerics/Ivp/RungeKutta.h>
 
 
@@ -22,251 +9,14 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+using namespace std::chrono;
 
 
 const int WIDTH  = 1500;
 const int HEIGHT = 1000;
  
 
-using namespace std::chrono;
-
-
-//create context for OpenGL and input
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void posCallback(GLFWwindow* window, double xPos, double yPos);
-void errorCallback(int error, const char* description);
-void resizeCallback();
-
-GLFWwindow* createContext()
-{
-    auto glfwErr = glfwInit();
-
-    GLFWwindow* win;
-
-    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-    glfwWindowHint(GLFW_DEPTH_BITS, 32);
-    glfwWindowHint(GLFW_STENCIL_BITS, 8);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
-    win = glfwCreateWindow(WIDTH, HEIGHT, "Rendezvous", nullptr, nullptr);
-
-    glfwSetKeyCallback(win, keyCallback);
-    glfwSetCursorPosCallback(win, posCallback);
-    glfwSetErrorCallback(errorCallback);
-
-    glfwMakeContextCurrent(win);
-
-    auto glewErr = glewInit();
-
-    return win;
-}
-
-
-//load shaders from assets
-void loadShaders(std::map<String, ShaderShared>& shadersStorage)
-{    
-    shadersStorage["planet.vs"]  = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/Planet/sphere.vs"));
-    shadersStorage["planet.tcs"] = ShaderShared(new Shader(Shader::TessControl, "assets/shaders/Planet/sphere.tcs"));
-    shadersStorage["planet.tes"] = ShaderShared(new Shader(Shader::TessEvaluation, "assets/shaders/Planet/sphere.tes"));
-    shadersStorage["planet.gs"]  = ShaderShared(new Shader(Shader::Geometry, "assets/shaders/Planet/sphere.gs"));
-    shadersStorage["planet.fs"]  = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/Planet/sphere.fs"));
-
-	shadersStorage["satellite.vs"] = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/Satellite/satellite.vs"));
-	shadersStorage["satellite.gs"] = ShaderShared(new Shader(Shader::Geometry, "assets/shaders/Satellite/satellite.gs"));
-    shadersStorage["satellite.fs"] = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/Satellite/satellite.fs"));
-
-	shadersStorage["simple.vs"] = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/Simple/simple.vs"));
-	shadersStorage["simple.fs"] = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/Simple/simple.fs"));
-
-    for (const auto&[location, shader] : shadersStorage)
-    {
-        if (!(shader->compiled()))
-        {
-            std::cerr << "FAILED TO COMPILE SHADER: " << location << std::endl;
-            std::cerr << shader->infoLog();
-        }
-    }
-}
-
-
-//load all models from assets + custom
-void loadModels(std::map<String, ModelShared>& modelsStorage)
-{
-	AssimpBuilder assimpBuilder;
-	//assimpBuilder.readFile("assets/textures/Satellite/10477_Satellite_v1_L3.obj");
-
-	//modelsStorage["satellite"] = ModelShared(new Model(std::move(assimpBuilder.imported())));
-
-
-	PlanetBuilder planetBuilder;
-	planetBuilder.build(3, "assets/textures/earth/earthmap1k.jpg", "Earth");
-
-	modelsStorage["earth"] = ModelShared(new Model(std::move(planetBuilder.model())));
-
-
-	BoxBuilder boxBuilder;
-	boxBuilder.build("box");
-
-	modelsStorage["box"] = ModelShared(new Model(std::move(boxBuilder.model())));
-}
-
-
-//assemble shader programs
-ShaderProgramShared createPlanetProgram(std::map<String, ShaderShared>& shadersStorage)
-{
-    ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Planet"));
-    program->attachShader(*shadersStorage["planet.vs"]);
-    program->attachShader(*shadersStorage["planet.tcs"]);
-    program->attachShader(*shadersStorage["planet.tes"]);
-    program->attachShader(*shadersStorage["planet.gs"]);
-    program->attachShader(*shadersStorage["planet.fs"]);
-
-    program->link();
-    if (!(program->linked()))
-    {
-        std::cerr << program->infoLog();
-    }
-
-    return program;
-}
-
-ShaderProgramShared createSatelliteProgram(std::map<String, ShaderShared>& shadersStorage)
-{
-    ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Satellite"));
-	program->attachShader(*shadersStorage["satellite.vs"]);
-	program->attachShader(*shadersStorage["satellite.gs"]);
-    program->attachShader(*shadersStorage["satellite.fs"]);
-
-    program->link();
-    if (!(program->linked()))
-    {
-        std::cerr << program->infoLog();
-    }
-
-    return program;
-}
-
-ShaderProgramShared createSimpleProgram(std::map<String, ShaderShared>& shadersHolder)
-{
-	ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Simple"));
-	program->attachShader(*shadersHolder["simple.vs"]);
-	program->attachShader(*shadersHolder["simple.fs"]);
-
-	program->link();
-	if (!(program->linked()))
-	{
-		std::cerr << program->infoLog();
-	}
-
-	return program;
-}
-
-void createShaderPrograms(
-	  std::map<String, ShaderProgramShared>& programStorage
-	, std::map<String, ShaderShared>& shadersStorage
-)
-{
-	programStorage["satellite"] = createSatelliteProgram(shadersStorage);
-	programStorage["planet"]    = createPlanetProgram(shadersStorage);
-	programStorage["simple"]    = createSimpleProgram(shadersStorage);
-}
-
-
-//assemble renderers
-void createRenderers(
-	  std::map<String, IRendererShared>& renderersStorage
-	, std::map<String, ShaderProgramShared>& programsStorage
-)
-{
-	renderersStorage["satellite"] = IRendererShared(new SatelliteRenderer(programsStorage["satellite"]));
-	renderersStorage["planet"]    = IRendererShared(new PlanetRenderer(programsStorage["planet"]));
-	renderersStorage["simple"]    = IRendererShared(new SimpleRenderer(programsStorage["simple"]));
-}
-
-
-
-//object factories
-IObjectShared createSatellite(
-	  const ModelShared& model
-	, float mass
-	, const Vec3& color = Vec3(1.0f)
-	, const Mat4& mat = Mat4(1.0f)
-	, const Vec3& pos = Vec3()
-	, const Vec3& vel = Vec3()
-	, const String& name = ""
-	, const PhysicsComponentWeak& planet = PhysicsComponentShared(nullptr)
-)
-{
-	SatelliteShared satellite = std::make_shared<Satellite>();
-
-
-	satellite->mPhysics  = PhysicsComponentShared(
-		new PhysicsComponent(satellite.get(), mat, pos, vel, Vec3(), mass)
-	);
-
-	satellite->mGraphics = GraphicsComponentShared(
-		new GraphicsComponent(
-			satellite.get()
-			, model
-			, satellite->mPhysics
-		)
-	);
-
-	satellite->mSatellite = SatelliteComponentShared(
-		new SatelliteComponent(nullptr, color)
-	);
-
-	satellite->mName = NameComponentShared(
-		new NameComponent(satellite.get(), name)
-	);
-
-	satellite->mOrbit = OrbitComponentShared(
-		new OrbitComponent(
-			satellite.get()
-			, planet
-			, satellite->mPhysics
-		)
-	);
-
-
-	return satellite;
-}
-
-IObjectShared createPlanet(
-	  const ModelShared& model
-	, float mass
-	, const Mat4& mat = Mat4(1.0f)
-	, const Vec3& pos = Vec3()
-	, const Vec3& vel = Vec3()
-	, const Vec3& angularMomentum = Vec3()
-	, const String& name = ""
-)
-{
-	PlanetShared planet = std::make_shared<Planet>();
-
-
-	planet->mPhysics  = PhysicsComponentShared(
-		new PhysicsComponent(nullptr, mat, pos, vel, angularMomentum, mass)
-		);
-
-	planet->mGraphics = GraphicsComponentShared(
-		new GraphicsComponent(
-			nullptr
-			, model
-			, planet->mPhysics
-		)
-	);
-
-
-	return planet;
-}
-
-
 //globals
-
 //context
 GLFWwindow* window;
 
@@ -275,15 +25,16 @@ std::map<String, ShaderShared>        shaders;
 std::map<String, ModelShared>         models;
 std::map<String, ShaderProgramShared> programs;
 std::map<String, IRendererShared>     renderers;
-std::map<String, IObjectShared>       objects;
-
-//cached
-SatelliteShared sat1;
-SatelliteShared sat2;
+std::map<String, SatelliteShared>     satellites;
 PlanetShared earth;
 
 //view
 View view;
+
+//gui
+SatelliteWeak currentWeak;
+float timeTrack0;
+float timeTrack1;
 
 //flags
 bool fill;          // wireframe mode
@@ -301,18 +52,15 @@ uint64_t delta;
 uint64_t maxUpdates;
 
 uint64_t timeStep;
-uint64_t stepMin;
-uint64_t stepMax;
-
-uint64_t rawDivisor;
-uint64_t rawMin;
-uint64_t rawMax;
 
 uint64_t accum;
 
+uint64_t warp;
+uint64_t warpMin;
+uint64_t warpMax;
+
 float divisor;
-float divMin;
-float divMax;
+
 
 
 //callbacks
@@ -391,21 +139,16 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
     prevY = yPos;
 }
 
-void errorCallback(int error, const char* msg)
-{
-    std::cout << "Error callback" << std::endl;
-
-    std::cout << "ERROR: " << error << std::endl;
-    std::cout << "MSG: " << msg << std::endl;
-}
-
 
 //init all globals
 void initGlobals()
 {
 	//context
-	window  = std::move(createContext());
-	
+	createContext(window, WIDTH, HEIGHT, "Rendezvous");
+	glfwSetKeyCallback(window, keyCallback);
+	glfwSetCursorPosCallback(window, posCallback);
+
+
 	//resources
 	loadShaders(shaders);
 	loadModels(models);
@@ -435,20 +178,19 @@ void initGlobals()
 	);
 
 	//satellites
-	sat1 = std::dynamic_pointer_cast<Satellite>(
+	satellites["satellite 1"] = std::dynamic_pointer_cast<Satellite>(
 		createSatellite(
 			  models["box"]
 			, 1.0f
 			, Vec3(1.0f, 0.0f, 0.0f)
 			, glm::scale(Mat4(1.0f), Vec3(0.1f))
 			, Vec3(-10.0f, 0.0f, 0.0f)
-			, Vec3(0.0f, 0.0f, 17.32045f)
+			, Vec3(0.0f, 0.0f, 15.0f)
 			, "satellite 1"
 			, earth->mPhysics
 		)
 	);
-
-	sat2 = std::dynamic_pointer_cast<Satellite>(
+	satellites["satellite 2"] = std::dynamic_pointer_cast<Satellite>(
 		createSatellite(
 			  models["box"]
 			, 1.0f
@@ -460,14 +202,18 @@ void initGlobals()
 			, earth->mPhysics
 		)
 	);
-	
 
 	//render lists
-	renderers["satellite"]->addToList(sat1);
-	renderers["satellite"]->addToList(sat2);
-
+	for (auto&[name, sat] : satellites)
+	{
+		renderers["satellite"]->addToList(sat);
+	}
 	renderers["planet"]->addToList(earth);
 
+	//gui
+	currentWeak = SatelliteShared(nullptr);
+	timeTrack0 = 0.0f;
+	timeTrack1 = 0.0f;
 
 	//loop states
 	fill    = false;
@@ -482,22 +228,21 @@ void initGlobals()
 	t1 = 0;
 	delta = 0;
 	accum = 0;
-	rawDivisor = 10;
-	rawMin     = 10;
-	rawMax     = 50;
-	timeStep = 50;
-	stepMin  = 10;
-	stepMax  = 60;
+
+	timeStep = 10;
 	maxUpdates = 10;	
 
 	divisor = 1000000.0f;
-	divMin = 10000.0f;
-	divMax = 1000000.0f;
+
+	warp = 1;
+	warpMin = 1;
+	warpMax = 1000;
 }
 
 
 
 //main loop
+//integrator
 void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_step)
 {
 	using glm::dot;
@@ -549,20 +294,22 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_s
 void updatePhysics()
 {
 	t1 = glfwGetTimerValue();
-	delta += (t1 - t0) / rawDivisor;
+	delta += (t1 - t0) * warp;
 	
-	if (delta > maxUpdates * timeStep)
+	if (delta > maxUpdates * timeStep * warp)
 	{
-		delta = maxUpdates * timeStep;
-		accum += delta;
+		delta = maxUpdates * timeStep * warp;
 	}
 
-	while (delta >= timeStep)
+	accum += delta;
+	while (delta >= timeStep * warp)
 	{
-		delta -= timeStep;
+		delta -= timeStep * warp;
 
-		updateSatPlanet(sat1, earth, timeStep);
-		updateSatPlanet(sat2, earth, timeStep);
+		for (auto&[key, sat] : satellites)
+		{
+			updateSatPlanet(sat, earth, timeStep * warp);
+		}
 	}
 
 	t0 = t1;
@@ -570,24 +317,18 @@ void updatePhysics()
 
 void updateObjects()
 {
+	//TODO : update method souldn't take zero args
+
 	earth->update(0.0f, 0.0f);
 
-	sat1->update(0.0f, 0.0f);
-	sat2->update(0.0f, 0.0f);
+	for (auto&[key, sat] : satellites)
+	{
+		sat->update(0.0f, 0.0f);
+	}
 }
 
 
-void initGui()
-{
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 430 core");
-}
 
 void testGui()
 {
@@ -618,16 +359,12 @@ void systemOptions()
 		ImGui::Text("Time raw: %llu", accum);
 		ImGui::Text("Time    : %f"  , accum / divisor);
 		
-		ImGui::SliderScalar("Divisor    : ", ImGuiDataType_Float, &divisor, &divMin, &divMax);
-		ImGui::SliderScalar("Raw Divisor: ", ImGuiDataType_S64, &rawDivisor, &rawMin, &rawMax);
-		ImGui::SliderScalar("Time step  : ", ImGuiDataType_S64, &timeStep, &stepMin, &stepMax);
+		ImGui::SliderScalar("Time warp: ", ImGuiDataType_S64, &warp, &warpMin, &warpMax);
+
 		//integrator(combo)
-
-		//time warp(slider)
-
-		//time step(slider)
 	}
 }
+
 
 void planetOptions()
 {
@@ -680,37 +417,27 @@ void satellitesOptions()
 {
 	if (ImGui::CollapsingHeader("Satellites parameters"))
 	{
-		//names
-		static String current = "";
-
 		//flags : single flag
 		int flags = ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_HeightRegular;
 
-		//show all satellites
-		ImGui::Text("Satellites:");
-		if (ImGui::BeginCombo("##1", current.c_str(), flags))
+		//choose satellite
+		auto current = currentWeak.lock();
+		const char* init = (current ? current->mName->mName.c_str() : "none");
+		if (ImGui::BeginCombo("Satellites", init, flags))
 		{
 			bool selected = false;
 
-			//hardcoded for only 2 satellites
-			auto& name1 = sat1->mName->mName;
-			if (current == name1)
+			for (auto&[key, sat] : satellites)
 			{
-				selected = true;
-			}
-			if (ImGui::Selectable(name1.c_str(), selected))
-			{
-				current = name1;
-			}
+				auto& name = sat->mName->mName;
 
-			auto& name2 = sat2->mName->mName;
-			if (current == name2)
-			{
-				selected = true;
-			}
-			if (ImGui::Selectable(name2.c_str(), selected))
-			{
-				current = name2;
+				selected = (current == sat);
+				if (ImGui::Selectable(name.c_str(), selected))
+				{
+					currentWeak = sat;
+					timeTrack0 = sat->mOrbit->mT;
+					timeTrack1 = sat->mOrbit->mT;
+				}
 			}
 
 			ImGui::EndCombo();
@@ -718,14 +445,16 @@ void satellitesOptions()
 
 		ImGui::Separator();
 
-		//show satellite parameters
-		if (current == sat1->mName->mName)
+		//show params
+		if (current)
 		{
-			showSatelliteParameters(sat1);
-		}
-		else if (current == sat2->mName->mName)
-		{
-			showSatelliteParameters(sat2);
+			showSatelliteParameters(current);
+
+			//show tracked time
+			ImGui::Separator();
+			timeTrack0 = timeTrack1;
+			timeTrack1 = current->mOrbit->mT;
+			ImGui::Text("Tracked delta: %f", timeTrack1 - timeTrack0);
 		}
 		else
 		{
@@ -733,6 +462,7 @@ void satellitesOptions()
 		}
 	}
 }
+
 
 void myGui()
 {
@@ -758,6 +488,20 @@ void myGui()
 	ImGui::End();
 }
 
+
+void initGui()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 430 core");
+
+}
+
 void renderGui()
 {
 	ImGui_ImplOpenGL3_NewFrame();
@@ -781,6 +525,7 @@ void destroyGui()
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 }
+
 
 void render()
 {
@@ -845,33 +590,6 @@ void featureTest()
 
 int main(int argc, char* argv[])
 {
-	////test
-	//Vec3 rv1 = Vec3(-10.0f, 0.0f, 0.0f);
-	//Vec3 rv2 = Vec3(+10.0f, 0.0f, 0.0f);
-	//float t1 = 0.0f;
-	//float t2 = 6.0f;
-	//float mu = 3000.0f;
-
-	//using glm::dot;
-	//using glm::length;
-
-	//auto r1 = length(rv1);
-	//auto r2 = length(rv2);
-
-	//auto cosTransfer = dot(rv1 / r1, rv2 / r2);
-	//auto cosHalf = sqrt((cosTransfer + 1) / 2);
-
-	//auto rho   = sqrt(2 * r1 * r2) / (r1 + r2) * cosHalf;
-	//auto sigma = sqrt(mu) / pow(r1 + r2, 1.5f) * (t2 - t1);
-
-	//float um = sqrt(1.0f - sqrt(2) * abs(rho));
-	//float e0 = pow(PI / (2.0f / 3 * pow(um, 3) + sigma - rho * um), 1.0f / 3) * um;
-	//float x0 = 4 * pow(PI - e0, 2);
-
-	//float x = solveLambertProblem(rv1, t1, rv2, t2, mu, x0);
-
-
-
     featureTest();
 
     return EXIT_SUCCESS;

@@ -23,6 +23,7 @@
     <ClInclude Include="src\Components.h" />
     <ClInclude Include="src\Component\IComponent.h" />
     <ClInclude Include="src\Entity\ITimeVarying.h" />
+    <ClInclude Include="src\Factories.h" />
     <ClInclude Include="src\Graphics\GraphicsComponent.h" />
     <ClInclude Include="src\Model\Builders\AssimpBuilder.h" />
     <ClInclude Include="src\Model\Builders\CustomBuilders.h" />
@@ -46,12 +47,14 @@
     <ClInclude Include="src\Render\Renderers.h" />
     <ClInclude Include="src\Render\SatelliteRenderer.h" />
     <ClInclude Include="src\Render\SimpleRenderer.h" />
+    <ClInclude Include="src\Resources.h" />
     <ClInclude Include="src\Shader\Shader.h" />
     <ClInclude Include="src\Shader\ShaderProgram.h" />
     <ClInclude Include="src\Texture\Texture2D.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\IComponent.cpp" />
+    <ClCompile Include="src\Factories.cpp" />
     <ClCompile Include="src\Graphics\GraphicsComponent.cpp" />
     <ClCompile Include="src\ImGui\imgui.cpp" />
     <ClCompile Include="src\ImGui\imgui_demo.cpp" />
@@ -82,6 +85,7 @@
     <ClCompile Include="src\Render\PlanetRenderer.cpp" />
     <ClCompile Include="src\Render\SatelliteRenderer.cpp" />
     <ClCompile Include="src\Render\SimpleRenderer.cpp" />
+    <ClCompile Include="src\Resources.cpp" />
     <ClCompile Include="src\Shader\Shader.cpp" />
     <ClCompile Include="src\Shader\ShaderProgram.cpp" />
     <ClCompile Include="src\Texture\Texture2D.cpp" />

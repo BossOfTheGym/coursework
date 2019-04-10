@@ -127,11 +127,15 @@ void OrbitComponent::updateSpecificParams()
 	{
 		mA  = mP / (1.0f - mE * mE);
 		mEA = 2.0f * atan(sqrt((1.0f - mE) / (1.0f + mE)) * tan(mTA / 2));
+		if (mTA > PI)//fix comparison
+		{
+			mEA = PI_2 + mEA;
+		}
 
-		auto n = pow(mA, 3.0f / 2.0f) / sqrt(mMu);
+		auto nInv = pow(mA, 3.0f / 2.0f) / sqrt(mMu);
 
-		mT  = n * (mEA - mE * sin(mEA));
-		mOT = n * PI_2;
+		mT  = nInv * (mEA - mE * sin(mEA));
+		mOT = nInv * PI_2;
 	}
 	else
 	{

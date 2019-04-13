@@ -33,10 +33,6 @@ const IComponent::Type& OrbitComponent::componentType() const
 	return type;
 }
 
-void OrbitComponent::update(float t, float dt)
-{
-	updateOrbit();
-}
 
 void OrbitComponent::updateOrbit()
 {

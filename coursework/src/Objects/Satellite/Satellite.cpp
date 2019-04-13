@@ -3,13 +3,14 @@
 
 Satellite::Satellite(
 	IComponent* parent
+	, const Time& time
 	, const GraphicsComponentShared&  graphics
 	, const PhysicsComponentShared&   physics
 	, const SatelliteComponentShared& satellite
 	, const OrbitComponentShared&     orbit
 	, const NameComponentShared&      name
 )
-	: IObject(parent)
+	: IObject(parent, time)
 	, mGraphics(graphics)
 	, mPhysics(physics)
 	, mSatellite(satellite)
@@ -18,12 +19,13 @@ Satellite::Satellite(
 {}
 
 
-void Satellite::update(float t, float dt)
+void Satellite::update(const Time& t)
 {
 	if (mOrbit)
 	{
 		mOrbit->updateOrbit();
 	}
+	mTime = t;
 }
 
 const IComponent::Type& Satellite::componentType() const

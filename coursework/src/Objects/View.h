@@ -3,6 +3,7 @@
 #include <Common.h>
 
 
+//TODO : should be object-like
 class View
 {
 public:

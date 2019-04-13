@@ -14,7 +14,8 @@ struct Satellite : public IObject
 {
 public:
 	Satellite(
-		IComponent* parent = nullptr
+		  IComponent* parent = nullptr
+		, const Time& time = Time()
 		, const GraphicsComponentShared&  graphics  = nullptr
 		, const PhysicsComponentShared&   physics   = nullptr
 		, const SatelliteComponentShared& satellite = nullptr
@@ -23,21 +24,17 @@ public:
 	);
 
 	Satellite(const Satellite& sat) = default;
-
-	Satellite(Satellite&& sat) = default;
-
+	Satellite(Satellite&& sat)      = default;
 
 	~Satellite() = default;
 
-
 	Satellite& operator = (const Satellite& sat) = default;
-
 	Satellite& operator = (Satellite&& sat) = default;
 
 
 
 public:
-	virtual void update(float t, float dt) override;
+	virtual void update(const Time& t) override;
 	
 	virtual const Type& componentType() const override;
 

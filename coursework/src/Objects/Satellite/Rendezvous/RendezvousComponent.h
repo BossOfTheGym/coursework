@@ -9,34 +9,32 @@
 #include "../Satellite.h"
 
 
-//forward decl
+//Satellite forward decl
 struct Satellite;
 
-
-
-//state machine
-//always has default state : Floating
-struct RendezvousControl : public IComponent, public ITimeVarying
+struct RendezvousComponent : public IComponent, public ITimeVarying
 {
 public:
+	using Commands = std::vector<Command>;
+
 
 public:
-	RendezvousControl(
+	RendezvousComponent(
 		IComponent* parent = nullptr
 		, const SatelliteWeak& target = SatelliteShared(nullptr)
 	);
 
-	RendezvousControl(const RendezvousControl& comp) = default;
+	RendezvousComponent(const RendezvousComponent& comp) = default;
 
-	RendezvousControl(RendezvousControl&& comp) = default;
-
-
-	virtual ~RendezvousControl() = default;
+	RendezvousComponent(RendezvousComponent&& comp) = default;
 
 
-	RendezvousControl& operator = (const RendezvousControl& comp) = default;
+	virtual ~RendezvousComponent() = default;
 
-	RendezvousControl& operator = (RendezvousControl&& comp) = default;
+
+	RendezvousComponent& operator = (const RendezvousComponent& comp) = default;
+
+	RendezvousComponent& operator = (RendezvousComponent&& comp) = default;
 
 	
 public:
@@ -46,15 +44,20 @@ public:
 
 
 public:
-	void pushCommand();
+	void start();
 
-	void popCommand();
+	void stop();
 
-	void peekCommand();
 
-	void clear();
+	bool finished() const;
+
+	SatelliteWeak target() const;
 
 
 public:
 	SatelliteWeak mTarget;
+	Commands mCommandStack;
 };
+
+
+

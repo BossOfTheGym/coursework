@@ -11,7 +11,7 @@
 struct Planet : public IObject
 {
 public:
-	Planet(IComponent* parent = nullptr, const NameComponentShared& = nullptr);
+	Planet(IComponent* parent = nullptr, const Time& t = Time(), const NameComponentShared& = nullptr);
 
 	Planet(const Planet& planet) = default;
 
@@ -27,7 +27,7 @@ public:
 
 
 public:
-	virtual void update(float t, float dt) override;
+	virtual void update(const Time& t) override;
 
 	virtual const Type& componentType() const override;
 

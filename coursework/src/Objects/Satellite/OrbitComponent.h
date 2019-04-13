@@ -7,17 +7,16 @@
 #include <Physics/PhysicsComponent.h>
 
 
-struct OrbitComponent : public IComponent, public ITimeVarying
+struct OrbitComponent : public IComponent
 {
 public:
 	OrbitComponent(
-		IComponent* parent = nullptr
+		  IComponent* parent = nullptr
 		, const PhysicsComponentWeak& planet    = PhysicsComponentShared(nullptr)
 		, const PhysicsComponentWeak& satellite = PhysicsComponentShared(nullptr)
 	);
 
 	OrbitComponent(const OrbitComponent& comp) = default;
-
 	OrbitComponent(OrbitComponent&& comp) = default;
 
 
@@ -25,20 +24,14 @@ public:
 
 
 	OrbitComponent& operator = (const OrbitComponent& comp) = default;
-
 	OrbitComponent& operator = (OrbitComponent&& comp) = default;
-
 
 
 public:
 	virtual const Type& componentType() const override;
 	
-
 public:
 	void updateOrbit();
-
-	virtual void update(float t, float dt) override;
-
 
 private:
 	void updateSpecificParams();

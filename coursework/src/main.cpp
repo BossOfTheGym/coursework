@@ -3,7 +3,7 @@
 #include <Resources.h>
 #include <Factories.h>
 #include <Numerics/Ivp/RungeKutta.h>
-
+#include <Integrators/Integrator.h>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -59,7 +59,10 @@ uint64_t warp;
 uint64_t warpMin;
 uint64_t warpMax;
 
+uint64_t fps;
+
 float divisor;
+
 
 
 
@@ -139,7 +142,6 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
     prevY = yPos;
 }
 
-
 //init all globals
 void initGlobals()
 {
@@ -202,6 +204,54 @@ void initGlobals()
 			, earth->mPhysics
 		)
 	);
+	satellites["satellite 3"] = std::dynamic_pointer_cast<Satellite>(
+		createSatellite(
+			models["box"]
+			, 1.0f
+			, Vec3(1.0f, 0.0f, 1.0f)
+			, glm::scale(Mat4(1.0f), Vec3(0.1f))
+			, Vec3(10.0f, 0.0f, 0.0f)
+			, Vec3(0.0f, -5.0f, -15.32045f)
+			, "satellite 3"
+			, earth->mPhysics
+		)
+		);
+	satellites["satellite 4"] = std::dynamic_pointer_cast<Satellite>(
+		createSatellite(
+			models["box"]
+			, 1.0f
+			, Vec3(0.0f, 1.0f, 1.0f)
+			, glm::scale(Mat4(1.0f), Vec3(0.1f))
+			, Vec3(9.0f, 0.0f, 0.0f)
+			, Vec3(0.0f, 0.0f, -17.32045f)
+			, "satellite 4"
+			, earth->mPhysics
+		)
+		);
+	satellites["satellite 5"] = std::dynamic_pointer_cast<Satellite>(
+		createSatellite(
+			models["box"]
+			, 1.0f
+			, Vec3(1.0f, 1.0f, 0.0f)
+			, glm::scale(Mat4(1.0f), Vec3(0.1f))
+			, Vec3(10.0f, 0.0f, 0.0f)
+			, Vec3(-5.0f, 0.0f, -17.32045f)
+			, "satellite 5"
+			, earth->mPhysics
+		)
+		);
+	satellites["satellite 6"] = std::dynamic_pointer_cast<Satellite>(
+		createSatellite(
+			models["box"]
+			, 1.0f
+			, Vec3(0.5f, 0.5f, 1.0f)
+			, glm::scale(Mat4(1.0f), Vec3(0.1f))
+			, Vec3(10.0f, 2.0f, 0.0f)
+			, Vec3(0.0f, 6.0f, 19.32045f)
+			, "satellite 6"
+			, earth->mPhysics
+		)
+		);
 
 	//render lists
 	for (auto&[name, sat] : satellites)
@@ -237,11 +287,14 @@ void initGlobals()
 	warp = 1;
 	warpMin = 1;
 	warpMax = 1000;
+
+	fps = 0;
 }
 
 
 
 //main loop
+
 //integrator
 void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_step)
 {
@@ -253,8 +306,8 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_s
 	using Solver   = Num::Ivp::RungeKuttaExplicit<6, float, StateVec>;
 
 	auto& mat = sat->mPhysics->mMat;
-	auto& r = sat->mPhysics->mPosition;
-	auto& v = sat->mPhysics->mVelocity;
+	auto& r   = sat->mPhysics->mPosition;
+	auto& v   = sat->mPhysics->mVelocity;
 
 	auto& r0 = planet->mPhysics->mPosition;
 	auto  mu = G * planet->mPhysics->mMass;
@@ -318,18 +371,17 @@ void updatePhysics()
 void updateObjects()
 {
 	//TODO : update method souldn't take zero args
-
-	earth->update(0.0f, 0.0f);
+	earth->update(Time());
 
 	for (auto&[key, sat] : satellites)
 	{
-		sat->update(0.0f, 0.0f);
+		sat->update(Time());
 	}
 }
 
 
 
-
+//test gui
 void testGui()
 {
 	static bool show_demo_window = true;
@@ -352,6 +404,7 @@ void testGui()
 }
 
 
+//my gui
 void systemOptions()
 {
 	if (ImGui::CollapsingHeader("System parameters"))
@@ -360,11 +413,12 @@ void systemOptions()
 		ImGui::Text("Time    : %f"  , accum / divisor);
 		
 		ImGui::SliderScalar("Time warp: ", ImGuiDataType_S64, &warp, &warpMin, &warpMax);
+		warp = std::min(warp, warpMax);
+		warp = std::max(warp, warpMin);
 
 		//integrator(combo)
 	}
 }
-
 
 void planetOptions()
 {
@@ -379,7 +433,6 @@ void planetOptions()
 		//pos
 	}
 }
-
 
 void showSatelliteParameters(SatelliteShared& sat)
 {
@@ -463,7 +516,6 @@ void satellitesOptions()
 	}
 }
 
-
 void myGui()
 {
 	ImGui::SetNextWindowPos({10, 10}, ImGuiCond_Once);
@@ -485,10 +537,14 @@ void myGui()
 
 	satellitesOptions();
 
+	ImGui::Separator();
+	ImGui::Text("FPS    : %lf", fps / glfwGetTime());
+
 	ImGui::End();
 }
 
 
+//gui init/render/destroy
 void initGui()
 {
 	IMGUI_CHECKVERSION();
@@ -509,7 +565,7 @@ void renderGui()
 	ImGui::NewFrame();
 
 
-	testGui();
+	//testGui();
 
 	myGui();
 
@@ -561,7 +617,8 @@ void featureTest()
 	glfwMakeContextCurrent(window);
     glfwSetCursorPos(window, prevX, prevY);
 	glfwSwapInterval(1);
-
+	
+	glfwSetTime(0.0);
 	t0 = glfwGetTimerValue();
     while (!glfwWindowShouldClose(window))
     {
@@ -579,6 +636,8 @@ void featureTest()
 		renderGui();
 
 		glfwSwapBuffers(window);
+
+		fps++;
     }
 
 	destroyGui();

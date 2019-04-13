@@ -23,8 +23,10 @@
     <ClInclude Include="src\Components.h" />
     <ClInclude Include="src\Component\IComponent.h" />
     <ClInclude Include="src\Entity\ITimeVarying.h" />
+    <ClInclude Include="src\Entity\Time.h" />
     <ClInclude Include="src\Factories.h" />
     <ClInclude Include="src\Graphics\GraphicsComponent.h" />
+    <ClInclude Include="src\Integrators\Integrator.h" />
     <ClInclude Include="src\Model\Builders\AssimpBuilder.h" />
     <ClInclude Include="src\Model\Builders\CustomBuilders.h" />
     <ClInclude Include="src\Model\Model.h" />
@@ -35,9 +37,7 @@
     <ClInclude Include="src\Objects\Planet\Planet.h" />
     <ClInclude Include="src\Objects\Planet\PlanetComponent.h" />
     <ClInclude Include="src\Objects\Satellite\OrbitComponent.h" />
-    <ClInclude Include="src\Objects\Satellite\Rendezvous\Commands.h" />
     <ClInclude Include="src\Objects\Satellite\Rendezvous\LambertSolver.h" />
-    <ClInclude Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.h" />
     <ClInclude Include="src\Objects\Satellite\Satellite.h" />
     <ClInclude Include="src\Objects\Satellite\SatelliteComponent.h" />
     <ClInclude Include="src\Objects\View.h" />
@@ -54,6 +54,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\IComponent.cpp" />
+    <ClCompile Include="src\Entity\ITimeVarying.cpp" />
+    <ClCompile Include="src\Entity\Time.cpp" />
     <ClCompile Include="src\Factories.cpp" />
     <ClCompile Include="src\Graphics\GraphicsComponent.cpp" />
     <ClCompile Include="src\ImGui\imgui.cpp" />
@@ -62,6 +64,7 @@
     <ClCompile Include="src\ImGui\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\ImGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="src\Integrators\Integrator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Model\Builders\AssimpBuilder.cpp" />
     <ClCompile Include="src\Model\Builders\CustomBuilders.cpp" />
@@ -75,9 +78,7 @@
     <ClCompile Include="src\Objects\Planet\Planet.cpp" />
     <ClCompile Include="src\Objects\Planet\PlanetComponent.cpp" />
     <ClCompile Include="src\Objects\Satellite\OrbitComponent.cpp" />
-    <ClCompile Include="src\Objects\Satellite\Rendezvous\Commands.cpp" />
     <ClCompile Include="src\Objects\Satellite\Rendezvous\LambertSolver.cpp" />
-    <ClCompile Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.cpp" />
     <ClCompile Include="src\Objects\Satellite\Satellite.cpp" />
     <ClCompile Include="src\Objects\Satellite\SatelliteComponent.cpp" />
     <ClCompile Include="src\Objects\View.cpp" />

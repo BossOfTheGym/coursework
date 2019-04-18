@@ -51,7 +51,7 @@ public:
     void setUniformVec3(GLint location, const Vec3& vec) const;
 
 
-    void setUniform1f(GLint location, float value) const;
+    void setUniform1f(GLint location, double value) const;
 
 
     GLint getUniformLocation(const String& name) const;

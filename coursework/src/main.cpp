@@ -33,8 +33,8 @@ View view;
 
 //gui state
 SatelliteWeak currentWeak;
-float timeTrack0;
-float timeTrack1;
+double timeTrack0;
+double timeTrack1;
 
 //flags
 bool fill;          // wireframe mode
@@ -58,9 +58,7 @@ uint64_t warp;
 uint64_t warpMin;
 uint64_t warpMax;
 
-float divisor;
-
-
+double divisor;
 
 
 //callbacks
@@ -181,7 +179,7 @@ void initGlobals()
 		, Vec3(1.0f, 0.0f, 0.0f)
 		, glm::scale(Mat4(1.0f), Vec3(0.1f))
 		, Vec3(-10.0f, 0.0f, 0.0f)
-		, Vec3(0.0f, 0.0f, 15.0f)
+		, Vec3(0.0f, 0.0f, sqrt(300))
 		, "target 1"
 		, earth->mPhysics
 	);
@@ -218,7 +216,7 @@ void initGlobals()
 	prevY = HEIGHT / 2;
 
 	//time step
-	divisor = (float)glfwGetTimerFrequency();
+	divisor = (double)glfwGetTimerFrequency();
 	t  = Time();
 	t0 = Time();
 	t1 = Time();
@@ -236,14 +234,14 @@ void initGlobals()
 //main loop
 
 //integrator
-void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& dt)
+void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, const Time& dt)
 {
 	using glm::dot;
 	using glm::length;
 
-	using StateVec = Num::Arg::VecN<float, 6>;
+	using StateVec = Num::Arg::VecN<double, 6>;
 	using Methods  = Num::Ivp::Methods;
-	using Solver   = Num::Ivp::RungeKuttaExplicit<6, float, StateVec>;
+	using Solver   = Num::Ivp::RungeKuttaExplicit<6, double, StateVec>;
 
 	auto& mat = sat->mPhysics->mMat;
 	auto& r   = sat->mPhysics->mPosition;
@@ -256,7 +254,7 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& dt)
 	 
 
 	Solver solver;
-	auto force = [&] (float t, const StateVec& vec) -> StateVec
+	auto force = [&] (double t, const StateVec& vec) -> StateVec
 	{
 		Vec3 rv = Vec3(vec[0], vec[1], vec[2]);
 		Vec3 vv = Vec3(vec[3], vec[4], vec[5]);
@@ -271,8 +269,8 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& dt)
 	StateVec curr{dr[0], dr[1], dr[2], v[0], v[1], v[2]};
 	StateVec next = solver.solve(
 		  force
-		, Methods::classic4<float>
-		, dt.asFloat()
+		, Methods::classic4<double>
+		, t.asFloat()
 		, curr
 		, dt.asFloat()
 	).second;
@@ -302,7 +300,7 @@ void updatePhysics()
 
 		for (auto&[key, sat] : satellites)
 		{
-			updateSatPlanet(sat, earth, dt0 * warp);
+			updateSatPlanet(sat, earth, t, dt0 * warp);
 		}
 	}
 }
@@ -555,8 +553,8 @@ void featureTest()
     //setups
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
     glViewport(0, 0, WIDTH, HEIGHT);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	
@@ -569,7 +567,7 @@ void featureTest()
 	glfwMakeContextCurrent(window);
     glfwSetCursorPos(window, prevX, prevY);
 	glfwSwapInterval(1);
-	
+
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

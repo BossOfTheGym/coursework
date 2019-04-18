@@ -6,7 +6,7 @@
 class Time
 {
 public:
-	Time(uint64_t timeInt = 0, float timeFloat = 0.0f);
+	Time(uint64_t timeInt = 0, double timeFloat = 0.0f);
 
 	Time(const Time& time) = default;
 	Time(Time&& time)      = default;
@@ -20,7 +20,7 @@ public:
 public:
 	uint64_t asU64() const;
 
-	float asFloat() const;
+	double asFloat() const;
 
 
 public:
@@ -40,5 +40,5 @@ public:
 
 private:
 	uint64_t mTimeInt;
-	float    mTimeFloat;
+	double    mTimeFloat;
 };

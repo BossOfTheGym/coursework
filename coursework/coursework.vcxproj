@@ -95,6 +95,18 @@
     <ClCompile Include="src\Shader\ShaderProgram.cpp" />
     <ClCompile Include="src\Texture\Texture2D.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\Planet\sphere.fs" />
+    <None Include="assets\shaders\Planet\sphere.gs" />
+    <None Include="assets\shaders\Planet\sphere.tcs" />
+    <None Include="assets\shaders\Planet\sphere.tes" />
+    <None Include="assets\shaders\Planet\sphere.vs" />
+    <None Include="assets\shaders\Satellite\satellite.fs" />
+    <None Include="assets\shaders\Satellite\satellite.gs" />
+    <None Include="assets\shaders\Satellite\satellite.vs" />
+    <None Include="assets\shaders\Simple\simple.fs" />
+    <None Include="assets\shaders\Simple\simple.vs" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{1DBEFC56-F956-4903-8B1A-96C9BA2606AB}</ProjectGuid>

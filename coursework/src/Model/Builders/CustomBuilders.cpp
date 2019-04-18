@@ -30,7 +30,7 @@ namespace
 	
 
 
-	void pushVertex(std::vector<float>& data, const Vec3& vertex)
+	void pushVertex(std::vector<double>& data, const Vec3& vertex)
 	{
 		data.push_back(vertex.x);
 		data.push_back(vertex.y);
@@ -38,7 +38,7 @@ namespace
 	}
 
 	void pushSplitedTriangles(
-		std::vector<float>& data 
+		std::vector<double>& data 
 		, const Vec3& vertex0
 		, const Vec3& vertex1
 		, const Vec3& vertex2
@@ -46,9 +46,9 @@ namespace
 	{
 		if (split > 0)
 		{
-			Vec3 vertex01 = (vertex0 + vertex1) / 2.0f;
-			Vec3 vertex12 = (vertex1 + vertex2) / 2.0f;
-			Vec3 vertex20 = (vertex2 + vertex0) / 2.0f;
+			Vec3 vertex01 = (vertex0 + vertex1) / 2.0;
+			Vec3 vertex12 = (vertex1 + vertex2) / 2.0;
+			Vec3 vertex20 = (vertex2 + vertex0) / 2.0;
 
 			pushSplitedTriangles(data, vertex0, vertex01, vertex20, split - 1);
 
@@ -71,19 +71,19 @@ namespace
 		//icosahedron params
 		const int PENTAGON_SIDES = 5;
 
-		const float HALF_ANGLE = PI / PENTAGON_SIDES;
-		const float ANGLE      = 2 * HALF_ANGLE;
-		const float SIN_HALF   = sin(HALF_ANGLE);
+		const double HALF_ANGLE = PI / PENTAGON_SIDES;
+		const double ANGLE      = 2 * HALF_ANGLE;
+		const double SIN_HALF   = sin(HALF_ANGLE);
 
-		const float ICOSAHEDRON_SIDE = sqrt(4 * pow(SIN_HALF, 2) - 1.0f) / SIN_HALF;
-		const float PYRAMID_HEIGHT   = pow(ICOSAHEDRON_SIDE, 2) / 2;
-		const float RADIUS           = ICOSAHEDRON_SIDE / (2 * SIN_HALF);
-		const float HEIGHT_ANGLE = atan((1.0f - PYRAMID_HEIGHT) / RADIUS);
+		const double ICOSAHEDRON_SIDE = sqrt(4 * pow(SIN_HALF, 2) - 1.0f) / SIN_HALF;
+		const double PYRAMID_HEIGHT   = pow(ICOSAHEDRON_SIDE, 2) / 2;
+		const double RADIUS           = ICOSAHEDRON_SIDE / (2 * SIN_HALF);
+		const double HEIGHT_ANGLE = atan((1.0f - PYRAMID_HEIGHT) / RADIUS);
 
-		const float A   = ICOSAHEDRON_SIDE;
-		const float H   = PYRAMID_HEIGHT;
-		const float R   = RADIUS;
-		const float PHI = HEIGHT_ANGLE;
+		const double A   = ICOSAHEDRON_SIDE;
+		const double H   = PYRAMID_HEIGHT;
+		const double R   = RADIUS;
+		const double PHI = HEIGHT_ANGLE;
 
 		const int N = PENTAGON_SIDES;
 
@@ -96,7 +96,7 @@ namespace
 		glm::vec3 bottomRing[N];
 
 
-		float angle;
+		double angle;
 		for (int i = 0; i < N; i++) 
 		{
 			angle = ANGLE * i;
@@ -108,7 +108,7 @@ namespace
 
 
 		//assemble triangles
-		std::vector<float> data;
+		std::vector<double> data;
 		for (int curr = 0; curr < N; curr++)
 		{
 			int prev = (curr + N - 1) % N;
@@ -145,7 +145,7 @@ namespace
 			)
 		);
 		buffer.bindArray();
-		buffer.setAttribPointer(VAB::VERTEX, 3, GL_FLOAT, 3 * sizeof(float), 0);
+		buffer.setAttribPointer(VAB::VERTEX, 3, GL_DOUBLE, 3 * sizeof(double), 0);
 
 		UInt materialIndex = 0;
 			
@@ -271,7 +271,7 @@ namespace
 		};
 
 
-		std::vector<float> data;
+		std::vector<double> data;
 		for (int i = 0; i < 12; i++)
 		{
 			pushVertex(data, BOX_VERTICES[INDICES[i][0]]);
@@ -279,7 +279,7 @@ namespace
 			pushVertex(data, BOX_VERTICES[INDICES[i][2]]);
 		}
 
-		std::vector<float> normals;
+		std::vector<double> normals;
 		for (int i = 0; i < 12; i++)
 		{
 			pushVertex(normals, NORMALS[INDICES[i][3]]);
@@ -306,13 +306,13 @@ namespace
 		int offset = 0;
 		vertexBuffer.bindArray();
 
-		vertexBuffer.setAttribPointer(VAB::VERTEX, 3, GL_FLOAT, 3 * sizeof(float), (const void*)offset);
-		vertexBuffer.subData(offset, data.size() * sizeof(float), data.data());
+		vertexBuffer.setAttribPointer(VAB::VERTEX, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
+		vertexBuffer.subData(offset, data.size() * sizeof(double), data.data());
 
-		offset += data.size() * sizeof(float);
+		offset += data.size() * sizeof(double);
 
-		vertexBuffer.setAttribPointer(VAB::NORMAL, 3, GL_FLOAT, 3 * sizeof(float), (const void*)offset);
-		vertexBuffer.subData(offset, normals.size() * sizeof(float), normals.data());
+		vertexBuffer.setAttribPointer(VAB::NORMAL, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
+		vertexBuffer.subData(offset, normals.size() * sizeof(double), normals.data());
 		
 
 		UInt materialIndex = 0;

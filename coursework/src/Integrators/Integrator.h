@@ -7,14 +7,14 @@
 
 
 //radius(r) + velocity(v)
-class StateVec : public Num::Arg::VecN<float, 6>
+class StateVec : public Num::Arg::VecN<double, 6>
 {
 public:
 	StateVec();
 
 	StateVec(const Vec3& radius, const Vec3& velocity);
 
-	StateVec(float r0, float r1, float r2, float v0, float v1, float v2);
+	StateVec(double r0, double r1, double r2, double v0, double v1, double v2);
 
 
 	StateVec(const StateVec& sv) = default;

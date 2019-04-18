@@ -13,7 +13,7 @@ StateVec::StateVec(const Vec3& radius, const Vec3& velocity)
 	setVelocity(velocity);
 }
 
-StateVec::StateVec(float r0, float r1, float r2, float v0, float v1, float v2)
+StateVec::StateVec(double r0, double r1, double r2, double v0, double v1, double v2)
 {
 	m_vec[0] = r0;
 	m_vec[1] = r1;

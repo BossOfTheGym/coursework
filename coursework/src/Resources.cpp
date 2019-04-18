@@ -58,7 +58,7 @@ void loadModels(std::map<String, ModelShared>& modelsStorage)
 
 
 	PlanetBuilder planetBuilder;
-	planetBuilder.build(3, "assets/textures/earth/earthmap1k.jpg", "Earth");
+	planetBuilder.build(4, "assets/textures/earth/earthmap1k.jpg", "Earth");
 
 	modelsStorage["earth"] = ModelShared(new Model(std::move(planetBuilder.model())));
 

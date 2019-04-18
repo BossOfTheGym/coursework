@@ -43,27 +43,27 @@ public:
 	PhysicsComponentWeak mSatellitePhys;
 
 	//main
-	float mC;   // specific Angular Momentum(length)
-	float mI;   // Inclination
-	float mRA;  // right ascension of the Ascending Node
-	float mE;   // Eccentricity
-	float mAP;  // Argument of Periapsis
-	float mTA;  // True Anomaly
+	double mC;   // specific Angular Momentum(length)
+	double mI;   // Inclination
+	double mRA;  // right ascension of the Ascending Node
+	double mE;   // Eccentricity
+	double mAP;  // Argument of Periapsis
+	double mTA;  // True Anomaly
 
 	//misc
 	Vec3 mCv;   // specific Angular Momentum
 	Vec3 mEv;   // eccentricity vector
 	Vec3 mLv;   // lagrange vector
 
-	float mH;   // energy integral
-	float mP;   // semi-latus rectum
-	float mMu;  // mu param
+	double mH;   // energy integral
+	double mP;   // semi-latus rectum
+	double mMu;  // mu param
 
 	//specific
-	float mOP;  // Orbit Period
-	float mA;   // apoapsis
-	float mEA;  // Eccentric Anomaly
-	float mT;   // time since periapsis	
+	double mOP;  // Orbit Period
+	double mA;   // apoapsis
+	double mEA;  // Eccentric Anomaly
+	double mT;   // time since periapsis	
 };
 
 

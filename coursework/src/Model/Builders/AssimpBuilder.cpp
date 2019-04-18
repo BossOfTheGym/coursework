@@ -80,14 +80,14 @@ namespace
 
 	auto getAttributes(const aiMesh* mesh)
 	{
-		std::vector<float> vertices;
+		std::vector<double> vertices;
 		if (mesh->HasPositions())
 		{
 			vertices.reserve(3 * 3 * mesh->mNumFaces);
 
-			float xMin = mesh->mVertices[0][0], xMax = mesh->mVertices[0][0];
-			float yMin = mesh->mVertices[0][1], yMax = mesh->mVertices[0][1];
-			float zMin = mesh->mVertices[0][2], zMax = mesh->mVertices[0][2];
+			double xMin = mesh->mVertices[0][0], xMax = mesh->mVertices[0][0];
+			double yMin = mesh->mVertices[0][1], yMax = mesh->mVertices[0][1];
+			double zMin = mesh->mVertices[0][2], zMax = mesh->mVertices[0][2];
 
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
@@ -116,16 +116,16 @@ namespace
 				}
 			}
 
-			float xDelta = xMax - xMin;
-			float yDelta = yMax - yMin;
-			float zDelta = zMax - zMin;
+			double xDelta = xMax - xMin;
+			double yDelta = yMax - yMin;
+			double zDelta = zMax - zMin;
 
-			float scale = (xDelta > yDelta ? xDelta : yDelta);
+			double scale = (xDelta > yDelta ? xDelta : yDelta);
 			scale = (scale > zDelta ? scale : zDelta);
 
-			float xCenter = (xMax + xMin) / 2.0f;
-			float yCenter = (yMax + yMin) / 2.0f;
-			float zCenter = (zMax + zMin) / 2.0f;
+			double xCenter = (xMax + xMin) / 2.0f;
+			double yCenter = (yMax + yMin) / 2.0f;
+			double zCenter = (zMax + zMin) / 2.0f;
 
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
@@ -143,7 +143,7 @@ namespace
 			}
 		}
 
-		std::vector<float> colors;
+		std::vector<double> colors;
 		if (mesh->HasVertexColors(0))
 		{
 			colors.reserve(4 * 3 * mesh->mNumFaces);
@@ -164,7 +164,7 @@ namespace
 			}
 		}
 
-		std::vector<float> normals;
+		std::vector<double> normals;
 		if (mesh->HasNormals())
 		{
 			normals.reserve(3 * mesh->mNumFaces);
@@ -184,8 +184,8 @@ namespace
 			}
 		}
 
-		std::vector<float> tangents;
-		std::vector<float> bitangents;
+		std::vector<double> tangents;
+		std::vector<double> bitangents;
 		if (mesh->HasTangentsAndBitangents())
 		{
 			tangents.reserve(3 * 3 * mesh->mNumFaces);
@@ -212,7 +212,7 @@ namespace
 			}
 		}
 
-		std::vector<float> textureCoords;
+		std::vector<double> textureCoords;
 		if (mesh->HasTextureCoords(0))
 		{
 			textureCoords.reserve(3 * 3 * mesh->mNumFaces);
@@ -275,48 +275,48 @@ namespace
 		vab.bindArray();
 		if (mesh->HasPositions())
 		{
-			vab.subData(offset, vertices.size() * sizeof(float), vertices.data());
-			vab.setAttribPointer(Mesh::VAB::VERTEX, 3, GL_FLOAT, 3 * sizeof(float), (const void*)offset);
+			vab.subData(offset, vertices.size() * sizeof(double), vertices.data());
+			vab.setAttribPointer(Mesh::VAB::VERTEX, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 
-			offset += static_cast<int>(vertices.size() * sizeof(float));
+			offset += static_cast<int>(vertices.size() * sizeof(double));
 		}
 
 		if (mesh->HasVertexColors(0))
 		{
-			vab.subData(offset, colors.size() * sizeof(float), colors.data());
-			vab.setAttribPointer(Mesh::VAB::COLOR, 4, GL_FLOAT, 4 * sizeof(float), (const void*)offset);
+			vab.subData(offset, colors.size() * sizeof(double), colors.data());
+			vab.setAttribPointer(Mesh::VAB::COLOR, 4, GL_DOUBLE, 4 * sizeof(double), (const void*)offset);
 
-			offset += static_cast<int>(colors.size() * sizeof(float));
+			offset += static_cast<int>(colors.size() * sizeof(double));
 		}
 
 		if (mesh->HasNormals())
 		{
-			vab.subData(offset, normals.size() * sizeof(float), normals.data());
-			vab.setAttribPointer(Mesh::VAB::NORMAL, 3, GL_FLOAT, 3* sizeof(float), (const void*)offset);
+			vab.subData(offset, normals.size() * sizeof(double), normals.data());
+			vab.setAttribPointer(Mesh::VAB::NORMAL, 3, GL_DOUBLE, 3* sizeof(double), (const void*)offset);
 
-			offset += static_cast<int>(normals.size() * sizeof(float));
+			offset += static_cast<int>(normals.size() * sizeof(double));
 		}
 
 		if (mesh->HasTangentsAndBitangents())
 		{
-			vab.subData(offset, tangents.size() * sizeof(float), tangents.data());
-			vab.setAttribPointer(Mesh::VAB::TANGENT, 3, GL_FLOAT, 3 * sizeof(float), (const void*)offset);
+			vab.subData(offset, tangents.size() * sizeof(double), tangents.data());
+			vab.setAttribPointer(Mesh::VAB::TANGENT, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 
-			offset += static_cast<int>(tangents.size() * sizeof(float));
+			offset += static_cast<int>(tangents.size() * sizeof(double));
 
 
-			vab.subData(offset, bitangents.size() * sizeof(float), bitangents.data());
-			vab.setAttribPointer(Mesh::VAB::BITANGENT, 3, GL_FLOAT, 3 * sizeof(float), (const void*)offset);
+			vab.subData(offset, bitangents.size() * sizeof(double), bitangents.data());
+			vab.setAttribPointer(Mesh::VAB::BITANGENT, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 
-			offset += static_cast<int>(bitangents.size() * sizeof(float));
+			offset += static_cast<int>(bitangents.size() * sizeof(double));
 		}
 
 		if (mesh->HasTextureCoords(0))
 		{
-			vab.subData(offset, textureCoords.size() * sizeof(float), textureCoords.data());
-			vab.setAttribPointer(Mesh::VAB::TEXTURE, 3, GL_FLOAT, 3 * sizeof(float), (const void*)offset);
+			vab.subData(offset, textureCoords.size() * sizeof(double), textureCoords.data());
+			vab.setAttribPointer(Mesh::VAB::TEXTURE, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 
-			offset += static_cast<int>(textureCoords.size() * sizeof(float));
+			offset += static_cast<int>(textureCoords.size() * sizeof(double));
 		}
 
 		return vab;

@@ -22,7 +22,7 @@ public:
 public:
 	VertexArrayBuffer();
 
-    VertexArrayBuffer(GLsizei elements, GLsizei size, const float* data);
+    VertexArrayBuffer(GLsizei elements, GLsizei size, const double* data);
 
     VertexArrayBuffer(const VertexArrayBuffer& vertexBuffer) = delete;
 
@@ -63,7 +63,7 @@ public:
 private:
     void resetArrayBuffer();
 
-    bool loadData(GLsizei size, const float* data);
+    bool loadData(GLsizei size, const double* data);
 
 
 private:

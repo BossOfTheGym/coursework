@@ -2,15 +2,15 @@
 
 
 //statics
-const float View::DELTA_THRESHOLD = 0.0001f;
+const double View::DELTA_THRESHOLD = 0.0001f;
 
-const float View::DEFAULT_SENSITIVITY = 0.25f;
+const double View::DEFAULT_SENSITIVITY = 0.25f;
 
-const float View::PITCH_MAX = 2 * PI;
-const float View::PITCH_MIN = 0;
+const double View::PITCH_MAX = 2 * PI;
+const double View::PITCH_MIN = 0;
 
-const float View::ROLL_MAX = +PI / 2;
-const float View::ROLL_MIN = -PI / 2;
+const double View::ROLL_MAX = +PI / 2;
+const double View::ROLL_MIN = -PI / 2;
 
 
 //constructor
@@ -18,7 +18,7 @@ View::View(
 	  const Mat4& axes
 	, const Mat4& proj
 	, const Vec3& pos
-	, float sensitivity
+	, double sensitivity
 ) 
 	: mView(axes)
 	, mAxes(axes)
@@ -34,7 +34,7 @@ View::View(
 
 
 //core
-void View::lookAround(float pitch, float roll)
+void View::lookAround(double pitch, double roll)
 {
 	mPitch += pitch / mSensivity;
 	mRoll  += roll / mSensivity;
@@ -64,7 +64,7 @@ void View::lookAround(float pitch, float roll)
 
 namespace
 {
-	void rotateMat(Mat4& mat, float delta, View::Axis axis)
+	void rotateMat(Mat4& mat, double delta, View::Axis axis)
 	{
 		static View::Axis cycled[5] = {View::X, View::Y, View::Z, View::X, View::Y};
 
@@ -74,8 +74,8 @@ namespace
 			//[1, 0] & [0, 1]
 			//[cos(a) -sin(a)]
 			//[sin(a)  cos(a)]
-			float cosDelta = cos(delta);
-			float sinDelta = sin(delta);
+			double cosDelta = cos(delta);
+			double sinDelta = sin(delta);
 
 			View::Axis axis1 = cycled[axis + 1];
 			View::Axis axis2 = cycled[axis + 2];
@@ -102,7 +102,7 @@ namespace
 	}
 }
 
-void View::rotateAxes(float angle, Axis axis)
+void View::rotateAxes(double angle, Axis axis)
 {
 	mAxes = mView;
 
@@ -111,7 +111,7 @@ void View::rotateAxes(float angle, Axis axis)
 	updateAxes();
 }
 
-void View::rotateView(float angle, Axis axis)
+void View::rotateView(double angle, Axis axis)
 {
 	rotateMat(mView, angle, axis);
 
@@ -119,7 +119,7 @@ void View::rotateView(float angle, Axis axis)
 }
 
 
-void View::travelView(float distance, Axis axis)
+void View::travelView(double distance, Axis axis)
 {
 	mPos[0] -= mView[0][axis] * distance;
 	mPos[1] -= mView[1][axis] * distance;
@@ -169,12 +169,12 @@ const Vec3& View::pos() const
 }
 
 
-float& View::sensivity()
+double& View::sensivity()
 {
 	return mSensivity;
 }
 
-const float& View::sensivity() const
+const double& View::sensivity() const
 {
 	return mSensivity;
 }

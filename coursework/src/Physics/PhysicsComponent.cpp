@@ -7,7 +7,7 @@ PhysicsComponent::PhysicsComponent(
 	, const Vec3& position
 	, const Vec3& velocity
 	, const Vec3& angularMomentum
-	, float mass
+	, double mass
 ) 
 	: IComponent(parent)
 	, mMat(mat)

@@ -7,15 +7,15 @@
 class View
 {
 public:
-	static const float DEFAULT_SENSITIVITY;
+	static const double DEFAULT_SENSITIVITY;
 
-	static const float DELTA_THRESHOLD;
+	static const double DELTA_THRESHOLD;
 
-	static const float PITCH_MAX;
-	static const float PITCH_MIN;
+	static const double PITCH_MAX;
+	static const double PITCH_MIN;
 
-	static const float ROLL_MAX;
-	static const float ROLL_MIN;
+	static const double ROLL_MAX;
+	static const double ROLL_MIN;
 
 
 	enum Axis : int
@@ -35,7 +35,7 @@ public:
 		const Mat4& axes = Mat4(1.0f)
 		, const Mat4& proj = Mat4(1.0f)
 		, const Vec3& pos = Vec3(0.0f)
-		, float sensitivity = DEFAULT_SENSITIVITY
+		, double sensitivity = DEFAULT_SENSITIVITY
 	);
 
 
@@ -44,13 +44,13 @@ public:
 	View& operator = (View&& view) = default;
 
 
-	void lookAround(float pitch, float roll);
+	void lookAround(double pitch, double roll);
 
-	void rotateAxes(float delta, Axis axis);
+	void rotateAxes(double delta, Axis axis);
 
-	void rotateView(float delta, Axis axis);
+	void rotateView(double delta, Axis axis);
 
-	void travelView(float distance, Axis axis);
+	void travelView(double distance, Axis axis);
 
 
 
@@ -70,9 +70,9 @@ public:
 	const Vec3& pos() const;
 
 
-	float& sensivity();
+	double& sensivity();
 
-	const float& sensivity() const;
+	const double& sensivity() const;
 
 
 private:
@@ -82,8 +82,8 @@ private:
 
 
 private:
-	float mPitch; // y
-	float mRoll;  // x
+	double mPitch; // y
+	double mRoll;  // x
 
 	Mat4 mAxes;
 	Mat4 mView;
@@ -91,5 +91,5 @@ private:
 
 	Vec3 mPos;
 
-	float mSensivity;
+	double mSensivity;
 };

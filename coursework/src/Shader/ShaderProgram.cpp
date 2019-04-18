@@ -66,29 +66,29 @@ void ShaderProgram::use() const
 //uniforms
 void ShaderProgram::setUniformMat4(GLint location, const Mat4& mat) const
 {
-    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
+    glUniformMatrix4dv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void ShaderProgram::setUniformMat3(GLint location, const Mat3& mat) const
 {
-    glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(mat));
+    glUniformMatrix3dv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 
 void ShaderProgram::setUniformVec4(GLint location, const Vec4& vec) const
 {
-    glUniform4fv(location, 1, glm::value_ptr(vec));
+    glUniform4dv(location, 1, glm::value_ptr(vec));
 }
 
 void ShaderProgram::setUniformVec3(GLint location, const Vec3& vec) const
 {
-    glUniform3fv(location, 1, glm::value_ptr(vec));
+    glUniform3dv(location, 1, glm::value_ptr(vec));
 }
 
 
-void ShaderProgram::setUniform1f(GLint location, float value) const
+void ShaderProgram::setUniform1f(GLint location, double value) const
 {
-    glUniform1f(location, value);
+    glUniform1d(location, value);
 }
 
 

@@ -1,20 +1,20 @@
 #version 430 core
 
-layout(location = 0) in vec3 vertex;
-layout(location = 2) in vec3 normal;
+layout(location = 0) in dvec3 vertex;
+layout(location = 2) in dvec3 normal;
 
 
-out vec3 vNormal;
+out dvec3 vNormal;
 
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
+uniform dmat4 model;
+uniform dmat4 view;
+uniform dmat4 proj;
 
 
 void main()
 {
-	gl_Position = proj * view * model * vec4(vertex, 1.0);
+	gl_Position = vec4(proj * view * model * dvec4(vertex, 1.0));
 
 	vNormal = normal;
 }

@@ -1,13 +1,13 @@
 #version 430 core
 
-layout(location = 0) in vec3 pos;
-layout(location = 1) in vec3 color;
-layout(location = 2) in vec2 tex;
+layout(location = 0) in dvec3 pos;
+layout(location = 1) in dvec3 color;
+layout(location = 2) in dvec2 tex;
 
 
-out vec3 vsPosition;
-out vec3 vsColor;
-out vec2 vsTex;
+out dvec3 vsPosition;
+out dvec3 vsColor;
+out dvec2 vsTex;
 
 void main()
 {

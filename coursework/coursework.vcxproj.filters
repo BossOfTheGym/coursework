@@ -237,4 +237,36 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\Planet\sphere.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Planet\sphere.gs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Planet\sphere.tcs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Planet\sphere.tes">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Planet\sphere.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Satellite\satellite.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Satellite\satellite.gs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Satellite\satellite.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Simple\simple.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Simple\simple.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

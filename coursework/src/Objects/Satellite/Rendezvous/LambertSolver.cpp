@@ -8,47 +8,47 @@ namespace
 {
 	//x > 0
 
-	float c0(float x)
+	double c0(double x)
 	{
 		return cos(sqrt(x));
 	}
 
-	float c1(float x)
+	double c1(double x)
 	{
 		auto sq = sqrt(x);
 
 		return sin(sq) / sq;
 	}
 
-	float c2(float x)
+	double c2(double x)
 	{
 		return (1.0f - cos(sqrt(x))) / x;
 	}
 
-	float c3(float x)
+	double c3(double x)
 	{
 		auto sq = sqrt(x);
 
 		return (sq - sin(sq)) / (x * sq);
 	}
 
-	float c4(float x)
+	double c4(double x)
 	{
 		return (1.0f / 2 - c2(x)) / x;
 	}
 
-	float c5(float x)
+	double c5(double x)
 	{
 		return (1.0f / 6 - c3(x)) / x;
 	}
 
-	float c6(float x)
+	double c6(double x)
 	{
 		return (1.0f / 24 - c4(x)) / x;
 	}
 
 
-	//float F(float x, float rho, float sigma)
+	//double F(double x, double rho, double sigma)
 	//{
 	//	auto c1Val = c1(x);
 	//	auto c2Val = c2(x);
@@ -59,7 +59,7 @@ namespace
 	//	return c3(x) / pow(c2(x), 1.5f) * pow(u, 3.0f) + rho * u - sigma;
 	//}
 
-	//float Fx(float x, float rho)
+	//double Fx(double x, double rho)
 	//{
 	//	auto c1Val = c1(x);
 	//	auto c2Val = c2(x);
@@ -80,14 +80,14 @@ namespace
 }
 
 
-float solveLambertProblem(
+double solveLambertProblem(
 	const Vec3& rv1
-	, float t1
+	, double t1
 	, const Vec3& rv2
-	, float t2
-	, float mu
-	, float x0
-	, float eps
+	, double t2
+	, double mu
+	, double x0
+	, double eps
 	, int limit
 )
 {
@@ -105,7 +105,7 @@ float solveLambertProblem(
 	auto sigma = sqrt(mu) / pow(r1 + r2, 1.5f) * (t2 - t1);
 
 	//func
-	auto F = [&] (float x) -> float
+	auto F = [&] (double x) -> double
 	{
 		auto c1Val = c1(x);
 		auto c2Val = c2(x);
@@ -117,7 +117,7 @@ float solveLambertProblem(
 	};
 
 	//deriv
-	auto Fx = [&] (float x) -> float
+	auto Fx = [&] (double x) -> double
 	{
 		auto c1Val = c1(x);
 		auto c2Val = c2(x);
@@ -135,5 +135,5 @@ float solveLambertProblem(
 			+(3 * c3Val / c2Pow * u * u + rho) * rho * sqrt(c2Val) / (8 * u);
 	};
 
-	return Num::Equ::NeutonScalar<float>(limit, eps).solve(F, Fx, x0).first;
+	return Num::Equ::NeutonScalar<double>(limit, eps).solve(F, Fx, x0).first;
 }

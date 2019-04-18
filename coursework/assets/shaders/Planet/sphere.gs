@@ -4,41 +4,46 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 
-in vec4 tesModelPos[];
-in vec4 tesWorldPos[];
-in vec3 tesNormal[];
-in vec3 tesColor[];
+in dvec4 tesModelPos[];
+in dvec4 tesWorldPos[];
+in dvec3 tesNormal[];
+in dvec3 tesColor[];
 
-out vec4 geoModelPos;
-out vec4 geoWorldPos;
-out vec3 geoNormal;
-out vec3 geoColor;
+flat out dvec4 geoModelPos[3];
+flat out dvec4 geoWorldPos[3];
+flat out dvec3 geoNormal[3];
+flat out dvec3 geoColor[3];
 out vec3 geoGomo;
 
 
 void main()
 {
+	geoModelPos[0] = tesModelPos[0];
+	geoModelPos[1] = tesModelPos[1];
+	geoModelPos[2] = tesModelPos[2];
+
+	geoWorldPos[0] = tesWorldPos[0];
+	geoWorldPos[1] = tesWorldPos[1];
+	geoWorldPos[2] = tesWorldPos[2];
+
+	geoNormal[0]   = tesNormal[0];
+	geoNormal[1]   = tesNormal[1];
+	geoNormal[2]   = tesNormal[2];
+
+	geoColor[0]    = tesColor[0];
+	geoColor[1]    = tesColor[1];
+	geoColor[2]    = tesColor[2];
+
+
 	gl_Position = gl_in[0].gl_Position;
-	geoModelPos = tesModelPos[0];
-	geoWorldPos = tesWorldPos[0];
-	geoNormal   = tesNormal[0];
-	geoColor    = tesColor[0];
 	geoGomo     = vec3(1.0f, 0.0f, 0.0f);
 	EmitVertex();
 
 	gl_Position = gl_in[1].gl_Position;
-	geoModelPos = tesModelPos[1];
-	geoWorldPos = tesWorldPos[1];
-	geoNormal   = tesNormal[1];
-	geoColor    = tesColor[1];
 	geoGomo     = vec3(0.0f, 1.0f, 0.0f);
 	EmitVertex();
 
 	gl_Position = gl_in[2].gl_Position;
-	geoModelPos = tesModelPos[2];
-	geoWorldPos = tesWorldPos[2];
-	geoNormal   = tesNormal[2];
-	geoColor    = tesColor[2];
 	geoGomo     = vec3(0.0f, 0.0f, 1.0f);
 	EmitVertex();
 

@@ -4,7 +4,7 @@
 //object factories
 SatelliteShared createSatellite(
 	const ModelShared& model
-	, float mass
+	, double mass
 	, const Vec3& color
 	, const Mat4& mat
 	, const Vec3& pos
@@ -51,7 +51,7 @@ SatelliteShared createSatellite(
 
 SatelliteShared createChaser(
 	const ModelShared& model
-	, float mass
+	, double mass
 	, const Vec3& color
 	, const Mat4& mat
 	, const Vec3& pos
@@ -72,7 +72,7 @@ SatelliteShared createChaser(
 
 PlanetShared createPlanet(
 	const ModelShared& model
-	, float mass
+	, double mass
 	, const Mat4& mat
 	, const Vec3& pos
 	, const Vec3& vel

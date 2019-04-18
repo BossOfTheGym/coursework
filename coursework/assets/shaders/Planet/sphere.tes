@@ -3,34 +3,35 @@
 layout(triangles, equal_spacing, ccw) in;
 
 
-in vec3 tcsPosition[];
-in vec3 tcsColor[];
-in vec2 tcsTex[];
+in dvec3 tcsPosition[];
+in dvec3 tcsColor[];
+in dvec2 tcsTex[];
 
-out vec4 tesModelPos;
-out vec4 tesWorldPos;
-out vec3 tesNormal;
-out vec3 tesColor;
+out dvec4 tesModelPos;
+out dvec4 tesWorldPos;
+out dvec3 tesNormal;
+out dvec3 tesColor;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
+
+uniform dmat4 model;
+uniform dmat4 view;
+uniform dmat4 proj;
 
 
 void main()
 {
-	vec3 p0, p1, p2;
-	vec2 t0, t1, t2;
-	vec4 point;
+	dvec3 p0, p1, p2;
+	dvec2 t0, t1, t2;
+	dvec4 point;
 
 	p0 = gl_TessCoord.x * tcsPosition[0];
 	p1 = gl_TessCoord.y * tcsPosition[1];
 	p2 = gl_TessCoord.z * tcsPosition[2];
 	
-	tesModelPos = vec4(normalize(p0 + p1 + p2), 1.0f);
+	tesModelPos = dvec4(normalize(p0 + p1 + p2), 1.0);
 	tesWorldPos = model * tesModelPos;
-	tesNormal = normalize((inverse(transpose(model)) * vec4(tesModelPos.xyz, 0.0)).xyz);
-	gl_Position = proj * view * tesWorldPos;
+	tesNormal = normalize((inverse(transpose(model)) * dvec4(tesModelPos.xyz, 0.0)).xyz);
+	gl_Position = vec4(proj * view * tesWorldPos);
 
 
 	p0 = gl_TessCoord.x * tcsColor[0];

@@ -1,6 +1,6 @@
 #include "Time.h"
 
-Time::Time(uint64_t timeInt, float timeFloat)
+Time::Time(uint64_t timeInt, double timeFloat)
 	: mTimeInt(timeInt)
 	, mTimeFloat(timeFloat)
 {}
@@ -10,7 +10,7 @@ uint64_t Time::asU64() const
 	return mTimeInt;
 }
 
-float Time::asFloat() const
+double Time::asFloat() const
 {
 	return mTimeFloat;
 }

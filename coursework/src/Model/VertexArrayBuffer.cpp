@@ -8,7 +8,7 @@ VertexArrayBuffer::VertexArrayBuffer()
 	, mElements(0)
 {}
 
-VertexArrayBuffer::VertexArrayBuffer(GLsizei elements, GLsizei size, const float* data)
+VertexArrayBuffer::VertexArrayBuffer(GLsizei elements, GLsizei size, const double* data)
     : mArrayId(EMPTY)
     , mBufferId(EMPTY)
     , mElements(elements)
@@ -91,7 +91,7 @@ void VertexArrayBuffer::resetArrayBuffer()
 
 
 //core functions
-bool VertexArrayBuffer::loadData(GLsizei size, const float* data)
+bool VertexArrayBuffer::loadData(GLsizei size, const double* data)
 {
     GLint prevArray;
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prevArray);
@@ -108,7 +108,7 @@ bool VertexArrayBuffer::loadData(GLsizei size, const float* data)
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, mBufferId);
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, size * sizeof(double), data, GL_STATIC_DRAW);
 
     glBindVertexArray(prevArray);
     return true;

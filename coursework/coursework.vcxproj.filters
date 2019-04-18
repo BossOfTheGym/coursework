@@ -111,6 +111,15 @@
     <ClInclude Include="src\Integrators\Integrator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Objects\Satellite\Rendezvous\Actions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Objects\Satellite\Rendezvous\ActionVariant.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -218,10 +227,13 @@
     <ClCompile Include="src\Integrators\Integrator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Entity\ITimeVarying.cpp">
+    <ClCompile Include="src\Entity\Time.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Entity\Time.cpp">
+    <ClCompile Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Objects\Satellite\Rendezvous\Actions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

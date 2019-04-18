@@ -4,10 +4,20 @@
 #include "../IObject.h"
 #include "SatelliteComponent.h"
 #include "OrbitComponent.h"
+#include "Rendezvous/RendezvousComponent.h"
 
 #include <Physics/PhysicsComponent.h>
 #include <Graphics/GraphicsComponent.h>
 #include <Objects/NameComponent.h>
+
+
+struct RendezvousComponent;
+using RendezvousComponentShared = std::shared_ptr<RendezvousComponent>;
+using RendezvousComponentWeak   = std::weak_ptr<RendezvousComponent>;
+
+struct Satellite;
+using SatelliteShared = std::shared_ptr<Satellite>;
+using SatelliteWeak   = std::weak_ptr<Satellite>;
 
 
 struct Satellite : public IObject
@@ -15,12 +25,12 @@ struct Satellite : public IObject
 public:
 	Satellite(
 		  IComponent* parent = nullptr
-		, const Time& time = Time()
-		, const GraphicsComponentShared&  graphics  = nullptr
-		, const PhysicsComponentShared&   physics   = nullptr
-		, const SatelliteComponentShared& satellite = nullptr
-		, const OrbitComponentShared&     orbit     = nullptr
-		, const NameComponentShared&      name      = nullptr
+		, const GraphicsComponentShared&   graphics   = nullptr
+		, const PhysicsComponentShared&    physics    = nullptr
+		, const SatelliteComponentShared&  satellite  = nullptr
+		, const OrbitComponentShared&      orbit      = nullptr
+		, const NameComponentShared&       name       = nullptr
+		, const RendezvousComponentShared& rendezvous = nullptr 
 	);
 
 	Satellite(const Satellite& sat) = default;
@@ -29,24 +39,25 @@ public:
 	~Satellite() = default;
 
 	Satellite& operator = (const Satellite& sat) = default;
-	Satellite& operator = (Satellite&& sat) = default;
+	Satellite& operator = (Satellite&& sat)      = default;
 
 
 
 public:
-	virtual void update(const Time& t) override;
+	virtual void update(const Time& t, const Time& dt) override;
 	
 	virtual const Type& componentType() const override;
 
 	
 public:
-	GraphicsComponentShared  mGraphics;
-	PhysicsComponentShared   mPhysics;
-	SatelliteComponentShared mSatellite;
-	OrbitComponentShared     mOrbit;
-	NameComponentShared      mName;
+	GraphicsComponentShared   mGraphics;
+	PhysicsComponentShared    mPhysics;
+	SatelliteComponentShared  mSatellite;
+	OrbitComponentShared      mOrbit;
+	NameComponentShared       mName;
+	RendezvousComponentShared mRendezvous;
 };
 
 
 using SatelliteShared = std::shared_ptr<Satellite>;
-using SatelliteWeak = std::weak_ptr<Satellite>;
+using SatelliteWeak   = std::weak_ptr<Satellite>;

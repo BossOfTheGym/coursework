@@ -21,10 +21,12 @@ OrbitComponent::OrbitComponent(
 	, mP(0.0f)
 	, mMu(0.0f)
 
-	, mOT(0.0f)
+	, mOP(0.0f)
 	, mEA(0.0f)
 	, mT(0.0f)
-{}
+{
+	updateOrbit();
+}
 
 const IComponent::Type& OrbitComponent::componentType() const
 {
@@ -71,7 +73,7 @@ void OrbitComponent::updateOrbit()
 	auto vr = dot(rv / r, vv);
 
 	//4, 5
-	auto cv = cross(rv, vv);
+	auto cv = cross(rv, vv);//
 	auto c = length(cv);
 	mC  = c;
 	mCv = cv;
@@ -82,7 +84,7 @@ void OrbitComponent::updateOrbit()
 	mI = i;
 
 	//7, 8
-	auto Nv = cross(Vec3{0.0f, 0.0f, 1.0f}, cv);
+	auto Nv = cross(Vec3{0.0f, 0.0f, 1.0f}, cv);//
 	auto N = length(Nv);
 
 	//9.
@@ -94,7 +96,7 @@ void OrbitComponent::updateOrbit()
 	mRA = lan;
 
 	//10, 11
-	auto ev = cross(vv, cv) / mMu - rv / r;
+	auto ev = cross(vv, cv) / mMu - rv / r;//
 	auto e  = length(ev);
 	mE = e;
 
@@ -131,13 +133,13 @@ void OrbitComponent::updateSpecificParams()
 		auto nInv = pow(mA, 3.0f / 2.0f) / sqrt(mMu);
 
 		mT  = nInv * (mEA - mE * sin(mEA));
-		mOT = nInv * PI_2;
+		mOP = nInv * PI_2;
 	}
 	else
 	{
 		mA = 0.0f;
 		mT = 0.0f;
-		mOT = 0.0f;
+		mOP = 0.0f;
 		mEA = 0.0f;
 	}
 }

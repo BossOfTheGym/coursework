@@ -5,6 +5,15 @@ Time::Time(uint64_t timeInt, float timeFloat)
 	, mTimeFloat(timeFloat)
 {}
 
+uint64_t Time::asU64() const
+{
+	return mTimeInt;
+}
+
+float Time::asFloat() const
+{
+	return mTimeFloat;
+}
 
 Time Time::operator - (const Time& t) const
 {
@@ -36,4 +45,30 @@ Time& Time::operator += (const Time& t)
 	mTimeInt   += t.mTimeInt;
 
 	return *this;
+}
+
+
+bool Time::operator == (const Time& t) const
+{
+	return mTimeInt == t.mTimeInt;
+}
+
+bool Time::operator <= (const Time& t) const
+{
+	return mTimeInt <= t.mTimeInt;
+}
+
+bool Time::operator >= (const Time& t) const
+{
+	return mTimeInt >= t.mTimeInt;
+}
+
+bool Time::operator < (const Time& t) const
+{
+	return mTimeInt < t.mTimeInt;
+}
+
+bool Time::operator > (const Time& t) const
+{
+	return mTimeInt > t.mTimeInt;
 }

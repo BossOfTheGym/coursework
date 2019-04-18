@@ -31,7 +31,7 @@ PlanetShared earth;
 //view
 View view;
 
-//gui
+//gui state
 SatelliteWeak currentWeak;
 float timeTrack0;
 float timeTrack1;
@@ -46,20 +46,17 @@ double prevX;
 double prevY;
 
 //time stepping
-uint64_t t0;
-uint64_t t1;
-uint64_t delta;
+Time t;
+Time t0;
+Time t1;
+Time dt;
+Time dt0;
+
 uint64_t maxUpdates;
-
-uint64_t timeStep;
-
-uint64_t accum;
 
 uint64_t warp;
 uint64_t warpMin;
 uint64_t warpMax;
-
-uint64_t fps;
 
 float divisor;
 
@@ -168,90 +165,37 @@ void initGlobals()
 	);
 
 	//planet
-	earth = std::dynamic_pointer_cast<Planet>(
-		createPlanet(
-			models["earth"]
-			, 3000.0f
-			, glm::scale(Mat4(1.0f), Vec3(4.0f))
-			, Vec3(0.0f)
-			, Vec3(0.0f)
-			, Vec3(0.0f)
-		)
+	earth = createPlanet(
+		models["earth"]
+		, 3000.0f
+		, glm::scale(Mat4(1.0f), Vec3(4.0f))
+		, Vec3(0.0f)
+		, Vec3(0.0f)
+		, Vec3(0.0f)
 	);
 
 	//satellites
-	satellites["satellite 1"] = std::dynamic_pointer_cast<Satellite>(
-		createSatellite(
-			  models["box"]
-			, 1.0f
-			, Vec3(1.0f, 0.0f, 0.0f)
-			, glm::scale(Mat4(1.0f), Vec3(0.1f))
-			, Vec3(-10.0f, 0.0f, 0.0f)
-			, Vec3(0.0f, 0.0f, 15.0f)
-			, "satellite 1"
-			, earth->mPhysics
-		)
+	satellites["satellite 1"] = createSatellite(
+		models["box"]
+		, 1.0f
+		, Vec3(1.0f, 0.0f, 0.0f)
+		, glm::scale(Mat4(1.0f), Vec3(0.1f))
+		, Vec3(-10.0f, 0.0f, 0.0f)
+		, Vec3(0.0f, 0.0f, 15.0f)
+		, "target 1"
+		, earth->mPhysics
 	);
-	satellites["satellite 2"] = std::dynamic_pointer_cast<Satellite>(
-		createSatellite(
-			  models["box"]
-			, 1.0f
-			, Vec3(0.0f, 0.0f, 1.0f)
-			, glm::scale(Mat4(1.0f), Vec3(0.1f))
-			, Vec3(10.0f, 0.0f, 0.0f)
-			, Vec3(0.0f, 0.0f, -17.32045f)
-			, "satellite 2"
-			, earth->mPhysics
-		)
+
+	satellites["satellite 2"] = createChaser(
+		models["box"]
+		, 1.0f
+		, Vec3(1.0f, 0.0f, 1.0f)
+		, glm::scale(Mat4(1.0f), Vec3(0.1f))
+		, Vec3(10.0f, 0.0f, 0.0f)
+		, Vec3(0.0f, 0.0f, -15.0f)
+		, "chaser"
+		, earth->mPhysics
 	);
-	satellites["satellite 3"] = std::dynamic_pointer_cast<Satellite>(
-		createSatellite(
-			models["box"]
-			, 1.0f
-			, Vec3(1.0f, 0.0f, 1.0f)
-			, glm::scale(Mat4(1.0f), Vec3(0.1f))
-			, Vec3(10.0f, 0.0f, 0.0f)
-			, Vec3(0.0f, -5.0f, -15.32045f)
-			, "satellite 3"
-			, earth->mPhysics
-		)
-		);
-	satellites["satellite 4"] = std::dynamic_pointer_cast<Satellite>(
-		createSatellite(
-			models["box"]
-			, 1.0f
-			, Vec3(0.0f, 1.0f, 1.0f)
-			, glm::scale(Mat4(1.0f), Vec3(0.1f))
-			, Vec3(9.0f, 0.0f, 0.0f)
-			, Vec3(0.0f, 0.0f, -17.32045f)
-			, "satellite 4"
-			, earth->mPhysics
-		)
-		);
-	satellites["satellite 5"] = std::dynamic_pointer_cast<Satellite>(
-		createSatellite(
-			models["box"]
-			, 1.0f
-			, Vec3(1.0f, 1.0f, 0.0f)
-			, glm::scale(Mat4(1.0f), Vec3(0.1f))
-			, Vec3(10.0f, 0.0f, 0.0f)
-			, Vec3(-5.0f, 0.0f, -17.32045f)
-			, "satellite 5"
-			, earth->mPhysics
-		)
-		);
-	satellites["satellite 6"] = std::dynamic_pointer_cast<Satellite>(
-		createSatellite(
-			models["box"]
-			, 1.0f
-			, Vec3(0.5f, 0.5f, 1.0f)
-			, glm::scale(Mat4(1.0f), Vec3(0.1f))
-			, Vec3(10.0f, 2.0f, 0.0f)
-			, Vec3(0.0f, 6.0f, 19.32045f)
-			, "satellite 6"
-			, earth->mPhysics
-		)
-		);
 
 	//render lists
 	for (auto&[name, sat] : satellites)
@@ -268,27 +212,23 @@ void initGlobals()
 	//loop states
 	fill    = false;
 	stopped = false;
-	menuOpened = true;
+	menuOpened = false;
 
 	prevX = WIDTH / 2;
 	prevY = HEIGHT / 2;
 
 	//time step
-	t0 = glfwGetTimerValue();
-	t1 = 0;
-	delta = 0;
-	accum = 0;
+	divisor = (float)glfwGetTimerFrequency();
+	t  = Time();
+	t0 = Time();
+	t1 = Time();
+	dt = Time();
+	dt0 = Time(40, 40 / divisor);
+	maxUpdates = 5;	
 
-	timeStep = 10;
-	maxUpdates = 10;	
-
-	divisor = 1000000.0f;
-
-	warp = 1;
+	warp    = 1;
 	warpMin = 1;
 	warpMax = 1000;
-
-	fps = 0;
 }
 
 
@@ -296,7 +236,7 @@ void initGlobals()
 //main loop
 
 //integrator
-void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_step)
+void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& dt)
 {
 	using glm::dot;
 	using glm::length;
@@ -332,9 +272,9 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_s
 	StateVec next = solver.solve(
 		  force
 		, Methods::classic4<float>
-		, accum / divisor
+		, dt.asFloat()
 		, curr
-		, time_step / divisor
+		, dt.asFloat()
 	).second;
 
 
@@ -344,41 +284,56 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, uint64_t time_s
 	mat[3] = Vec4(r, 1.0f);
 }
 
+void updateObjects()
+{
+	earth->update(t, dt);
+
+	for (auto&[key, sat] : satellites)
+	{
+		sat->update(t, dt);
+	}
+}
+
 void updatePhysics()
 {
-	t1 = glfwGetTimerValue();
-	delta += (t1 - t0) * warp;
-	
-	if (delta > maxUpdates * timeStep * warp)
+	while (dt >= dt0 * warp)
 	{
-		delta = maxUpdates * timeStep * warp;
-	}
-
-	accum += delta;
-	while (delta >= timeStep * warp)
-	{
-		delta -= timeStep * warp;
+		dt -= dt0 * warp;
 
 		for (auto&[key, sat] : satellites)
 		{
-			updateSatPlanet(sat, earth, timeStep * warp);
+			updateSatPlanet(sat, earth, dt0 * warp);
 		}
 	}
+}
+
+void updateTime()
+{
+	uint64_t raw = glfwGetTimerValue();
+	t1 = Time(raw, raw / divisor);
+
+	uint64_t delta = raw - t0.asU64();
+	dt += Time(delta * warp);
+
+	if (dt > dt0 * (maxUpdates * warp))
+	{
+		dt = dt0 * (maxUpdates * warp);
+	}
+
+	uint64_t time = t.asU64() + dt.asU64();
+	t  = Time(time, time / divisor);
+	dt = Time(dt.asU64(), dt.asU64() / divisor);
 
 	t0 = t1;
 }
 
-void updateObjects()
+void update()
 {
-	//TODO : update method souldn't take zero args
-	earth->update(Time());
+	updateTime();
 
-	for (auto&[key, sat] : satellites)
-	{
-		sat->update(Time());
-	}
+	updateObjects();
+	updatePhysics();
 }
-
 
 
 //test gui
@@ -403,15 +358,15 @@ void testGui()
 	}
 }
 
-
 //my gui
 void systemOptions()
 {
 	if (ImGui::CollapsingHeader("System parameters"))
 	{
-		ImGui::Text("Time raw: %llu", accum);
-		ImGui::Text("Time    : %f"  , accum / divisor);
-		
+		ImGui::Text("Time raw: %llu", t.asU64()  );
+		ImGui::Text("Time    : %f"  , t.asFloat());
+		ImGui::Text("Divisor : %f", divisor);
+
 		ImGui::SliderScalar("Time warp: ", ImGuiDataType_S64, &warp, &warpMin, &warpMax);
 		warp = std::min(warp, warpMax);
 		warp = std::max(warp, warpMin);
@@ -458,7 +413,7 @@ void showSatelliteParameters(SatelliteShared& sat)
 		ImGui::Text("");	
 
 		ImGui::Text("Spec: ");
-		ImGui::Text("Orbit period      : %f", orbit.mOT);
+		ImGui::Text("Orbit period      : %f", orbit.mOP);
 		ImGui::Text("Apoapsis          : %f", orbit.mA);
 		ImGui::Text("Eccentric anomaly : %f", orbit.mEA);
 		ImGui::Text("Time              : %f", orbit.mT);
@@ -536,9 +491,6 @@ void myGui()
 	planetOptions();
 
 	satellitesOptions();
-
-	ImGui::Separator();
-	ImGui::Text("FPS    : %lf", fps / glfwGetTime());
 
 	ImGui::End();
 }
@@ -618,8 +570,6 @@ void featureTest()
     glfwSetCursorPos(window, prevX, prevY);
 	glfwSwapInterval(1);
 	
-	glfwSetTime(0.0);
-	t0 = glfwGetTimerValue();
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -628,16 +578,13 @@ void featureTest()
 
 		if (!stopped)
 		{
-			updateObjects();
-			updatePhysics();
+			update();
 		}
 
 		render();
 		renderGui();
 
 		glfwSwapBuffers(window);
-
-		fps++;
     }
 
 	destroyGui();

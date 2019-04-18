@@ -17,20 +17,20 @@ public:
 	);
 
 	OrbitComponent(const OrbitComponent& comp) = default;
-	OrbitComponent(OrbitComponent&& comp) = default;
-
+	OrbitComponent(OrbitComponent&& comp)      = default;
 
 	virtual ~OrbitComponent() = default;
 
-
 	OrbitComponent& operator = (const OrbitComponent& comp) = default;
-	OrbitComponent& operator = (OrbitComponent&& comp) = default;
+	OrbitComponent& operator = (OrbitComponent&& comp)      = default;
 
 
 public:
 	virtual const Type& componentType() const override;
 	
 public:
+	
+
 	void updateOrbit();
 
 private:
@@ -38,7 +38,7 @@ private:
 
 	
 public:
-	//refs
+	//cache
 	PhysicsComponentWeak mPlanetPhys;
 	PhysicsComponentWeak mSatellitePhys;
 
@@ -51,14 +51,16 @@ public:
 	float mTA;  // True Anomaly
 
 	//misc
-	Vec3 mCv;   // specific Angular Momentum(vector)
+	Vec3 mCv;   // specific Angular Momentum
+	Vec3 mEv;   // eccentricity vector
+	Vec3 mLv;   // lagrange vector
 
 	float mH;   // energy integral
 	float mP;   // semi-latus rectum
 	float mMu;  // mu param
 
 	//specific
-	float mOT;  // Orbit Period
+	float mOP;  // Orbit Period
 	float mA;   // apoapsis
 	float mEA;  // Eccentric Anomaly
 	float mT;   // time since periapsis	

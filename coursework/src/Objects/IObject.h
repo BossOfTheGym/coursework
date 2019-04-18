@@ -10,7 +10,7 @@
 
 struct IObject : public IComponent, public ITimeVarying
 {
-	IObject(IComponent* parent = nullptr, const Time& t = Time());
+	IObject(IComponent* parent = nullptr);
 
 	IObject(const IObject& obj) = default;
 

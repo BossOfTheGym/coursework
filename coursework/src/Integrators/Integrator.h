@@ -45,5 +45,5 @@ public:
 class IntegratorBase
 {
 public:
-	virtual void updatePhysics(PhysicsComponentShared& planet, PhysicsComponentShared& satellite) = 0;
+	virtual void updatePhysics(PhysicsComponentShared planet, PhysicsComponentShared satellite) = 0;
 };

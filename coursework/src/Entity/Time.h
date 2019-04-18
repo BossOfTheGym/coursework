@@ -32,6 +32,11 @@ public:
 	Time& operator -= (const Time& t);
 	Time& operator += (const Time& t);
 
+	bool operator == (const Time& t) const;
+	bool operator <= (const Time& t) const;
+	bool operator >= (const Time& t) const;
+	bool operator < (const Time& t) const;
+	bool operator > (const Time& t) const;
 
 private:
 	uint64_t mTimeInt;

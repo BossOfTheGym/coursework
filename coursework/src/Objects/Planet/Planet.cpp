@@ -1,15 +1,15 @@
 #include "Planet.h"
 
 
-Planet::Planet(IComponent* parent, const Time& t, const NameComponentShared& name)
-	: IObject(parent, t)
+Planet::Planet(IComponent* parent, const NameComponentShared& name)
+	: IObject(parent)
 	, mName(name)
 {}
 
 
-void Planet::update(const Time& t)
+void Planet::update(const Time& t, const Time& dt)
 {
-	mTime = t;
+	
 }
 
 const IComponent::Type& Planet::componentType() const

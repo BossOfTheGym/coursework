@@ -13,7 +13,6 @@
 #include <Render/Renderers.h>
 
 
-
 void createContext(GLFWwindow*& win, int width, int height, const String& name);
 
 

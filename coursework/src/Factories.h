@@ -9,7 +9,18 @@
 
 
 //object factories
-IObjectShared createSatellite(
+SatelliteShared createSatellite(
+	const ModelShared& model
+	, float mass
+	, const Vec3& color = Vec3(1.0f)
+	, const Mat4& mat = Mat4(1.0f)
+	, const Vec3& pos = Vec3()
+	, const Vec3& vel = Vec3()
+	, const String& name = ""
+	, const PhysicsComponentWeak& planet = PhysicsComponentShared(nullptr)
+);
+
+SatelliteShared createChaser(
 	const ModelShared& model
 	, float mass
 	, const Vec3& color = Vec3(1.0f)
@@ -21,7 +32,7 @@ IObjectShared createSatellite(
 );
 
 
-IObjectShared createPlanet(
+PlanetShared createPlanet(
 	const ModelShared& model
 	, float mass
 	, const Mat4& mat = Mat4(1.0f)

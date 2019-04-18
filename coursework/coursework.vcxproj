@@ -37,7 +37,10 @@
     <ClInclude Include="src\Objects\Planet\Planet.h" />
     <ClInclude Include="src\Objects\Planet\PlanetComponent.h" />
     <ClInclude Include="src\Objects\Satellite\OrbitComponent.h" />
+    <ClInclude Include="src\Objects\Satellite\Rendezvous\Actions.h" />
+    <ClInclude Include="src\Objects\Satellite\Rendezvous\ActionVariant.h" />
     <ClInclude Include="src\Objects\Satellite\Rendezvous\LambertSolver.h" />
+    <ClInclude Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.h" />
     <ClInclude Include="src\Objects\Satellite\Satellite.h" />
     <ClInclude Include="src\Objects\Satellite\SatelliteComponent.h" />
     <ClInclude Include="src\Objects\View.h" />
@@ -54,7 +57,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Component\IComponent.cpp" />
-    <ClCompile Include="src\Entity\ITimeVarying.cpp" />
     <ClCompile Include="src\Entity\Time.cpp" />
     <ClCompile Include="src\Factories.cpp" />
     <ClCompile Include="src\Graphics\GraphicsComponent.cpp" />
@@ -78,7 +80,9 @@
     <ClCompile Include="src\Objects\Planet\Planet.cpp" />
     <ClCompile Include="src\Objects\Planet\PlanetComponent.cpp" />
     <ClCompile Include="src\Objects\Satellite\OrbitComponent.cpp" />
+    <ClCompile Include="src\Objects\Satellite\Rendezvous\Actions.cpp" />
     <ClCompile Include="src\Objects\Satellite\Rendezvous\LambertSolver.cpp" />
+    <ClCompile Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.cpp" />
     <ClCompile Include="src\Objects\Satellite\Satellite.cpp" />
     <ClCompile Include="src\Objects\Satellite\SatelliteComponent.cpp" />
     <ClCompile Include="src\Objects\View.cpp" />
@@ -164,7 +168,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableModules>true</EnableModules>
       <PrecompiledHeaderFile>common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -181,7 +185,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableModules>true</EnableModules>
       <PrecompiledHeaderFile>common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -200,7 +204,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableModules>true</EnableModules>
       <PrecompiledHeaderFile>common.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -221,7 +225,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableModules>true</EnableModules>
       <PrecompiledHeaderFile>common.h</PrecompiledHeaderFile>
     </ClCompile>

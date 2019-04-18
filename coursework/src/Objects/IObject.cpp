@@ -1,6 +1,5 @@
 #include "IObject.h"
 
-IObject::IObject(IComponent* parent, const Time& t)
+IObject::IObject(IComponent* parent)
 	: IComponent(parent)
-	, ITimeVarying(t)
 {}

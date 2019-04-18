@@ -50,4 +50,4 @@ void StateVec::setVelocity(const Vec3& velocity)
 }
 
 
-//Intgrator base
+//Integrator base

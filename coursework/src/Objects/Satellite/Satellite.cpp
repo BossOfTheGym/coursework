@@ -3,29 +3,34 @@
 
 Satellite::Satellite(
 	IComponent* parent
-	, const Time& time
-	, const GraphicsComponentShared&  graphics
-	, const PhysicsComponentShared&   physics
-	, const SatelliteComponentShared& satellite
-	, const OrbitComponentShared&     orbit
-	, const NameComponentShared&      name
+	, const GraphicsComponentShared&   graphics
+	, const PhysicsComponentShared&    physics
+	, const SatelliteComponentShared&  satellite
+	, const OrbitComponentShared&      orbit
+	, const NameComponentShared&       name
+	, const RendezvousComponentShared& rendezvous
 )
-	: IObject(parent, time)
+	: IObject(parent)
 	, mGraphics(graphics)
 	, mPhysics(physics)
 	, mSatellite(satellite)
 	, mOrbit(orbit)
 	, mName(name)
+	, mRendezvous(rendezvous)
 {}
 
 
-void Satellite::update(const Time& t)
+void Satellite::update(const Time& t, const Time& dt)
 {
 	if (mOrbit)
 	{
-		mOrbit->updateOrbit();
+		mOrbit->updateOrbit();		
 	}
-	mTime = t;
+
+	if (mRendezvous)
+	{
+		mRendezvous->update(t, dt);
+	}
 }
 
 const IComponent::Type& Satellite::componentType() const

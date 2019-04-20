@@ -88,7 +88,7 @@ namespace
 			double zMin = mesh->mVertices[0][2], zMax = mesh->mVertices[0][2];
 
 			vertices.resize(3 * 3 * mesh->mNumFaces);
-			int curr = 0;
+			auto iter = vertices.begin();
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
 				auto& face = mesh->mFaces[i];
@@ -106,9 +106,9 @@ namespace
 					zMin = (zMin < vertex[2] ? zMin : vertex[2]);
 					zMax = (zMax > vertex[2] ? zMax : vertex[2]);
 
-					vertices[curr] = vertex[0]; curr++;
-					vertices[curr] = vertex[1]; curr++;
-					vertices[curr] = vertex[2]; curr++;
+					*iter = vertex[0]; ++iter;
+					*iter = vertex[1]; ++iter;
+					*iter = vertex[2]; ++iter;
 				}
 			}
 
@@ -119,13 +119,26 @@ namespace
 			double scale = (xDelta > yDelta ? xDelta : yDelta);
 			scale = (scale > zDelta ? scale : zDelta);
 
-			double xCenter = (xMax + xMin) / 2.0f;
-			double yCenter = (yMax + yMin) / 2.0f;
-			double zCenter = (zMax + zMin) / 2.0f;
+			double xCenter = (xMax + xMin) / 2.0;
+			double yCenter = (yMax + yMin) / 2.0;
+			double zCenter = (zMax + zMin) / 2.0;
 
+			iter = vertices.begin();
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
-				vertices[9 * i + 0] = (vertices[9 * i + 0] - xCenter) / scale;
+				*(iter) = (*(iter) - xCenter) / scale; ++iter;
+				*(iter) = (*(iter) - yCenter) / scale; ++iter;
+				*(iter) = (*(iter) - zCenter) / scale; ++iter;
+
+				*(iter) = (*(iter) - xCenter) / scale; ++iter;
+				*(iter) = (*(iter) - yCenter) / scale; ++iter;
+				*(iter) = (*(iter) - zCenter) / scale; ++iter;
+
+				*(iter) = (*(iter) - xCenter) / scale; ++iter;
+				*(iter) = (*(iter) - yCenter) / scale; ++iter;
+				*(iter) = (*(iter) - zCenter) / scale; ++iter;
+
+				/*vertices[9 * i + 0] = (vertices[9 * i + 0] - xCenter) / scale;
 				vertices[9 * i + 1] = (vertices[9 * i + 1] - yCenter) / scale;
 				vertices[9 * i + 2] = (vertices[9 * i + 2] - zCenter) / scale;
 
@@ -135,15 +148,15 @@ namespace
 
 				vertices[9 * i + 6] = (vertices[9 * i + 6] - xCenter) / scale;
 				vertices[9 * i + 7] = (vertices[9 * i + 7] - yCenter) / scale;
-				vertices[9 * i + 8] = (vertices[9 * i + 8] - zCenter) / scale;
+				vertices[9 * i + 8] = (vertices[9 * i + 8] - zCenter) / scale;*/
 			}
 		}
 
 		std::vector<double> colors;
 		if (mesh->HasVertexColors(0))
 		{
-			int curr = 0;
 			colors.resize(4 * 3 * mesh->mNumFaces);
+			auto iter = colors.begin();
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
 				auto& face = mesh->mFaces[i];
@@ -153,10 +166,10 @@ namespace
 					auto& index = face.mIndices[j];
 
 					auto& color = mesh->mColors[0][index];
-					colors[curr] = color.r; curr++;
-					colors[curr] = color.g; curr++;
-					colors[curr] = color.b; curr++;
-					colors[curr] = color.a; curr++;
+					*(iter) = color.r; ++iter;
+					*(iter) = color.g; ++iter;
+					*(iter) = color.b; ++iter;
+					*(iter) = color.a; ++iter;
 				}
 			}
 		}
@@ -164,8 +177,8 @@ namespace
 		std::vector<double> normals;
 		if (mesh->HasNormals())
 		{
-			int curr = 0;
 			normals.resize(3 * 3 * mesh->mNumFaces);
+			auto iter = normals.begin();
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
 				auto& face = mesh->mFaces[i];
@@ -175,9 +188,9 @@ namespace
 					auto& index = face.mIndices[j];
 
 					auto& normal = mesh->mNormals[index];
-					normals[curr] = normal[0]; curr++;
-					normals[curr] = normal[1]; curr++;
-					normals[curr] = normal[2]; curr++;
+					*(iter) = normal[0]; ++iter;
+					*(iter) = normal[1]; ++iter;
+					*(iter) = normal[2]; ++iter;
 				}
 			}
 		}
@@ -189,8 +202,8 @@ namespace
 			tangents.resize(3 * 3 * mesh->mNumFaces);
 			bitangents.resize(3 * 3 * mesh->mNumFaces);
 
-			int curr_t  = 0;
-			int curr_bt = 0;
+			auto iter_t  = tangents.begin();
+			auto iter_bt = bitangents.begin();
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
 				auto& face = mesh->mFaces[i];
@@ -200,14 +213,14 @@ namespace
 					auto& index = face.mIndices[j];
 
 					auto& tangent = mesh->mTangents[index];
-					tangents[curr_t] = tangent[0]; curr_t++;
-					tangents[curr_t] = tangent[1]; curr_t++;
-					tangents[curr_t] = tangent[2]; curr_t++;
+					*(iter_t) = tangent[0]; ++iter_t;
+					*(iter_t) = tangent[1]; ++iter_t;
+					*(iter_t) = tangent[2]; ++iter_t;
 
 					auto& bitangent = mesh->mBitangents[index];
-					bitangents[curr_bt] = bitangent[0]; curr_bt++;
-					bitangents[curr_bt] = bitangent[1]; curr_bt++;
-					bitangents[curr_bt] = bitangent[2]; curr_bt++;
+					*(iter_bt) = bitangent[0]; ++iter_bt;
+					*(iter_bt) = bitangent[1]; ++iter_bt;
+					*(iter_bt) = bitangent[2]; ++iter_bt;
 				}
 			}
 		}
@@ -215,8 +228,8 @@ namespace
 		std::vector<double> textureCoords;
 		if (mesh->HasTextureCoords(0))
 		{
-			int curr = 0;
 			textureCoords.resize(3 * 3 * mesh->mNumFaces);
+			auto iter = textureCoords.begin();
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
 				auto& face = mesh->mFaces[i];
@@ -226,9 +239,9 @@ namespace
 					auto& index = face.mIndices[j];
 
 					auto& tex = mesh->mTextureCoords[0][index];
-					textureCoords[curr] = tex.x; curr++;
-					textureCoords[curr] = tex.y; curr++;
-					textureCoords[curr] = tex.z; curr++;
+					*(iter) = tex.x; ++iter;
+					*(iter) = tex.y; ++iter;
+					*(iter) = tex.z; ++iter;
 				}
 			}
 		}

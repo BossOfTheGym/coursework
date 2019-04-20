@@ -268,5 +268,14 @@
     <None Include="assets\shaders\Simple\simple.vs">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="assets\shaders\Axes\Axes.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Axes\Axes.gs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\Axes\Axes.vs">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

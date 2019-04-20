@@ -37,6 +37,10 @@ void loadShaders(std::map<String, ShaderShared>& shadersStorage)
 	shadersStorage["simple.vs"] = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/Simple/simple.vs"));
 	shadersStorage["simple.fs"] = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/Simple/simple.fs"));
 
+	shadersStorage["axes.vs"] = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/Axes/axes.vs"));
+	shadersStorage["axes.gs"] = ShaderShared(new Shader(Shader::Geometry, "assets/shaders/Axes/axes.gs"));
+	shadersStorage["axes.fs"] = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/Axes/axes.fs"));
+
 	for (const auto&[location, shader] : shadersStorage)
 	{
 		if (!(shader->compiled()))
@@ -52,9 +56,9 @@ void loadShaders(std::map<String, ShaderShared>& shadersStorage)
 void loadModels(std::map<String, ModelShared>& modelsStorage)
 {
 	AssimpBuilder assimpBuilder;
-	//assimpBuilder.readFile("assets/textures/Satellite/10477_Satellite_v1_L3.obj");
+	assimpBuilder.readFile("assets/textures/Satellite/10477_Satellite_v1_L3.obj");
 
-	//modelsStorage["satellite"] = ModelShared(new Model(std::move(assimpBuilder.imported())));
+	modelsStorage["satellite"] = ModelShared(new Model(std::move(assimpBuilder.imported())));
 
 
 	PlanetBuilder planetBuilder;

@@ -96,6 +96,9 @@
     <ClCompile Include="src\Texture\Texture2D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\Axes\Axes.fs" />
+    <None Include="assets\shaders\Axes\Axes.gs" />
+    <None Include="assets\shaders\Axes\Axes.vs" />
     <None Include="assets\shaders\Planet\sphere.fs" />
     <None Include="assets\shaders\Planet\sphere.gs" />
     <None Include="assets\shaders\Planet\sphere.tcs" />

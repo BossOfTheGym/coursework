@@ -14,7 +14,7 @@ void main()
 {
 	vec4 frag = vec4(vec3(color), 1.0);
 
-	if(abs(geoGomo[0]) < 0.05 || abs(geoGomo[1]) < 0.05 || abs(geoGomo[2]) < 0.05)
+	if(abs(geoGomo[0]) < 0.03 || abs(geoGomo[1]) < 0.03 || abs(geoGomo[2]) < 0.03)
 	{
 		frag.xyz = vec3(0.0);
 	}

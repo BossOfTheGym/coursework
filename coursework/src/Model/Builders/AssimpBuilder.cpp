@@ -83,20 +83,16 @@ namespace
 		std::vector<double> vertices;
 		if (mesh->HasPositions())
 		{
-			vertices.reserve(3 * 3 * mesh->mNumFaces);
-
 			double xMin = mesh->mVertices[0][0], xMax = mesh->mVertices[0][0];
 			double yMin = mesh->mVertices[0][1], yMax = mesh->mVertices[0][1];
 			double zMin = mesh->mVertices[0][2], zMax = mesh->mVertices[0][2];
 
+			vertices.resize(3 * 3 * mesh->mNumFaces);
+			int curr = 0;
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
 				auto& face = mesh->mFaces[i];
 
-				if (face.mNumIndices != 3)
-				{
-					std::cout << face.mNumIndices << std::endl;
-				}
 				for (UInt j = 0; j < face.mNumIndices; j++)
 				{
 					auto& index = face.mIndices[j];
@@ -110,9 +106,9 @@ namespace
 					zMin = (zMin < vertex[2] ? zMin : vertex[2]);
 					zMax = (zMax > vertex[2] ? zMax : vertex[2]);
 
-					vertices.push_back(vertex[0]);
-					vertices.push_back(vertex[1]);
-					vertices.push_back(vertex[2]);
+					vertices[curr] = vertex[0]; curr++;
+					vertices[curr] = vertex[1]; curr++;
+					vertices[curr] = vertex[2]; curr++;
 				}
 			}
 
@@ -146,7 +142,8 @@ namespace
 		std::vector<double> colors;
 		if (mesh->HasVertexColors(0))
 		{
-			colors.reserve(4 * 3 * mesh->mNumFaces);
+			int curr = 0;
+			colors.resize(4 * 3 * mesh->mNumFaces);
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
 				auto& face = mesh->mFaces[i];
@@ -156,10 +153,10 @@ namespace
 					auto& index = face.mIndices[j];
 
 					auto& color = mesh->mColors[0][index];
-					colors.push_back(color.r);
-					colors.push_back(color.g);
-					colors.push_back(color.b);
-					colors.push_back(color.a);
+					colors[curr] = color.r; curr++;
+					colors[curr] = color.g; curr++;
+					colors[curr] = color.b; curr++;
+					colors[curr] = color.a; curr++;
 				}
 			}
 		}
@@ -167,7 +164,8 @@ namespace
 		std::vector<double> normals;
 		if (mesh->HasNormals())
 		{
-			normals.reserve(3 * mesh->mNumFaces);
+			int curr = 0;
+			normals.resize(3 * 3 * mesh->mNumFaces);
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
 				auto& face = mesh->mFaces[i];
@@ -177,9 +175,9 @@ namespace
 					auto& index = face.mIndices[j];
 
 					auto& normal = mesh->mNormals[index];
-					normals.push_back(normal[0]);
-					normals.push_back(normal[1]);
-					normals.push_back(normal[2]);
+					normals[curr] = normal[0]; curr++;
+					normals[curr] = normal[1]; curr++;
+					normals[curr] = normal[2]; curr++;
 				}
 			}
 		}
@@ -188,9 +186,11 @@ namespace
 		std::vector<double> bitangents;
 		if (mesh->HasTangentsAndBitangents())
 		{
-			tangents.reserve(3 * 3 * mesh->mNumFaces);
-			bitangents.reserve(3 * 3 * mesh->mNumFaces);
+			tangents.resize(3 * 3 * mesh->mNumFaces);
+			bitangents.resize(3 * 3 * mesh->mNumFaces);
 
+			int curr_t  = 0;
+			int curr_bt = 0;
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
 				auto& face = mesh->mFaces[i];
@@ -200,14 +200,14 @@ namespace
 					auto& index = face.mIndices[j];
 
 					auto& tangent = mesh->mTangents[index];
-					tangents.push_back(tangent[0]);
-					tangents.push_back(tangent[1]);
-					tangents.push_back(tangent[2]);
+					tangents[curr_t] = tangent[0]; curr_t++;
+					tangents[curr_t] = tangent[1]; curr_t++;
+					tangents[curr_t] = tangent[2]; curr_t++;
 
 					auto& bitangent = mesh->mBitangents[index];
-					bitangents.push_back(bitangent[0]);
-					bitangents.push_back(bitangent[1]);
-					bitangents.push_back(bitangent[2]);
+					bitangents[curr_bt] = bitangent[0]; curr_bt++;
+					bitangents[curr_bt] = bitangent[1]; curr_bt++;
+					bitangents[curr_bt] = bitangent[2]; curr_bt++;
 				}
 			}
 		}
@@ -215,7 +215,8 @@ namespace
 		std::vector<double> textureCoords;
 		if (mesh->HasTextureCoords(0))
 		{
-			textureCoords.reserve(3 * 3 * mesh->mNumFaces);
+			int curr = 0;
+			textureCoords.resize(3 * 3 * mesh->mNumFaces);
 			for (UInt i = 0; i < mesh->mNumFaces; i++)
 			{
 				auto& face = mesh->mFaces[i];
@@ -225,9 +226,9 @@ namespace
 					auto& index = face.mIndices[j];
 
 					auto& tex = mesh->mTextureCoords[0][index];
-					textureCoords.push_back(tex.x);
-					textureCoords.push_back(tex.y);
-					textureCoords.push_back(tex.z);
+					textureCoords[curr] = tex.x; curr++;
+					textureCoords[curr] = tex.y; curr++;
+					textureCoords[curr] = tex.z; curr++;
 				}
 			}
 		}
@@ -251,7 +252,7 @@ namespace
 			, normals
 			, tangents
 			, bitangents
-				, textureCoords
+			, textureCoords
 		] = std::move(getAttributes(mesh));
 
 		//all floats
@@ -292,7 +293,7 @@ namespace
 		if (mesh->HasNormals())
 		{
 			vab.subData(offset, normals.size() * sizeof(double), normals.data());
-			vab.setAttribPointer(Mesh::VAB::NORMAL, 3, GL_DOUBLE, 3* sizeof(double), (const void*)offset);
+			vab.setAttribPointer(Mesh::VAB::NORMAL, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 
 			offset += static_cast<int>(normals.size() * sizeof(double));
 		}

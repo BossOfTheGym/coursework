@@ -52,10 +52,10 @@ void main()
     }
     vec4 tex = texture(mapMain, vec2(longitude / PI_2, 1.0 - latitude / PI));
 
-	if(any(bvec3(geoGomo[0] < 0.02, geoGomo[1] < 0.02, geoGomo[2] < 0.02)))
-	{
-		tex = vec4(vec3(0.0), 1.0);
-	}
+	//if(any(bvec3(geoGomo[0] < 0.02, geoGomo[1] < 0.02, geoGomo[2] < 0.02)))
+	//{
+	//	tex = vec4(vec3(0.0), 1.0);
+	//}
 
 
 	//result

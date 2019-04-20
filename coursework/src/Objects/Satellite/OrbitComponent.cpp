@@ -35,6 +35,10 @@ const IComponent::Type& OrbitComponent::componentType() const
 	return type;
 }
 
+OrbitComponent::R_V OrbitComponent::orbitState(const Time& t) const
+{
+	return {Vec3(0.0), Vec3(0.0)};
+}
 
 void OrbitComponent::updateOrbit()
 {
@@ -84,7 +88,7 @@ void OrbitComponent::updateOrbit()
 	mI = i;
 
 	//7, 8
-	auto Nv = cross(Vec3{0.0f, 0.0f, 1.0f}, cv);//
+	auto Nv = cross(Vec3{0.0, 0.0, 1.0}, cv);//
 	auto N = length(Nv);
 
 	//9.
@@ -121,25 +125,25 @@ void OrbitComponent::updateOrbit()
 
 void OrbitComponent::updateSpecificParams()
 {
-	if (mE < 1.0f) // process elliptic only
+	if (mE < 1.0) // process elliptic only
 	{
-		mA  = mP / (1.0f - mE * mE);
-		mEA = 2.0f * atan(sqrt((1.0f - mE) / (1.0f + mE)) * tan(mTA / 2));
+		mA  = mP / (1.0 - mE * mE);
+		mEA = 2 * atan(sqrt((1.0 - mE) / (1.0 + mE)) * tan(mTA / 2));
 		if (mTA > PI)//fix comparison
 		{
 			mEA = PI_2 + mEA;
 		}
 
-		auto nInv = pow(mA, 3.0f / 2.0f) / sqrt(mMu);
+		auto nInv = pow(mA, 1.5) / sqrt(mMu);
 
 		mT  = nInv * (mEA - mE * sin(mEA));
 		mOP = nInv * PI_2;
 	}
 	else
 	{
-		mA = 0.0f;
-		mT = 0.0f;
-		mOP = 0.0f;
-		mEA = 0.0f;
+		mA = 0.0;
+		mT = 0.0;
+		mOP = 0.0;
+		mEA = 0.0;
 	}
 }

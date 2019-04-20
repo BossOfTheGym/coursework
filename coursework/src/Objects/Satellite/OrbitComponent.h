@@ -10,10 +10,13 @@
 struct OrbitComponent : public IComponent
 {
 public:
+	using R_V = std::pair<Vec3, Vec3>;
+
+public:
 	OrbitComponent(
-		  IComponent* parent = nullptr
-		, const PhysicsComponentWeak& planet    = PhysicsComponentShared(nullptr)
-		, const PhysicsComponentWeak& satellite = PhysicsComponentShared(nullptr)
+		  IComponent* parent
+		, const PhysicsComponentWeak& planet
+		, const PhysicsComponentWeak& satellite
 	);
 
 	OrbitComponent(const OrbitComponent& comp) = default;
@@ -29,18 +32,18 @@ public:
 	virtual const Type& componentType() const override;
 	
 public:
-	
+	R_V orbitState(const Time& t) const;
 
 	void updateOrbit();
+
 
 private:
 	void updateSpecificParams();
 
 	
 public:
-	//cache
-	PhysicsComponentWeak mPlanetPhys;
 	PhysicsComponentWeak mSatellitePhys;
+	PhysicsComponentWeak mPlanetPhys;
 
 	//main
 	double mC;   // specific Angular Momentum(length)

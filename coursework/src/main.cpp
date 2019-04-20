@@ -12,8 +12,8 @@
 using namespace std::chrono;
 
 
-const int WIDTH  = 1500;
-const int HEIGHT = 1000;
+const int WIDTH  = 1200;
+const int HEIGHT = 900;
  
 
 //globals
@@ -174,10 +174,10 @@ void initGlobals()
 
 	//satellites
 	satellites["satellite 1"] = createSatellite(
-		models["box"]
+		models["satellite"]
 		, 1.0f
 		, Vec3(1.0f, 0.0f, 0.0f)
-		, glm::scale(Mat4(1.0f), Vec3(0.1f))
+		, glm::scale(Mat4(1.0f), Vec3(0.5f))
 		, Vec3(-10.0f, 0.0f, 0.0f)
 		, Vec3(0.0f, 0.0f, sqrt(300))
 		, "target 1"
@@ -185,10 +185,10 @@ void initGlobals()
 	);
 
 	satellites["satellite 2"] = createChaser(
-		models["box"]
+		models["satellite"]
 		, 1.0f
 		, Vec3(1.0f, 0.0f, 1.0f)
-		, glm::scale(Mat4(1.0f), Vec3(0.1f))
+		, glm::scale(Mat4(1.0f), Vec3(0.5f))
 		, Vec3(10.0f, 0.0f, 0.0f)
 		, Vec3(0.0f, 0.0f, -15.0f)
 		, "chaser"
@@ -561,8 +561,12 @@ void featureTest()
 
 	GLFWmonitor* primary = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(primary);
-
-	glfwSetWindowPos(window, mode->width / 2 - WIDTH / 2, mode->height / 2 - HEIGHT / 2);
+	
+	glfwSetWindowPos(
+		  window
+		, mode->width / 2 - WIDTH / 2  /* - std::min(WIDTH / 2, mode->width / 3)*/
+		, mode->height / 2 - HEIGHT / 2 /*- std::min(HEIGHT / 2, mode->height / 3)*/
+	);
 	glfwShowWindow(window);
 	glfwMakeContextCurrent(window);
     glfwSetCursorPos(window, prevX, prevY);

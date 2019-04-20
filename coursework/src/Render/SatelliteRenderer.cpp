@@ -15,7 +15,6 @@ SatelliteRenderer::SatelliteRenderer(const ShaderProgramShared& shared)
 void SatelliteRenderer::setRequiredStates()
 {
 	mProgramShared->use();	
-	mProgramShared->setUniformVec3(uColor, Vec3(1.0f, 1.0f, 1.0f));
 }
 
 void SatelliteRenderer::addToList(const IObjectWeak& obj)

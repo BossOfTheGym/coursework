@@ -21,9 +21,15 @@ namespace Stumpff
 
 namespace Lambert
 {
-	using X_S = std::pair<double, double>;
+	//x = -h * s^2, s - universal var, theta - transfer angle
+	struct X_S_T
+	{
+		double x;
+		double s;
+		double theta;
+	};
 
-	X_S solve(
+	X_S_T solve(
 		  const Vec3& rv1
 		, double t1
 		, const Vec3& rv2

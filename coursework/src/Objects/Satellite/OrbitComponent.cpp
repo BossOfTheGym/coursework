@@ -35,8 +35,17 @@ const IComponent::Type& OrbitComponent::componentType() const
 	return type;
 }
 
-OrbitComponent::R_V OrbitComponent::orbitState(const Time& t) const
+OrbitComponent::R_V OrbitComponent::orbitState(const Time& dt) const
 {
+	auto planet    = mPlanetPhys.lock();
+	auto satellite = mSatellitePhys.lock();
+	if (!planet || !satellite)
+	{
+		return {Vec3{0.0}, Vec3{0.0}};
+	}
+
+
+
 	return {Vec3(0.0), Vec3(0.0)};
 }
 
@@ -49,7 +58,7 @@ void OrbitComponent::updateOrbit()
 	// i : (1, 0, 0)
 	// j : (0, 1, 0)
 	// k : (0, 0, 1)
-	auto planet = mPlanetPhys.lock();
+	auto planet    = mPlanetPhys.lock();
 	auto satellite = mSatellitePhys.lock();
 	if (!planet || !satellite)
 	{
@@ -77,48 +86,41 @@ void OrbitComponent::updateOrbit()
 	auto vr = dot(rv / r, vv);
 
 	//4, 5
-	auto cv = cross(rv, vv);//
-	auto c = length(cv);
-	mC  = c;
-	mCv = cv;
-	mP  = dot(cv, cv) / mMu;
+	mCv = cross(rv, vv);//
+	mC  = length(mCv);	
+	mP  = mC * mC / mMu;
 
 	//6.
-	auto i = acos(cv.z / c);
-	mI = i;
+	mI = acos(mCv.z / mC);
 
 	//7, 8
-	auto Nv = cross(Vec3{0.0, 0.0, 1.0}, cv);//
-	auto N = length(Nv);
+	mNv = cross(Vec3{0.0, 0.0, 1.0}, mCv);
+	auto N = length(mNv);
 
 	//9.
-	auto lan = acos(Nv.x / N);
-	if(Nv.y < 0.0f)
+	mRA = acos(mNv.x / N);
+	if(mNv.y < 0.0f)
 	{
-		lan = PI_2 - lan;
-	}
-	mRA = lan;
+		mRA = PI_2 - mRA;
+	}	
 
 	//10, 11
-	auto ev = cross(vv, cv) / mMu - rv / r;//
-	auto e  = length(ev);
-	mE = e;
+	mEv = cross(vv, mCv) / mMu - rv / r;
+	mE  = length(mEv);
 
 	//12.
-	auto ap = acos(dot(Nv / N, ev / e));
-	if (ev.z < 0.0f)
+	mAP = acos(dot(mNv / N, mEv / mE));
+	if (mEv.z < 0.0f)
 	{
-		ap = PI_2 - ap;
+		mAP = PI_2 - mAP;
 	}
-	mAP = ap;
 
 	//13.
-	auto ta = acos(dot(ev / e, rv / r));
+	mTA = acos(dot(mEv / mE, rv / r));
 	if(vr < 0.0f)
 	{
-		ta = PI_2 - ta;
-	}
-	mTA = ta;
+		mTA = PI_2 - mTA;
+	}	
 
 	updateSpecificParams();
 }
@@ -129,7 +131,7 @@ void OrbitComponent::updateSpecificParams()
 	{
 		mA  = mP / (1.0 - mE * mE);
 		mEA = 2 * atan(sqrt((1.0 - mE) / (1.0 + mE)) * tan(mTA / 2));
-		if (mTA > PI)//fix comparison
+		if (mTA > PI)
 		{
 			mEA = PI_2 + mEA;
 		}

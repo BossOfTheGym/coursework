@@ -226,8 +226,8 @@ void initGlobals()
 		, 1.0f
 		, Vec3(1.0f, 0.0f, 1.0f)
 		, glm::scale(Mat4(1.0f), Vec3(0.5f))
-		, Vec3(-5.0f, 0.0f, 0.0f)
-		, Vec3(0.0f, 0.0f, 30.0)
+		, Vec3(-5.0f, 0.0f, -5.0f)
+		, Vec3(0.0f, 25.0f, 0.0)
 		, "chaser"
 		, earth->mPhysics
 	);
@@ -591,7 +591,7 @@ void render()
 	}
 
 	//test: TODO(add renderer + point builder)
-	static Mat4    rot = glm::rotate(Mat4(1.0), glm::radians(+3.0), Vec3(1.0, 1.0, 1.0));
+	/*static Mat4    rot = glm::rotate(Mat4(1.0), glm::radians(+3.0), Vec3(1.0, 1.0, 1.0));
 	static Mat4 invRot = glm::rotate(Mat4(1.0), glm::radians(-3.0), Vec3(1.0, 1.0, 1.0));
 
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -608,7 +608,7 @@ void render()
 		mat[3] = Vec4(pos, 1.0);
 
 		glDrawArrays(GL_POINTS, 0, 1);
-	}
+	}*/
 }
 
 

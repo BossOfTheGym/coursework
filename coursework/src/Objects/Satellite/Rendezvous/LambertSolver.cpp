@@ -81,15 +81,15 @@ namespace Stumpff
 
 namespace Lambert
 {
-	X_S solve(
-		const Vec3& rv1
-		, double t1
-		, const Vec3& rv2
-		, double t2
-		, double mu
-		, double x0
-		, double eps
-		, int limit
+	X_S_T solve(
+		const Vec3& rv1   // rad-vec 1
+		, double t1       // time1
+		, const Vec3& rv2 // rad-vec 2
+		, double t2       // time2
+		, double mu       // G * M
+		, double x0       // initiall value
+		, double eps      // eps for solver
+		, int limit       // iterations limit
 	)
 	{
 		using namespace Stumpff;
@@ -97,18 +97,22 @@ namespace Lambert
 		using Solver = Num::Equ::NeutonScalar<double>;
 
 		using glm::dot;
+		using glm::cross;
 		using glm::length;
 
 
 		auto r1 = length(rv1);
 		auto r2 = length(rv2);
 
-		//cos(2a) = 2 * cos(a)^2 - 1
-		auto cosTransfer = dot(rv1 / r1, rv2 / r2);
-		auto cosHalf = sqrt((cosTransfer + 1) / 2);
+		auto transfer = acos(dot(rv1 / r1, rv2 / r2));
+		if (cross(rv1, rv2).z < 0.0)
+		{
+			transfer = PI_2 - transfer;
+		}
 
-		auto rho   = sqrt(2 * r1 * r2) / (r1 + r2) * cosHalf;
+		auto rho   = sqrt(2 * r1 * r2) / (r1 + r2) * cos(transfer / 2);
 		auto sigma = sqrt(mu) / pow(r1 + r2, 1.5) * (t2 - t1);
+
 
 		//func
 		auto F = [&] (double x) -> double
@@ -146,6 +150,7 @@ namespace Lambert
 		auto u = sqrt(1.0 - rho * c1(x) / sqrt(c2(x)));
 		auto s = sqrt((r1 + r2) / (mu * c2(x))) * u;
 
-		return {x, s};
+
+		return X_S_T{x, s, transfer};
 	}
 }

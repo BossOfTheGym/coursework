@@ -10,7 +10,11 @@
 struct OrbitComponent : public IComponent
 {
 public:
-	using R_V = std::pair<Vec3, Vec3>;
+	struct R_V
+	{
+		Vec3 radius;
+		Vec3 velocity;
+	};
 
 public:
 	OrbitComponent(
@@ -32,7 +36,7 @@ public:
 	virtual const Type& componentType() const override;
 	
 public:
-	R_V orbitState(const Time& t) const;
+	R_V orbitState(const Time& dt) const;
 
 	void updateOrbit();
 
@@ -55,8 +59,8 @@ public:
 
 	//misc
 	Vec3 mCv;   // specific Angular Momentum
-	Vec3 mEv;   // eccentricity vector
-	Vec3 mLv;   // lagrange vector
+	Vec3 mEv;   // apsis line
+	Vec3 mNv;   // node line
 
 	double mH;   // energy integral
 	double mP;   // semi-latus rectum

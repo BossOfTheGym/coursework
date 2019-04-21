@@ -21,11 +21,10 @@ namespace Num
             using Base::limit;
             using Base::eps;
 
-            using FunctionType = Utils::OneArgument<Argument, Value>;
 
-
+			template<class Function>
             Root<Argument> solve(
-                const FunctionType& mapping
+                  Function&& mapping
                 , const Argument& start
             )
             {
@@ -66,7 +65,6 @@ namespace Num
             using Scalar = ScalarType;
             using Matrix = MatrixType<Scalar, N, N>;
             using Vector = VectorType<Scalar, N>;
-            using FunctionType = Utils::OneArgument<Vector>;
 
 
             FixedPointSystem() : Base(), m_norm()
@@ -81,9 +79,9 @@ namespace Num
 
             FixedPointSystem(FixedPointSystem&& ns) = default;
 
-
+			template<class Function>
             Root<Vector> solve(
-                const FunctionType& mapping
+                  Function&& mapping
                 , const Vector& start
             )
             {

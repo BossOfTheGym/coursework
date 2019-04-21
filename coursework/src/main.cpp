@@ -288,7 +288,7 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, 
 	using glm::length;
 
 	using StateVec = Num::Arg::VecN<double, 6>;
-	using Methods  = Num::Ivp::Methods;
+	using Methods  = Num::Ivp::Methods<double>;
 	using Solver   = Num::Ivp::RungeKuttaExplicit<6, double, StateVec>;
 
 	auto& mat = sat->mPhysics->mMat;
@@ -301,7 +301,7 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, 
 	auto dr = r - r0;
 	 
 
-	Solver solver;
+	Solver solver(Methods::classic4());
 	auto force = [&] (double t, const StateVec& vec) -> StateVec
 	{
 		Vec3 rv = Vec3(vec[0], vec[1], vec[2]);
@@ -317,7 +317,6 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, 
 	StateVec curr{dr[0], dr[1], dr[2], v[0], v[1], v[2]};
 	StateVec next = solver.solve(
 		  force
-		, Methods::classic4<double>
 		, t.asFloat()
 		, curr
 		, dt.asFloat()

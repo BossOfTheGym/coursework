@@ -250,8 +250,6 @@ namespace Num
 
             bool solve(Matrix& mat, Vector& term)
             {
-                reset();
-
                 if (!forward(mat, term))
                 {
                     m_determinant = Scalar(0);
@@ -264,6 +262,7 @@ namespace Num
 
                 restoreComponentOrder(term);
 
+				reset();
 
                 return true;
             }
@@ -393,8 +392,6 @@ namespace Num
 
             bool solve(Matrix& mat, Term& term)
             {
-                reset();
-
                 if (!forward(mat, term))
                 {
                     m_determinant = Scalar(0);
@@ -407,6 +404,7 @@ namespace Num
 
                 restoreComponentOrder(term);
 
+				reset();
 
                 return true;
             }

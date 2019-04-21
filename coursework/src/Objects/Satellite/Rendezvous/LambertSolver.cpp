@@ -46,37 +46,6 @@ namespace Stumpff
 	{
 		return (1.0f / 24 - c4(x)) / x;
 	}
-
-
-	//double F(double x, double rho, double sigma)
-	//{
-	//	auto c1Val = c1(x);
-	//	auto c2Val = c2(x);
-	//	auto c3Val = c3(x);
-	//
-	//	auto u = sqrt(1.0f - rho * c1Val / sqrt(c2Val));
-	//
-	//	return c3(x) / pow(c2(x), 1.5f) * pow(u, 3.0f) + rho * u - sigma;
-	//}
-
-	//double Fx(double x, double rho)
-	//{
-	//	auto c1Val = c1(x);
-	//	auto c2Val = c2(x);
-	//	auto c3Val = c3(x);
-	//	auto c4Val = c4(x);
-	//	auto c5Val = c5(x);
-	//	auto c6Val = c6(x);
-	//
-	//	auto c2Pow = pow(c2Val, 1.5f);
-	//
-	//	auto u = sqrt(1.0f - rho * c1Val / sqrt(c2Val));
-	//
-	//	return
-	//		+(c3Val * c3Val - c5Val + 4 * c6Val) / (4 * c2Pow) * pow(u, 3)
-	//		+(3 * c3Val / c2Pow * u * u + rho) * rho * sqrt(c2Val) / (8 * u);
-	//}
-
 }
 
 namespace Lambert

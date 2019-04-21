@@ -22,12 +22,12 @@ namespace Num
             using Base::limit;
             using Base::eps;
 
-            using FunctionType = Utils::OneArgument<Argument, Value>;
+            //using FunctionType = Utils::OneArgument<Argument, Value>;
 
-
+			template<class Function, class Derivative>
             Root<Argument> solve(
-                  const FunctionType& func
-                , const FunctionType& deriv
+                  Function&& func
+                , Derivative&& deriv
                 , const Argument& start
             )
             {
@@ -71,8 +71,6 @@ namespace Num
             using Scalar = ScalarType;
             using Matrix = MatrixType<Scalar, N, N>;
             using Vector = VectorType<Scalar, N>;
-            using FunctionType = Utils::OneArgument<Vector>;
-            using JacobianType = Utils::OneArgument<Vector, Matrix>;
 
 
             NeutonSystem() : Base(), m_solver(), m_norm()
@@ -87,11 +85,11 @@ namespace Num
 
             NeutonSystem(NeutonSystem&& ns) = default;
 
-
+			template<class Function, class Jacobian>
             Root<Vector> solve(
-                const FunctionType& func
-                , const JacobianType& jacobian
-                , const Vector& start
+                  Function&& func
+                , Jacobian&& jacobian
+                , Vector&& start
             )
             {
                 Vector xPrev;
@@ -130,11 +128,11 @@ namespace Num
 
         private:
             Solver m_solver;
-            Norm m_norm;
+            Norm   m_norm;
         };
 
 
-		//Jacobians(not tested)
+		//Jacobians
 		template< 
 			  class ScalarType
 			, int N

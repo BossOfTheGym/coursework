@@ -1,5 +1,10 @@
 #include "OrbitComponent.h"
 
+#include "LambertSolver.h"
+#include <limits>
+
+#include <Numerics/Equ/Neuton.h>
+
 
 OrbitComponent::OrbitComponent(
 	IComponent* parent
@@ -35,8 +40,23 @@ const IComponent::Type& OrbitComponent::componentType() const
 	return type;
 }
 
-OrbitComponent::R_V OrbitComponent::orbitState(const Time& dt) const
+//TEST
+OrbitComponent::R_V OrbitComponent::orbitStateAngle(double theta) const
 {
+	//TODO
+	return {Vec3(0.0), Vec3(0.0)};
+}
+
+OrbitComponent::R_V OrbitComponent::orbitStateTime(const Time& dt) const
+{
+	using glm::dot;
+	using glm::length;
+
+	using namespace Stumpff;
+
+	using Solver = Num::Equ::NeutonScalar<double>;
+
+
 	auto planet    = mPlanetPhys.lock();
 	auto satellite = mSatellitePhys.lock();
 	if (!planet || !satellite)
@@ -44,10 +64,54 @@ OrbitComponent::R_V OrbitComponent::orbitState(const Time& dt) const
 		return {Vec3{0.0}, Vec3{0.0}};
 	}
 
+	Vec3& rv = satellite->mPosition;
+	Vec3& vv = satellite->mVelocity;
 
+	double tau    = dt.asFloat();
+	double r0     = length(rv);
+	double dotrv  = dot(rv, vv);
 
-	return {Vec3(0.0), Vec3(0.0)};
+	double mu = mMu;
+	double h  = mH;
+
+	auto universalKeplerEqu = [&] (double s) -> double
+	{
+		auto s2 = s * s;
+		auto s3 = s2 * s;
+		auto x = -h * s2;
+
+		return r0 * s * c1(x) + dotrv * s2 * c2(x) + mu * s3 * c3(x) - tau;
+	};
+
+	auto universalKeplerEquDeriv = [&] (double s) -> double
+	{
+		auto s2 = s * s;
+		auto x = -h * s2;
+
+		return r0 * c0(x) + dotrv * s * c1(x) + mu * s2 * c2(x);
+	};
+
+	auto[s, iter] = Solver(10, 1e-15).solve(
+		  universalKeplerEqu
+		, universalKeplerEquDeriv
+		, abs(h) * tau / mu
+	);
+	double s2 = s * s;
+	double s3 = s2 * s;
+	double x = -h * s2;
+	double c0Val = c0(x);
+	double c1Val = c1(x);
+	double c2Val = c2(x);
+	double c3Val = c3(x);
+
+	double r = r0 * c0Val + dotrv * s * c1Val + mu * s2 * c2Val;
+
+	double  f = 1.0 - mu * s2 * c2Val / r0; double  g = tau = mu * s3 * c3Val;
+	double df = -mu * s * c1Val / (r * r0); double dg = 1.0 - mu * s2 * c2Val / r;
+
+	return {f * rv + g * vv, df * rv + dg * vv};
 }
+
 
 void OrbitComponent::updateOrbit()
 {
@@ -55,9 +119,7 @@ void OrbitComponent::updateOrbit()
 	using glm::dot;
 	using glm::length;
 
-	// i : (1, 0, 0)
-	// j : (0, 1, 0)
-	// k : (0, 0, 1)
+
 	auto planet    = mPlanetPhys.lock();
 	auto satellite = mSatellitePhys.lock();
 	if (!planet || !satellite)
@@ -69,21 +131,21 @@ void OrbitComponent::updateOrbit()
 	mMu = G * planet->mMass;
 
 	//1.
-	auto& r0 = satellite->mPosition;
-	auto& v0 = satellite->mVelocity;
-	auto& center = planet->mPosition;
+	Vec3& r0 = satellite->mPosition;
+	Vec3& v0 = satellite->mVelocity;
+	Vec3& center = planet->mPosition;
 
 
-	auto rv = r0 - center;
-	auto r = length(rv);
+	Vec3  rv = r0 - center;
+	double r = length(rv);
 
 	//2.
-	auto vv = v0;
-	auto v = length(v0);
+	Vec3  vv = v0;
+	double v = length(v0);
 	mH = dot(vv, vv) - 2 * mMu / r;
 
 	//3.
-	auto vr = dot(rv / r, vv);
+	double vr = dot(rv / r, vv);
 
 	//4, 5
 	mCv = cross(rv, vv);//
@@ -94,8 +156,8 @@ void OrbitComponent::updateOrbit()
 	mI = acos(mCv.z / mC);
 
 	//7, 8
-	mNv = cross(Vec3{0.0, 0.0, 1.0}, mCv);
-	auto N = length(mNv);
+	mNv = cross(Vec3(0.0, 0.0, 1.0), mCv);
+	double N = length(mNv);
 
 	//9.
 	mRA = acos(mNv.x / N);
@@ -127,7 +189,7 @@ void OrbitComponent::updateOrbit()
 
 void OrbitComponent::updateSpecificParams()
 {
-	if (mE < 1.0) // process elliptic only
+	if (mE < 1.0) //elliptic
 	{
 		mA  = mP / (1.0 - mE * mE);
 		mEA = 2 * atan(sqrt((1.0 - mE) / (1.0 + mE)) * tan(mTA / 2));
@@ -140,6 +202,16 @@ void OrbitComponent::updateSpecificParams()
 
 		mT  = nInv * (mEA - mE * sin(mEA));
 		mOP = nInv * PI_2;
+	}
+	else if (mE > 1.0) // hyperbolic
+	{
+		mA  = mP / (mE * mE - 1.0);
+		mEA = 2 * atanh(sqrt((mE - 1.0) / (mE + 1.0)) * tanh(mTA / 2));
+
+		auto nInv = pow(mA, 1.5) / sqrt(mMu);
+
+		mT  = nInv * (mE * sinh(mEA) - mEA); //something strange happens here
+		mOP = std::numeric_limits<double>::infinity();
 	}
 	else
 	{

@@ -35,8 +35,12 @@ public:
 public:
 	virtual const Type& componentType() const override;
 	
+
 public:
-	R_V orbitState(const Time& dt) const;
+	R_V orbitStateAngle(double theta) const;
+
+	R_V orbitStateTime(const Time& dt) const;
+
 
 	void updateOrbit();
 

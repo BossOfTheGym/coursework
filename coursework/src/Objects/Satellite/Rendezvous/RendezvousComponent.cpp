@@ -40,7 +40,7 @@ void RendezvousComponent::update(const Time& t, const Time& dt)
 
 
 //methods
-void RendezvousComponent::start(Method method)
+void RendezvousComponent::start()
 {
 	mActions.clear();
 

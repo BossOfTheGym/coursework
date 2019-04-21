@@ -36,10 +36,10 @@
     <ClInclude Include="src\Objects\Objects.h" />
     <ClInclude Include="src\Objects\Planet\Planet.h" />
     <ClInclude Include="src\Objects\Planet\PlanetComponent.h" />
+    <ClInclude Include="src\Objects\Satellite\LambertSolver.h" />
     <ClInclude Include="src\Objects\Satellite\OrbitComponent.h" />
     <ClInclude Include="src\Objects\Satellite\Rendezvous\Actions.h" />
     <ClInclude Include="src\Objects\Satellite\Rendezvous\ActionVariant.h" />
-    <ClInclude Include="src\Objects\Satellite\Rendezvous\LambertSolver.h" />
     <ClInclude Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.h" />
     <ClInclude Include="src\Objects\Satellite\Satellite.h" />
     <ClInclude Include="src\Objects\Satellite\SatelliteComponent.h" />
@@ -79,9 +79,9 @@
     <ClCompile Include="src\Objects\NameComponent.cpp" />
     <ClCompile Include="src\Objects\Planet\Planet.cpp" />
     <ClCompile Include="src\Objects\Planet\PlanetComponent.cpp" />
+    <ClCompile Include="src\Objects\Satellite\LambertSolver.cpp" />
     <ClCompile Include="src\Objects\Satellite\OrbitComponent.cpp" />
     <ClCompile Include="src\Objects\Satellite\Rendezvous\Actions.cpp" />
-    <ClCompile Include="src\Objects\Satellite\Rendezvous\LambertSolver.cpp" />
     <ClCompile Include="src\Objects\Satellite\Rendezvous\RendezvousComponent.cpp" />
     <ClCompile Include="src\Objects\Satellite\Satellite.cpp" />
     <ClCompile Include="src\Objects\Satellite\SatelliteComponent.cpp" />

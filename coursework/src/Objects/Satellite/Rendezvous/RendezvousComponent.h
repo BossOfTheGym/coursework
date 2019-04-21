@@ -28,14 +28,6 @@ public:
 
 
 public:
-	enum class Method : int
-	{
-		THREE_IMPULS
-		, LAMBERT_PROBLEM
-	};
-
-
-public:
 	using Action  = ActionVariant<Impuls, Wait>;
 	using Actions = std::vector<Action>;
 
@@ -62,7 +54,7 @@ public:
 
 
 public:
-	void start(Method method);
+	void start();
 
 	void reset();
 

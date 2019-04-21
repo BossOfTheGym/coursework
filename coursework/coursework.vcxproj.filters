@@ -96,9 +96,6 @@
     <ClInclude Include="src\Objects\Satellite\OrbitComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Objects\Satellite\Rendezvous\LambertSolver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Factories.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -118,6 +115,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Objects\Satellite\Rendezvous\ActionVariant.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Objects\Satellite\LambertSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -215,9 +215,6 @@
     <ClCompile Include="src\Objects\NameComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Objects\Satellite\Rendezvous\LambertSolver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Factories.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -234,6 +231,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Objects\Satellite\Rendezvous\Actions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Objects\Satellite\LambertSolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

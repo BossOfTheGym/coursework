@@ -25,8 +25,6 @@ void createContext(GLFWwindow*& win, int width, int height, const String& name)
 void loadShaders(std::map<String, ShaderShared>& shadersStorage)
 {    
 	shadersStorage["planet.vs"]  = ShaderShared(new Shader(Shader::Vertex, "assets/shaders/Planet/sphere.vs"));
-	shadersStorage["planet.tcs"] = ShaderShared(new Shader(Shader::TessControl, "assets/shaders/Planet/sphere.tcs"));
-	shadersStorage["planet.tes"] = ShaderShared(new Shader(Shader::TessEvaluation, "assets/shaders/Planet/sphere.tes"));
 	shadersStorage["planet.gs"]  = ShaderShared(new Shader(Shader::Geometry, "assets/shaders/Planet/sphere.gs"));
 	shadersStorage["planet.fs"]  = ShaderShared(new Shader(Shader::Fragment, "assets/shaders/Planet/sphere.fs"));
 
@@ -62,7 +60,7 @@ void loadModels(std::map<String, ModelShared>& modelsStorage)
 
 
 	PlanetBuilder planetBuilder;
-	planetBuilder.build(3, "assets/textures/earth/earthmap1k.jpg", "Earth");
+	planetBuilder.build(5, "assets/textures/earth/earthmap1k.jpg", "Earth");
 
 	modelsStorage["earth"] = ModelShared(new Model(std::move(planetBuilder.model())));
 
@@ -79,8 +77,6 @@ ShaderProgramShared createPlanetProgram(std::map<String, ShaderShared>& shadersS
 {
 	ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Planet"));
 	program->attachShader(*shadersStorage["planet.vs"]);
-	program->attachShader(*shadersStorage["planet.tcs"]);
-	program->attachShader(*shadersStorage["planet.tes"]);
 	program->attachShader(*shadersStorage["planet.gs"]);
 	program->attachShader(*shadersStorage["planet.fs"]);
 

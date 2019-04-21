@@ -9,6 +9,7 @@ out dvec3 vsPosition;
 out dvec3 vsColor;
 out dvec2 vsTex;
 
+
 void main()
 {
 	vsPosition = pos;

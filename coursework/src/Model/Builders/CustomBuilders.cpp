@@ -60,9 +60,9 @@ namespace
 		}
 		else
 		{
-			pushVertex(data, vertex0);
-			pushVertex(data, vertex1);
-			pushVertex(data, vertex2);
+			pushVertex(data, glm::normalize(vertex0));
+			pushVertex(data, glm::normalize(vertex1));
+			pushVertex(data, glm::normalize(vertex2));
 		}
 	}
 	

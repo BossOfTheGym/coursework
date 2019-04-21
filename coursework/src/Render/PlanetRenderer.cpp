@@ -103,7 +103,7 @@ void PlanetRenderer::renderMesh(const Model& model, UInt index)
 	diffuse.bind();
 
 	vab.bindArray();
-	glDrawArrays(GL_PATCHES, 0, vab.elements());
+	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
 }
 
 void PlanetRenderer::restoreStates()

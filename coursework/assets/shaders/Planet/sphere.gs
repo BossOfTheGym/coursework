@@ -4,52 +4,76 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 
-in dvec4 tesModelPos[];
-in dvec4 tesWorldPos[];
-in dvec3 tesNormal[];
-in dvec3 tesColor[];
+in dvec3 vsPosition[];
+in dvec3 vsColor[];
+in dvec2 vsTex[];
 
-flat out dvec4 geoModelPos[3];
-flat out dvec4 geoWorldPos[3];
-flat out dvec3 geoNormal[3];
-flat out dvec3 geoColor[3];
+
+out vec4 geoModelPos;
+out vec4 geoWorldPos;
+out vec3 geoNormal;
+out vec3 geoColor;
 out vec3 geoGomo;
 
 
-
+uniform dmat4 model;
+uniform dmat4 view;
+uniform dmat4 proj;
+uniform dmat4 invTrans;
 
 
 
 void main()
 {
-	geoModelPos[0] = tesModelPos[0];
-	geoModelPos[1] = tesModelPos[1];
-	geoModelPos[2] = tesModelPos[2];
+	dmat4 vp = proj * view;
+	dvec4 modelPos;
+	dvec4 worldPos;
+	dvec3 normal;
 
-	geoWorldPos[0] = tesWorldPos[0];
-	geoWorldPos[1] = tesWorldPos[1];
-	geoWorldPos[2] = tesWorldPos[2];
+	//[0]
+	modelPos = dvec4(vsPosition[0], 1.0);
+	worldPos = model * modelPos;
+	normal   = normalize(invTrans * dvec4(modelPos.xyz, 0.0)).xyz;
 
-	geoNormal[0]   = tesNormal[0];
-	geoNormal[1]   = tesNormal[1];
-	geoNormal[2]   = tesNormal[2];
+	geoModelPos = vec4(modelPos);
+	geoWorldPos = vec4(worldPos);
+	geoNormal   = vec3(normal);
+	geoColor    = vec3(vsColor[0]);
+	geoGomo     = vec3(1.0, 0.0, 0.0);
+	gl_Position = vec4(vp * worldPos);
 
-	geoColor[0]    = tesColor[0];
-	geoColor[1]    = tesColor[1];
-	geoColor[2]    = tesColor[2];
-
-
-	gl_Position = gl_in[0].gl_Position;
-	geoGomo     = vec3(1.0f, 0.0f, 0.0f);
 	EmitVertex();
 
-	gl_Position = gl_in[1].gl_Position;
-	geoGomo     = vec3(0.0f, 1.0f, 0.0f);
+
+	//[1]
+	modelPos = dvec4(vsPosition[1], 1.0);
+	worldPos = model * modelPos;
+	normal   = normalize(invTrans * dvec4(modelPos.xyz, 0.0)).xyz;
+
+	geoModelPos = vec4(modelPos);
+	geoWorldPos = vec4(worldPos);
+	geoNormal   = vec3(normal);
+	geoColor    = vec3(vsColor[1]);
+	geoGomo     = vec3(0.0, 1.0, 0.0);
+	gl_Position = vec4(vp * worldPos);
+
 	EmitVertex();
 
-	gl_Position = gl_in[2].gl_Position;
-	geoGomo     = vec3(0.0f, 0.0f, 1.0f);
+
+	//[2]
+	modelPos = dvec4(vsPosition[2], 1.0);
+	worldPos = model * modelPos;
+	normal   = normalize(invTrans * dvec4(modelPos.xyz, 0.0)).xyz;
+
+	geoModelPos = vec4(modelPos);
+	geoWorldPos = vec4(worldPos);
+	geoNormal   = vec3(normal);
+	geoColor    = vec3(vsColor[2]);
+	geoGomo     = vec3(0.0, 0.0, 1.0);
+	gl_Position = vec4(vp * worldPos);
+
 	EmitVertex();
+
 
 	EndPrimitive();
 }

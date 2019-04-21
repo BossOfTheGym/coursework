@@ -101,8 +101,6 @@
     <None Include="assets\shaders\Axes\Axes.vs" />
     <None Include="assets\shaders\Planet\sphere.fs" />
     <None Include="assets\shaders\Planet\sphere.gs" />
-    <None Include="assets\shaders\Planet\sphere.tcs" />
-    <None Include="assets\shaders\Planet\sphere.tes" />
     <None Include="assets\shaders\Planet\sphere.vs" />
     <None Include="assets\shaders\Satellite\satellite.fs" />
     <None Include="assets\shaders\Satellite\satellite.gs" />

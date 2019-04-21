@@ -244,12 +244,6 @@
     <None Include="assets\shaders\Planet\sphere.gs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="assets\shaders\Planet\sphere.tcs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="assets\shaders\Planet\sphere.tes">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="assets\shaders\Planet\sphere.vs">
       <Filter>Resource Files</Filter>
     </None>

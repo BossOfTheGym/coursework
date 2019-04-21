@@ -1,9 +1,9 @@
 #version 430 core
 
-flat in dvec4 geoModelPos[3];
-flat in dvec4 geoWorldPos[3];
-flat in dvec3 geoColor[3];
-flat in dvec3 geoNormal[3];
+in vec4 geoModelPos;
+in vec4 geoWorldPos;
+in vec3 geoColor;
+in vec3 geoNormal;
 in vec3 geoGomo;
 
 out vec4 FragColor;
@@ -15,16 +15,6 @@ uniform sampler2D mapMain;
 const float PI   = 3.14159265358979; 
 const float PI_2 = 2 * PI;
 
-
-vec4 gomo(dvec4 vecs[3], vec3 gomo)
-{
-	return vec4(vecs[0] * gomo[0] + vecs[1] * gomo[1] + vecs[2] * gomo[2]);
-}
-
-vec3 gomo(dvec3 vecs[3], vec3 gomo)
-{
-	return vec3(vecs[0] * gomo[0] + vecs[1] * gomo[1] + vecs[2] * gomo[2]);
-}
 
 float acosNV(float x) {
 	float negate = float(x < 0);
@@ -44,13 +34,8 @@ float acosNV(float x) {
 
 void main()
 {
-	vec4 modelPos = gomo(geoModelPos, geoGomo);
-	vec4 worldPos = gomo(geoWorldPos, geoGomo);
-	vec3 color    = gomo(geoColor   , geoGomo);
-	vec3 normal   = gomo(geoNormal  , geoGomo);
-
     //texel obtainment
-    vec3 normalized = normalize(modelPos.xyz);
+    vec3 normalized = normalize(geoModelPos.xyz);
 	
 	float x = normalized.x;
 	float y = normalized.y;

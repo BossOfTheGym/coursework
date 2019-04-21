@@ -50,15 +50,36 @@ namespace Stumpff
 
 namespace Lambert
 {
-	X_S_T solve(
-		const Vec3& rv1   // rad-vec 1
-		, double t1       // time1
-		, const Vec3& rv2 // rad-vec 2
-		, double t2       // time2
-		, double mu       // G * M
-		, double x0       // initiall value
-		, double eps      // eps for solver
-		, int limit       // iterations limit
+	//initialD  :D
+	struct InitialX
+	{
+		double x0;
+		double x1;
+	};
+
+	InitialX x_K_revolutions(double rho, double sigma, unsigned k)
+	{		
+		double um = sqrt(1.0 - sqrt(2.0) * abs(rho));
+
+		double eps1 = pow(PI * k / (sqrt(2.0) * (sigma - rho * um)), 1.0 / 3.0) * um;
+		double eps2 = pow(PI * (k + 1) / (2.0 / 3.0 * pow(um, 3.0) + sigma - rho * um), 1.0 / 3.0) * um;
+
+		double z1 = eps1;
+		double z2 = PI - eps2;
+
+		return {4 * pow(z1 + PI * k, 2), 4 * pow(z2 + PI * k, 2)};
+	}
+
+
+	Solution solve(
+		  const Vec3& rv1  // rad-vec 1
+		, double t1        // time1
+		, const Vec3& rv2  // rad-vec 2
+		, double t2        // time2
+		, double mu        // G * M
+		, unsigned revolutions  // revolutions on transfer
+		, double eps       // eps for solver
+		, int limit        // iterations limit
 	)
 	{
 		using namespace Stumpff;
@@ -70,8 +91,8 @@ namespace Lambert
 		using glm::length;
 
 
-		auto r1 = length(rv1);
-		auto r2 = length(rv2);
+		double r1 = length(rv1);
+		double r2 = length(rv2);
 
 		auto transfer = acos(dot(rv1 / r1, rv2 / r2));
 		if (cross(rv1, rv2).z < 0.0)
@@ -79,9 +100,12 @@ namespace Lambert
 			transfer = PI_2 - transfer;
 		}
 
-		auto rho   = sqrt(2 * r1 * r2) / (r1 + r2) * cos(transfer / 2);
-		auto sigma = sqrt(mu) / pow(r1 + r2, 1.5) * (t2 - t1);
+		double tau = t2 - t1;
+		double rho   = sqrt(2 * r1 * r2) / (r1 + r2) * cos(transfer / 2);
+		double sigma = sqrt(mu) / pow(r1 + r2, 1.5) * tau;
 
+	
+		auto[x1, x2] = x_K_revolutions(rho, sigma, revolutions);
 
 		//func
 		auto F = [&] (double x) -> double
@@ -115,11 +139,22 @@ namespace Lambert
 				+(3 * c3Val / c2Pow * u * u + rho) * rho * sqrt(c2Val) / (8 * u);
 		};
 		
-		auto x = Solver(limit, eps).solve(F, Fx, x0).first;
-		auto u = sqrt(1.0 - rho * c1(x) / sqrt(c2(x)));
-		auto s = sqrt((r1 + r2) / (mu * c2(x))) * u;
+		//get velocity vector
+		auto solution = [&] (double x0) -> Vec3
+		{
+			auto[x, iter] = Solver(limit, eps).solve(F, Fx, x0);
 
+			double u = sqrt(1.0 - rho * c1(x) / sqrt(c2(x)));
+			double s = sqrt((r1 + r2) / (mu * c2(x))) * u;
+			double s2 = s * s;
+			double s3 = s2 * s;
 
-		return X_S_T{x, s, transfer};
+			double f = 1.0 - mu * s2 * c2(x) / r1;
+			double g = tau - mu * s3 * c3(x);
+
+			return 1.0 / g * (rv2 - f * rv1);
+		};
+
+		return {solution(x1), solution(x2)};
 	}
 }

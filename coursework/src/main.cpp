@@ -9,6 +9,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+
 using namespace std::chrono;
 
 
@@ -60,14 +61,8 @@ uint64_t warpMax;
 
 double divisor;
 
-//test
-ShaderProgramShared axes;
-GLint uModel;
-GLint uView;
-GLint uProj;
 
-
-//callbacks
+//callbacks(70)
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if(menuOpened)
@@ -143,7 +138,8 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
     prevY = yPos;
 }
 
-//init all globals
+
+//init all globals(130)
 void initGlobals()
 {
 	//context
@@ -199,7 +195,7 @@ void initGlobals()
 		, earth->mPhysics
 	);
 
-	satellites["satellite 2"] = createSatellite(
+	/*satellites["satellite 2"] = createSatellite(
 		models["satellite"]
 		, 1.0f
 		, Vec3(1.0f, 0.0f, 0.0f)
@@ -219,7 +215,7 @@ void initGlobals()
 		, Vec3(0.0f, 0.0f, sqrt(3000.0 / 7))
 		, "target 3"
 		, earth->mPhysics
-	);
+	);*/
 
 	satellites["satellite 0"] = createChaser(
 		models["satellite"]
@@ -264,12 +260,6 @@ void initGlobals()
 	warp    = 1;
 	warpMin = 1;
 	warpMax = 1000;
-
-	//test
-	axes = programs["axes"];
-	uModel = axes->getUniformLocation("model");
-	uView  = axes->getUniformLocation("view");
-	uProj  = axes->getUniformLocation("proj");
 }
 
 void destroyGlobals()
@@ -281,7 +271,7 @@ void destroyGlobals()
 
 //main loop
 
-//integrator
+//integrator(100 lines)
 void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, const Time& dt)
 {
 	using glm::dot;
@@ -381,6 +371,7 @@ void update()
 }
 
 
+//gui(200 lines)
 //test gui
 void testGui()
 {

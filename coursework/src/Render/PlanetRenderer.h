@@ -57,4 +57,5 @@ private:
 	GLint uModel;
 	GLint uView;
 	GLint uProj;
+	GLint uInvTrans;
 };

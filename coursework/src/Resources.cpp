@@ -62,7 +62,7 @@ void loadModels(std::map<String, ModelShared>& modelsStorage)
 
 
 	PlanetBuilder planetBuilder;
-	planetBuilder.build(4, "assets/textures/earth/earthmap1k.jpg", "Earth");
+	planetBuilder.build(3, "assets/textures/earth/earthmap1k.jpg", "Earth");
 
 	modelsStorage["earth"] = ModelShared(new Model(std::move(planetBuilder.model())));
 
@@ -124,6 +124,22 @@ ShaderProgramShared createSimpleProgram(std::map<String, ShaderShared>& shadersH
 	return program;
 }
 
+ShaderProgramShared createAxesProgram(std::map<String, ShaderShared>& shadersHolder)
+{
+	ShaderProgramShared program = ShaderProgramShared(new ShaderProgram("Axes"));
+	program->attachShader(*shadersHolder["axes.vs"]);
+	program->attachShader(*shadersHolder["axes.gs"]);
+	program->attachShader(*shadersHolder["axes.fs"]);
+
+	program->link();
+	if (!(program->linked()))
+	{
+		std::cerr << program->infoLog();
+	}
+
+	return program;
+}
+
 void createShaderPrograms(
 	std::map<String, ShaderProgramShared>& programStorage
 	, std::map<String, ShaderShared>& shadersStorage
@@ -132,6 +148,7 @@ void createShaderPrograms(
 	programStorage["satellite"] = createSatelliteProgram(shadersStorage);
 	programStorage["planet"]    = createPlanetProgram(shadersStorage);
 	programStorage["simple"]    = createSimpleProgram(shadersStorage);
+	programStorage["axes"]      = createAxesProgram(shadersStorage);
 }
 
 

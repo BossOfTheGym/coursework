@@ -16,6 +16,7 @@ out dvec3 tesColor;
 uniform dmat4 model;
 uniform dmat4 view;
 uniform dmat4 proj;
+uniform dmat4 invTrans;
 
 
 void main()
@@ -30,7 +31,7 @@ void main()
 	
 	tesModelPos = dvec4(normalize(p0 + p1 + p2), 1.0);
 	tesWorldPos = model * tesModelPos;
-	tesNormal = normalize((inverse(transpose(model)) * dvec4(tesModelPos.xyz, 0.0)).xyz);
+	tesNormal   = normalize(invTrans * dvec4(tesModelPos.xyz, 0.0)).xyz;
 	gl_Position = vec4(proj * view * tesWorldPos);
 
 

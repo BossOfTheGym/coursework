@@ -16,6 +16,10 @@ flat out dvec3 geoColor[3];
 out vec3 geoGomo;
 
 
+
+
+
+
 void main()
 {
 	geoModelPos[0] = tesModelPos[0];

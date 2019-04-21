@@ -12,8 +12,8 @@
 using namespace std::chrono;
 
 
-const int WIDTH  = 1200;
-const int HEIGHT = 900;
+const int WIDTH  = 1800;
+const int HEIGHT = 1000;
  
 
 //globals
@@ -59,6 +59,12 @@ uint64_t warpMin;
 uint64_t warpMax;
 
 double divisor;
+
+//test
+ShaderProgramShared axes;
+GLint uModel;
+GLint uView;
+GLint uProj;
 
 
 //callbacks
@@ -141,17 +147,26 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
 void initGlobals()
 {
 	//context
+	std::cout << "---Context---" << std::endl;
+	std::cout << "Creating context..." << std::endl;
 	createContext(window, WIDTH, HEIGHT, "Rendezvous");
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, posCallback);
-
+	std::cout << "Context created" << std::endl;
+	std::cout << std::endl;
 
 	//resources
+	std::cout << "---Resources---" << std::endl;
+	std::cout << "Shaders..." << std::endl;
 	loadShaders(shaders);
+	std::cout << "Models..." << std::endl;
 	loadModels(models);
+	std::cout << "Programs..." << std::endl;
 	createShaderPrograms(programs, shaders);
+	std::cout << "Renderers..." << std::endl;
 	createRenderers(renderers, programs);
-	
+	std::cout << std::endl;
+
 	//view
 	Vec3 pos  = Vec3(0.0f, 30.0f, 0.0f);
 	Vec3 look = Vec3(0.0f);
@@ -178,19 +193,41 @@ void initGlobals()
 		, 1.0f
 		, Vec3(1.0f, 0.0f, 0.0f)
 		, glm::scale(Mat4(1.0f), Vec3(0.5f))
-		, Vec3(-10.0f, 0.0f, 0.0f)
-		, Vec3(0.0f, 0.0f, sqrt(300))
+		, Vec3(-5.0f, 0.0f, 0.0f)
+		, Vec3(0.0f, 0.0f, sqrt(3000.0 / 5))
 		, "target 1"
 		, earth->mPhysics
 	);
 
-	satellites["satellite 2"] = createChaser(
+	satellites["satellite 2"] = createSatellite(
+		models["satellite"]
+		, 1.0f
+		, Vec3(1.0f, 0.0f, 0.0f)
+		, glm::scale(Mat4(1.0f), Vec3(0.5f))
+		, Vec3(-6.0f, 0.0f, 0.0f)
+		, Vec3(0.0f, 0.0f, sqrt(3000.0 / 6))
+		, "target 2"
+		, earth->mPhysics
+	);
+
+	satellites["satellite 3"] = createSatellite(
+		models["satellite"]
+		, 1.0f
+		, Vec3(1.0f, 0.0f, 0.0f)
+		, glm::scale(Mat4(1.0f), Vec3(0.5f))
+		, Vec3(-7.0f, 0.0f, 0.0f)
+		, Vec3(0.0f, 0.0f, sqrt(3000.0 / 7))
+		, "target 3"
+		, earth->mPhysics
+	);
+
+	satellites["satellite 0"] = createChaser(
 		models["satellite"]
 		, 1.0f
 		, Vec3(1.0f, 0.0f, 1.0f)
 		, glm::scale(Mat4(1.0f), Vec3(0.5f))
-		, Vec3(10.0f, 0.0f, 0.0f)
-		, Vec3(0.0f, 0.0f, -15.0f)
+		, Vec3(-5.0f, 0.0f, 0.0f)
+		, Vec3(0.0f, 0.0f, 30.0)
 		, "chaser"
 		, earth->mPhysics
 	);
@@ -227,8 +264,19 @@ void initGlobals()
 	warp    = 1;
 	warpMin = 1;
 	warpMax = 1000;
+
+	//test
+	axes = programs["axes"];
+	uModel = axes->getUniformLocation("model");
+	uView  = axes->getUniformLocation("view");
+	uProj  = axes->getUniformLocation("proj");
 }
 
+void destroyGlobals()
+{
+	glfwDestroyWindow(window);
+	glfwTerminate();
+}
 
 
 //main loop
@@ -515,7 +563,7 @@ void renderGui()
 	ImGui::NewFrame();
 
 
-	//testGui();
+	testGui();
 
 	myGui();
 
@@ -541,6 +589,26 @@ void render()
 	{
 		renderer->render(view);
 	}
+
+	//test: TODO(add renderer + point builder)
+	static Mat4    rot = glm::rotate(Mat4(1.0), glm::radians(+3.0), Vec3(1.0, 1.0, 1.0));
+	static Mat4 invRot = glm::rotate(Mat4(1.0), glm::radians(-3.0), Vec3(1.0, 1.0, 1.0));
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	axes->use();
+	axes->setUniformMat4(uProj, view.proj());
+	axes->setUniformMat4(uView, view.view());
+	for (auto&[key, sat] : satellites)
+	{
+		auto& mat      = sat->mPhysics->mMat;
+		auto& pos = sat->mPhysics->mPosition;
+
+		axes->setUniformMat4(uModel, mat);
+		mat      = mat * rot;
+		mat[3] = Vec4(pos, 1.0);
+
+		glDrawArrays(GL_POINTS, 0, 1);
+	}
 }
 
 
@@ -562,11 +630,7 @@ void featureTest()
 	GLFWmonitor* primary = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(primary);
 	
-	glfwSetWindowPos(
-		  window
-		, mode->width / 2 - WIDTH / 2  /* - std::min(WIDTH / 2, mode->width / 3)*/
-		, mode->height / 2 - HEIGHT / 2 /*- std::min(HEIGHT / 2, mode->height / 3)*/
-	);
+	glfwSetWindowPos(window, mode->width / 2 - WIDTH / 2, mode->height / 2 - HEIGHT / 2	);
 	glfwShowWindow(window);
 	glfwMakeContextCurrent(window);
     glfwSetCursorPos(window, prevX, prevY);
@@ -590,8 +654,7 @@ void featureTest()
     }
 
 	destroyGui();
-    glfwDestroyWindow(window);
-    glfwTerminate();
+	destroyGlobals();
 }
 
  
@@ -599,6 +662,6 @@ void featureTest()
 int main(int argc, char* argv[])
 {
     featureTest();
-
+	
     return EXIT_SUCCESS;
 }

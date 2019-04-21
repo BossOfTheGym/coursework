@@ -1,5 +1,6 @@
 #version 430 core
 
+#define SIZE 0.5
 
 layout(points) in;
 layout(line_strip, max_vertices = 6) out;
@@ -41,32 +42,35 @@ void main()
 
 	dmat4 mvp = proj * view * axes;
 
-	vec4 center = vec4(mvp * dvec4(0.0, 0.0, 0.0, 1.0));
-	vec4 xAxis  = vec4(mvp * dvec4(1.0, 0.0, 0.0, 1.0));
-	vec4 yAxis  = vec4(mvp * dvec4(0.0, 1.0, 0.0, 1.0));
-	vec4 zAxis  = vec4(mvp * dvec4(0.0, 0.0, 1.0, 1.0));
-
+	vec4 center = SIZE * vec4(mvp * dvec4(0.0, 0.0, 0.0, 1.0));
+	vec4 xAxis  = SIZE * vec4(mvp * dvec4(1.0, 0.0, 0.0, 1.0));
+	vec4 yAxis  = SIZE * vec4(mvp * dvec4(0.0, 1.0, 0.0, 1.0));
+	vec4 zAxis  = SIZE * vec4(mvp * dvec4(0.0, 0.0, 1.0, 1.0));
+	
 	//xAxis
 	gsColor = vec4(1.0, 0.0, 0.0, 1.0);
 	gl_Position = center;
 	EmitVertex();
+	gsColor = vec4(1.0, 0.0, 0.0, 1.0);
 	gl_Position = xAxis;
 	EmitVertex();
+	EndPrimitive();
 
 	//yAxis
 	gsColor = vec4(0.0, 1.0, 0.0, 1.0);
 	gl_Position = center;
 	EmitVertex();
+	gsColor = vec4(0.0, 1.0, 0.0, 1.0);
 	gl_Position = yAxis;
 	EmitVertex();
+	EndPrimitive();
 
 	//zAxis
 	gsColor = vec4(0.0, 0.0, 1.0, 1.0);
 	gl_Position = center;
 	EmitVertex();
-	gl_Position = yAxis;
+	gsColor = vec4(0.0, 0.0, 1.0, 1.0);
+	gl_Position = zAxis;
 	EmitVertex();
-
-
 	EndPrimitive();
 }

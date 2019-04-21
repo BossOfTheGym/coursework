@@ -82,6 +82,7 @@ void PlanetRenderer::renderNode(const Model& model, UInt index, const Mat4& curr
 
 
 	mProgramShared->setUniformMat4(uModel, nextTransform);
+	mProgramShared->setUniformMat4(uInvTrans, glm::transpose(glm::inverse(nextTransform)));
 	for(UInt i = 0; i < meshes.size(); i++)
 	{
 		renderMesh(model, meshes[i]);
@@ -116,4 +117,5 @@ void PlanetRenderer::setUniforms()
 	uModel = mProgramShared->getUniformLocation("model");
 	uView  = mProgramShared->getUniformLocation("view");
 	uProj  = mProgramShared->getUniformLocation("proj");
+	uInvTrans = mProgramShared->getUniformLocation("invTrans");
 }

@@ -49,11 +49,11 @@ void View::lookAround(double pitch, double roll)
 	}
 	if (mRoll > ROLL_MAX)
 	{
-		mRoll = ROLL_MIN;
+		mRoll = ROLL_MAX;
 	}
 	if (mRoll < ROLL_MIN)
 	{
-		mRoll = ROLL_MAX;
+		mRoll = ROLL_MIN;
 	}
 
 	mView = mAxes;

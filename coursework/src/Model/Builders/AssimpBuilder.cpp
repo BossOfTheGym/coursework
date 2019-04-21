@@ -137,18 +137,6 @@ namespace
 				*(iter) = (*(iter) - xCenter) / scale; ++iter;
 				*(iter) = (*(iter) - yCenter) / scale; ++iter;
 				*(iter) = (*(iter) - zCenter) / scale; ++iter;
-
-				/*vertices[9 * i + 0] = (vertices[9 * i + 0] - xCenter) / scale;
-				vertices[9 * i + 1] = (vertices[9 * i + 1] - yCenter) / scale;
-				vertices[9 * i + 2] = (vertices[9 * i + 2] - zCenter) / scale;
-
-				vertices[9 * i + 3] = (vertices[9 * i + 3] - xCenter) / scale;
-				vertices[9 * i + 4] = (vertices[9 * i + 4] - yCenter) / scale;
-				vertices[9 * i + 5] = (vertices[9 * i + 5] - zCenter) / scale;
-
-				vertices[9 * i + 6] = (vertices[9 * i + 6] - xCenter) / scale;
-				vertices[9 * i + 7] = (vertices[9 * i + 7] - yCenter) / scale;
-				vertices[9 * i + 8] = (vertices[9 * i + 8] - zCenter) / scale;*/
 			}
 		}
 
@@ -490,6 +478,7 @@ void AssimpBuilder::readFile(const String& location)
 
 
 	const aiScene* scene = mImporter.ReadFile(location, mImportFlags);
+
 
 	Nodes nodes;
 	Transformations nodesTransformations;

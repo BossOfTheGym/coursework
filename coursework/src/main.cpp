@@ -178,55 +178,32 @@ void initGlobals()
 	//planet
 	earth = createPlanet(
 		models["earth"]
-		, 3000.0f
-		, glm::scale(Mat4(1.0f), Vec3(4.0f))
-		, Vec3(0.0f)
-		, Vec3(0.0f)
-		, Vec3(0.0f)
+		, 3000.0
+		, glm::scale(Mat4(1.0), Vec3(4.0))
+		, Vec3(0.0)
+		, Vec3(0.0)
+		, Vec3(0.0)
 		, "Earth"
 	);
 
 	//satellites
 	satellites["satellite 1"] = createSatellite(
 		models["satellite"]
-		, 1.0f
-		, Vec3(1.0f, 0.0f, 0.0f)
-		, glm::scale(Mat4(1.0f), Vec3(0.5f))
-		, Vec3(-5.0f, 0.0f, 0.0f)
-		, Vec3(0.0f, 0.0f, sqrt(3000.0 / 5))
+		, 1.0
+		, Vec3(1.0, 0.0, 0.0)
+		, glm::scale(Mat4(1.0), Vec3(0.5))
+		, Vec3(-5.0, 0.0, 0.0)
+		, Vec3(0.0, 0.0, sqrt(3000.0 / 5))
 		, "target"
 		, earth->mPhysics
 	);
-
-	/*satellites["satellite 2"] = createSatellite(
-		models["satellite"]
-		, 1.0f
-		, Vec3(1.0f, 0.0f, 0.0f)
-		, glm::scale(Mat4(1.0f), Vec3(0.5f))
-		, Vec3(-6.0f, 0.0f, 0.0f)
-		, Vec3(0.0f, 0.0f, sqrt(3000.0 / 6))
-		, "target 2"
-		, earth->mPhysics
-	);
-
-	satellites["satellite 3"] = createSatellite(
-		models["satellite"]
-		, 1.0f
-		, Vec3(1.0f, 0.0f, 0.0f)
-		, glm::scale(Mat4(1.0f), Vec3(0.5f))
-		, Vec3(-7.0f, 0.0f, 0.0f)
-		, Vec3(0.0f, 0.0f, sqrt(3000.0 / 7))
-		, "target 3"
-		, earth->mPhysics
-	);*/
-
 	satellites["satellite 0"] = createChaser(
 		models["satellite"]
-		, 1.0f
-		, Vec3(1.0f, 0.0f, 1.0f)
-		, glm::scale(Mat4(1.0f), Vec3(0.5f))
-		, Vec3(-5.0f, 0.0f, -5.0f)
-		, Vec3(0.0f, 25.0f, 0.0)
+		, 1.0
+		, Vec3(1.0, 0.0, 1.0)
+		, glm::scale(Mat4(1.0), Vec3(0.5))
+		, Vec3(5.0, 0.0, 0.0)
+		, Vec3(0.0, 0.0, 27.0)
 		, "chaser"
 		, earth->mPhysics
 	);
@@ -245,7 +222,7 @@ void initGlobals()
 
 	//loop states
 	fill    = false;
-	stopped = false;
+	stopped = true;
 	menuOpened = false;
 
 	prevX = WIDTH / 2;
@@ -334,7 +311,7 @@ void updateObjects()
 
 void updatePhysics()
 {
-	while (dt >= dt0 * warp)
+	while (dt > dt0 * warp)
 	{
 		dt -= dt0 * warp;
 
@@ -409,6 +386,13 @@ void systemOptions()
 		ImGui::SliderScalar("Time warp: ", ImGuiDataType_S64, &warp, &warpMin, &warpMax);
 		warp = std::min(warp, warpMax);
 		warp = std::max(warp, warpMin);
+
+		static const char* options[] = {"pause simulation", "resume simulation"};
+		if (ImGui::Button(options[stopped]))
+		{
+			stopped ^= true;
+		}
+		ImGui::Text("");
 
 		//integrator(combo)
 	}
@@ -647,13 +631,14 @@ void featureTest()
 		SatelliteShared target = satellites["satellite 1"];
 
 		double tt = 3.0;
-		unsigned k = 2;
+		unsigned k = 1;
 		Time time(uint64_t(tt * divisor), tt);
 
 		Vec3 rv1 = chaser->mPhysics->mPosition;
 		auto[rv2, vv2] = target->mOrbit->orbitStateTime(time);
 
-		auto solution = Lambert::solve(rv1, 0.0, rv2, tt, 3000, 2);
+		auto solution = Lambert::solve(rv1, 0.0, rv2, tt, 3000, k);
+
 		Vec3 deltaV1 = solution.vel1 - chaser->mPhysics->mVelocity;
 
 		chaser->mRendezvous->setTarget(target);

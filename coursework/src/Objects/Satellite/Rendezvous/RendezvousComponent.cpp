@@ -10,6 +10,7 @@ RendezvousComponent::RendezvousComponent(
 	, mChaser(dynamic_cast<Satellite*>(parent))
 	, mTarget(target)
 	, mActions()
+	, mState(State::FINISHED)
 {
 	mActions.reserve(DEFAULT_CAPACITY);
 }
@@ -25,15 +26,22 @@ const IComponent::Type& RendezvousComponent::componentType() const
 
 void RendezvousComponent::update(const Time& t, const Time& dt)
 {
-	if (!mActions.empty())
+	if (mState != State::FINISHED)
 	{
-		auto& action = mActions.back();
-
-		action.update(t, dt);
-		if (action.state() == ActionBase::State::FINISHED)
+		if (!mActions.empty())
 		{
-			mActions.pop_back();
-			std::cout << "Success" << std::endl;
+			auto& action = mActions.back();
+
+			action.update(t, dt);
+			if (action.state() == ActionBase::State::FINISHED)
+			{
+				mActions.pop_back();
+				std::cout << "Success" << std::endl;
+			}
+		}
+		else
+		{
+			mState = State::FINISHED;
 		}
 	}
 }
@@ -42,23 +50,24 @@ void RendezvousComponent::update(const Time& t, const Time& dt)
 //methods
 void RendezvousComponent::start()
 {
-	mActions.clear();
-
-	//TODO(it's just test)
-	mActions.push_back(Impuls(mChaser, Vec3(0.0f, 0.0f, 5.0f)));
-	mActions.push_back(Wait(Time(100000)));
-	mActions.push_back(Impuls(mChaser, Vec3(0.0f, 0.0f, 5.0f)));
-	mActions.push_back(Wait(Time(100000)));
+	mState = State::STARTED;
 }
 
-void RendezvousComponent::reset()
+void RendezvousComponent::stop()
 {
 	mActions.clear();
+	mState = State::FINISHED;
 }
 
-bool RendezvousComponent::finished() const
+
+RendezvousComponent::State RendezvousComponent::state() const
 {
-	return mActions.empty();
+	return mState;
+}
+
+void RendezvousComponent::setTarget(const SatelliteWeak& target)
+{
+	mTarget = target;
 }
 
 const SatelliteWeak& RendezvousComponent::target() const

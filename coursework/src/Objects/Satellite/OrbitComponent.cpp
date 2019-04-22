@@ -96,6 +96,7 @@ OrbitComponent::R_V OrbitComponent::orbitStateTime(const Time& dt) const
 		, universalKeplerEquDeriv
 		, abs(h) * tau / mu
 	);
+
 	double s2 = s * s;
 	double s3 = s2 * s;
 	double x = -h * s2;
@@ -106,7 +107,7 @@ OrbitComponent::R_V OrbitComponent::orbitStateTime(const Time& dt) const
 
 	double r = r0 * c0Val + dotrv * s * c1Val + mu * s2 * c2Val;
 
-	double  f = 1.0 - mu * s2 * c2Val / r0; double  g = tau = mu * s3 * c3Val;
+	double  f = 1.0 - mu * s2 * c2Val / r0; double  g = tau - mu * s3 * c3Val;
 	double df = -mu * s * c1Val / (r * r0); double dg = 1.0 - mu * s2 * c2Val / r;
 
 	return {f * rv + g * vv, df * rv + dg * vv};

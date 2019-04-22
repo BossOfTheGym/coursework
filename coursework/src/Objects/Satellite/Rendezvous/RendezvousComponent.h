@@ -12,6 +12,7 @@
 //forward decl
 template<class ... Types>
 class ActionVariant;
+
 class Impuls;
 class Wait;
 
@@ -25,6 +26,14 @@ struct RendezvousComponent : public IComponent, public ITimeVarying
 {
 public:
 	static const size_t DEFAULT_CAPACITY = 10;
+
+
+public:
+	enum class State : int
+	{
+		  STARTED = 1
+		, FINISHED = 0
+	};
 
 
 public:
@@ -56,10 +65,30 @@ public:
 public:
 	void start();
 
-	void reset();
+	void stop();
+
+	template<class ActionType>
+	void pushAction(ActionType&& action)
+	{
+		if (mState == State::FINISHED)
+		{
+			mActions.push_back(action);
+		}
+	}
+
+	template<class ActionType>
+	void pushAction(const Action& action)
+	{
+		if (mState == State::FINISHED)
+		{
+			mActions.push_back(action);
+		}
+	}
+
+	State state() const;
 
 
-	bool finished() const;
+	void setTarget(const SatelliteWeak& target);
 
 	const SatelliteWeak& target() const;
 
@@ -68,6 +97,7 @@ public:
 	Satellite*    mChaser; // from IComponent* mParent
 	SatelliteWeak mTarget;
 	Actions       mActions;
+	State         mState;
 };
 
 

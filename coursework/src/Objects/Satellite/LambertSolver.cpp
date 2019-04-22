@@ -6,30 +6,84 @@
 
 namespace Stumpff
 {
-	//x > 0
-
 	double c0(double x)
 	{
-		return cos(sqrt(x));
+		if (x > std::numeric_limits<double>::epsilon())
+		{
+			return cos(sqrt(x));
+		}
+		else if (x < std::numeric_limits<double>::epsilon())
+		{
+			return cosh(sqrt(-x));
+		}
+		else
+		{
+			return 1.0;
+		}
+
+		return 0.0;
 	}
 
 	double c1(double x)
 	{
-		auto sq = sqrt(x);
+		if (x > std::numeric_limits<double>::epsilon())
+		{
+			double xSq = sqrt(x);
 
-		return sin(sq) / sq;
+			return sin(xSq) / xSq;
+		}
+		else if (x < std::numeric_limits<double>::epsilon())
+		{
+			double xSq = sqrt(-x);
+
+			return sinh(xSq) / xSq;
+		}
+		else
+		{
+			return 1.0;
+		}
+
+		return 0.0;
 	}
 
 	double c2(double x)
 	{
-		return (1.0f - cos(sqrt(x))) / x;
+		if (x > std::numeric_limits<double>::epsilon())
+		{
+			return (1.0f - cos(sqrt(x))) / x;
+		}
+		else if (x < std::numeric_limits<double>::epsilon())
+		{
+			return (cosh(sqrt(-x)) - 1.0) / (-x);
+		}
+		else
+		{
+			return 1.0 / 2;
+		}
+
+		return 0.0;
 	}
 
 	double c3(double x)
 	{
-		auto sq = sqrt(x);
+		if (x > std::numeric_limits<double>::epsilon())
+		{
+			double sq = sqrt(x);
 
-		return (sq - sin(sq)) / (x * sq);
+			return (sq - sin(sq)) / (x * sq);
+		}
+		else if (x < std::numeric_limits<double>::epsilon())
+		{
+			double sq = sqrt(-x);
+
+			return (sinh(sq) - sq) / (-x * sq);
+		}
+		else
+		{
+			return 1.0 / 6;
+		}
+
+		return 0.0;
 	}
 
 	double c4(double x)
@@ -70,6 +124,49 @@ namespace Lambert
 		return {4 * pow(z1 + PI * k, 2), 4 * pow(z2 + PI * k, 2)};
 	}
 
+	double C(double z)
+	{
+		if (z > std::numeric_limits<double>::epsilon())
+		{
+			return (1.0 - cos(sqrt(z))) / z;
+		}
+		else if (z < std::numeric_limits<double>::epsilon())
+		{
+			return (cosh(sqrt(-z)) - 1.0) / -z;
+		}
+		else
+		{
+			return 1.0 / 2;
+		}
+
+		return 0.0;
+	}
+
+	double S(double z)
+	{
+		if (z > std::numeric_limits<double>::epsilon())
+		{
+			double zSq = sqrt(z);
+			double zSq3 = z * zSq;
+
+			return (zSq - sin(zSq)) / zSq3;
+
+		}
+		else if (z < std::numeric_limits<double>::epsilon())
+		{
+			double zSq  = sqrt(-z);
+			double zSq3 = -z * zSq;
+
+			return (sinh(zSq) - zSq) / zSq3;
+		}
+		else
+		{
+			return 1.0 / 6;
+		}
+
+		return 0.0;
+	}
+
 
 	Solution solve(
 		  const Vec3& rv1  // rad-vec 1
@@ -89,6 +186,7 @@ namespace Lambert
 		using glm::dot;
 		using glm::cross;
 		using glm::length;
+
 
 
 		double r1 = length(rv1);
@@ -130,13 +228,17 @@ namespace Lambert
 			auto c5Val = c5(x);
 			auto c6Val = c6(x);
 
+			auto c3Val2 = c3Val * c3Val;
+
 			auto c2Pow = pow(c2Val, 1.5);
 
 			auto u = sqrt(1.0f - rho * c1Val / sqrt(c2Val));
+			auto u2 = u * u;
+			auto u3 = u2 * u;
 
 			return
-				+(c3Val * c3Val - c5Val + 4 * c6Val) / (4 * c2Pow) * pow(u, 3)
-				+(3 * c3Val / c2Pow * u * u + rho) * rho * sqrt(c2Val) / (8 * u);
+				+(c3Val2 - c5Val + 4.0 * c6Val) / (4.0 * c2Pow) * u3
+				+(3.0 * c3Val / c2Pow * u2 + rho) * rho * sqrt(c2Val) / (8 * u);
 		};
 		
 		//get velocity vector

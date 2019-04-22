@@ -2,8 +2,10 @@
 
 #include <Resources.h>
 #include <Factories.h>
-#include <Numerics/Ivp/RungeKutta.h>
 #include <Integrators/Integrator.h>
+#include <Objects/Satellite/LambertSolver.h>
+
+#include <Numerics/Ivp/RungeKutta.h>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -181,6 +183,7 @@ void initGlobals()
 		, Vec3(0.0f)
 		, Vec3(0.0f)
 		, Vec3(0.0f)
+		, "Earth"
 	);
 
 	//satellites
@@ -191,7 +194,7 @@ void initGlobals()
 		, glm::scale(Mat4(1.0f), Vec3(0.5f))
 		, Vec3(-5.0f, 0.0f, 0.0f)
 		, Vec3(0.0f, 0.0f, sqrt(3000.0 / 5))
-		, "target 1"
+		, "target"
 		, earth->mPhysics
 	);
 
@@ -435,23 +438,33 @@ void showSatelliteParameters(SatelliteShared& sat)
 		ImGui::Text("");
 	}
 
+	if (sat->mPhysics)
+	{
+		auto& physics = *(sat->mPhysics);
+
+		ImGui::Text("State parameters");
+		ImGui::Text("Radius   x:%f y:%f z:%f", physics.mPosition.x, physics.mPosition.y, physics.mPosition.z);
+		ImGui::Text("Velocity x:%f y:%f z:%f", physics.mVelocity.x, physics.mVelocity.y, physics.mVelocity.z);
+		ImGui::Text("");
+	}
+
 	if (sat->mOrbit)
 	{
 		auto& orbit = *(sat->mOrbit);
 
-		ImGui::Text("Main:");
+		ImGui::Text("Main");
 		ImGui::Text("Specific ang. momentum : %f", orbit.mC);
-		ImGui::Text("Inclination            : %f", orbit.mI);
 		ImGui::Text("Right ascension        : %f", orbit.mRA);
-		ImGui::Text("Eccentricity           : %f", orbit.mE);
 		ImGui::Text("Argument of perigee    : %f", orbit.mAP);
+		ImGui::Text("Inclination            : %f", orbit.mI);
+		ImGui::Text("Eccentricity           : %f", orbit.mE);
 		ImGui::Text("True anomaly           : %f", orbit.mTA);
 		ImGui::Text("");	
 
-		ImGui::Text("Spec: ");
-		ImGui::Text("Orbit period      : %f", orbit.mOP);
-		ImGui::Text("Apoapsis          : %f", orbit.mA);
+		ImGui::Text("Spec ");
 		ImGui::Text("Eccentric anomaly : %f", orbit.mEA);
+		ImGui::Text("Apoapsis          : %f", orbit.mA);
+		ImGui::Text("Orbit period      : %f", orbit.mOP);
 		ImGui::Text("Time              : %f", orbit.mT);
 		ImGui::Text("");
 	}
@@ -625,6 +638,28 @@ void featureTest()
 	glfwMakeContextCurrent(window);
     glfwSetCursorPos(window, prevX, prevY);
 	glfwSwapInterval(1);
+	
+	//TEST
+	{
+		using Action = RendezvousComponent::Action;
+
+ 		SatelliteShared chaser = satellites["satellite 0"];
+		SatelliteShared target = satellites["satellite 1"];
+
+		double tt = 3.0;
+		unsigned k = 2;
+		Time time(uint64_t(tt * divisor), tt);
+
+		Vec3 rv1 = chaser->mPhysics->mPosition;
+		auto[rv2, vv2] = target->mOrbit->orbitStateTime(time);
+
+		auto solution = Lambert::solve(rv1, 0.0, rv2, tt, 3000, 2);
+		Vec3 deltaV1 = solution.vel1 - chaser->mPhysics->mVelocity;
+
+		chaser->mRendezvous->setTarget(target);
+		chaser->mRendezvous->pushAction(Impuls(chaser.get(), deltaV1));
+		chaser->mRendezvous->start();
+	}
 
     while (!glfwWindowShouldClose(window))
     {

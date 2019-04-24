@@ -21,25 +21,19 @@ namespace Stumpff
 
 namespace Lambert
 {
-	//case 1:
-	//if revolutions count = 0 then velocity1 is for hyperbolic trajectory
-	//and velocity2 is for elliptical trajectory
-	//case 2:
-	//both velocities are for elliptical trajectory
 	struct Solution
 	{
-		Vec3 vel1;
-		Vec3 vel2;
+		Vec3 vv1;
+		Vec3 vv2;
 	};
 
 	Solution solve(
 		  const Vec3& rv1
-		, double t1
 		, const Vec3& rv2
-		, double t2
+		, double dt
 		, double mu
-		, unsigned revolutions
+		, double z0
 		, double eps = 1e-15f
-		, int limit = 10
+		, int limit = 25
 	);
 }

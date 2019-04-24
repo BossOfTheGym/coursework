@@ -50,7 +50,8 @@ void main()
     }
     vec4 tex = texture(mapMain, vec2(longitude / PI_2, 1.0 - latitude / PI));
 
-	if(geoGomo[0] < 0.04 || geoGomo[1] < 0.04 || geoGomo[2] < 0.04)
+	float d = min(min(geoGomo[0], geoGomo[1]), geoGomo[2]);
+	if(d < 0.02)
 	{
 		tex = vec4(vec3(0.0), 1.0);
 	}

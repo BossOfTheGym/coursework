@@ -12,6 +12,7 @@ void createContext(GLFWwindow*& win, int width, int height, const String& name)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_SAMPLES, 8);
 
 	win = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 
@@ -60,7 +61,7 @@ void loadModels(std::map<String, ModelShared>& modelsStorage)
 
 
 	PlanetBuilder planetBuilder;
-	planetBuilder.build(5, "assets/textures/earth/earthmap1k.jpg", "Earth");
+	planetBuilder.build(5, "assets/textures/earth/earthmap.jpg", "Earth");
 
 	modelsStorage["earth"] = ModelShared(new Model(std::move(planetBuilder.model())));
 

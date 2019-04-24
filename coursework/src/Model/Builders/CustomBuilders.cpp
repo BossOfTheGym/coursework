@@ -164,8 +164,8 @@ namespace
 
 		//should be configurable
 		diffuse[0].bind();
-		diffuse[0].texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP);
-		diffuse[0].texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP);
+		diffuse[0].texParameteri(GL_TEXTURE_WRAP_S, GL_REPEAT);
+		diffuse[0].texParameteri(GL_TEXTURE_WRAP_T, GL_REPEAT);
 		diffuse[0].texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		diffuse[0].texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

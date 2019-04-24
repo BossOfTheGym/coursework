@@ -2,15 +2,15 @@
 
 
 //statics
-const double View::DELTA_THRESHOLD = 0.0001f;
+const double View::DELTA_THRESHOLD = 0.00001;
 
-const double View::DEFAULT_SENSITIVITY = 0.25f;
+const double View::DEFAULT_SENSITIVITY = 0.25;
 
-const double View::PITCH_MAX = 2 * PI;
-const double View::PITCH_MIN = 0;
+const double View::PITCH_MAX = 2.0 * PI;
+const double View::PITCH_MIN = 0.0;
 
-const double View::ROLL_MAX = +PI / 2;
-const double View::ROLL_MIN = -PI / 2;
+const double View::ROLL_MAX = +PI / 2.0;
+const double View::ROLL_MIN = -PI / 2.0;
 
 
 //constructor
@@ -191,8 +191,8 @@ void View::updateView()
 
 void View::updateAxes()
 {
-	mPitch = 0.0f;
-	mRoll  = 0.0f;
+	mPitch = 0.0;
+	mRoll  = 0.0;
 
 	mView = mAxes;
 

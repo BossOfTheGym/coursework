@@ -12,7 +12,6 @@ public:
 	static const int DEFAULT_FLAGS = 
 		  aiProcess_CalcTangentSpace 
 		| aiProcess_Triangulate 
-		| aiProcess_ImproveCacheLocality
 		| aiProcess_SortByPType 
 		| aiProcess_OptimizeMeshes;
 

@@ -15,8 +15,8 @@
 using namespace std::chrono;
 
 
-const int WIDTH  = 1800;
-const int HEIGHT = 1000;
+const int WIDTH  = 1500;
+const int HEIGHT = 900;
  
 
 //globals
@@ -141,7 +141,7 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
 }
 
 
-//init all globals(130)
+//init all globals(100)
 void initGlobals()
 {
 	//context
@@ -173,6 +173,7 @@ void initGlobals()
 		  glm::lookAt(pos, look, up)
 		, glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 500.0f)
 		, pos
+		, 0.5
 	);
 
 	//planet
@@ -197,13 +198,14 @@ void initGlobals()
 		, "target"
 		, earth->mPhysics
 	);
+
 	satellites["satellite 0"] = createChaser(
 		models["satellite"]
 		, 1.0
 		, Vec3(1.0, 0.0, 1.0)
 		, glm::scale(Mat4(1.0), Vec3(0.5))
 		, Vec3(5.0, 0.0, 0.0)
-		, Vec3(0.0, 0.0, 27.0)
+		, Vec3(0.0, 0.0, -sqrt(3000.0 / 5) + 0.11)
 		, "chaser"
 		, earth->mPhysics
 	);
@@ -222,7 +224,7 @@ void initGlobals()
 
 	//loop states
 	fill    = false;
-	stopped = true;
+	stopped = false;
 	menuOpened = false;
 
 	prevX = WIDTH / 2;
@@ -379,6 +381,10 @@ void systemOptions()
 {
 	if (ImGui::CollapsingHeader("System parameters"))
 	{
+		ImGuiIO& io = ImGui::GetIO();
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+		ImGui::Text("");
+
 		ImGui::Text("Time raw: %llu", t.asU64()  );
 		ImGui::Text("Time    : %f"  , t.asFloat());
 		ImGui::Text("Divisor : %f", divisor);
@@ -550,7 +556,7 @@ void renderGui()
 	ImGui::NewFrame();
 
 
-	testGui();
+	//testGui();
 
 	myGui();
 
@@ -570,8 +576,6 @@ void destroyGui()
 
 void render()
 {
-	glfwMakeContextCurrent(window);
-
 	for (auto&[name, renderer] : renderers)
 	{
 		renderer->render(view);
@@ -606,10 +610,11 @@ void featureTest()
 
 
     //setups
+	glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     glViewport(0, 0, WIDTH, HEIGHT);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	
@@ -623,28 +628,6 @@ void featureTest()
     glfwSetCursorPos(window, prevX, prevY);
 	glfwSwapInterval(1);
 	
-	//TEST
-	{
-		using Action = RendezvousComponent::Action;
-
- 		SatelliteShared chaser = satellites["satellite 0"];
-		SatelliteShared target = satellites["satellite 1"];
-
-		double tt = 3.0;
-		unsigned k = 1;
-		Time time(uint64_t(tt * divisor), tt);
-
-		Vec3 rv1 = chaser->mPhysics->mPosition;
-		auto[rv2, vv2] = target->mOrbit->orbitStateTime(time);
-
-		auto solution = Lambert::solve(rv1, 0.0, rv2, tt, 3000, k);
-
-		Vec3 deltaV1 = solution.vel1 - chaser->mPhysics->mVelocity;
-
-		chaser->mRendezvous->setTarget(target);
-		chaser->mRendezvous->pushAction(Impuls(chaser.get(), deltaV1));
-		chaser->mRendezvous->start();
-	}
 
     while (!glfwWindowShouldClose(window))
     {

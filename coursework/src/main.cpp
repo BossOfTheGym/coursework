@@ -540,7 +540,6 @@ void initGui()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
 	ImGui::StyleColorsDark();
 
@@ -580,26 +579,6 @@ void render()
 	{
 		renderer->render(view);
 	}
-
-	//test: TODO(add renderer + point builder)
-	/*static Mat4    rot = glm::rotate(Mat4(1.0), glm::radians(+3.0), Vec3(1.0, 1.0, 1.0));
-	static Mat4 invRot = glm::rotate(Mat4(1.0), glm::radians(-3.0), Vec3(1.0, 1.0, 1.0));
-
-	glClear(GL_DEPTH_BUFFER_BIT);
-	axes->use();
-	axes->setUniformMat4(uProj, view.proj());
-	axes->setUniformMat4(uView, view.view());
-	for (auto&[key, sat] : satellites)
-	{
-		auto& mat      = sat->mPhysics->mMat;
-		auto& pos = sat->mPhysics->mPosition;
-
-		axes->setUniformMat4(uModel, mat);
-		mat      = mat * rot;
-		mat[3] = Vec4(pos, 1.0);
-
-		glDrawArrays(GL_POINTS, 0, 1);
-	}*/
 }
 
 

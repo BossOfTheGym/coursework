@@ -10,8 +10,8 @@ namespace Num
 {
     namespace Equ
     {
-        template<class Argument>
-        using Root = std::pair<Argument, int>;
+        template<class Value>
+        using Root = std::pair<Value, int>;
 
 
         const int DEFAULT_ITERATIONS_LIMIT = 10;
@@ -21,18 +21,14 @@ namespace Num
         using DefaultNorm = Utils::Norm<Vector, Utils::NormType::OCTO>;
 
 
-        template<class ScalarType>
+        template<class Value>
         class IterativeSolverBase
         {
         public:
-            using Scalar = ScalarType;
-
-
-        public:
-            IterativeSolverBase() : IterativeSolverBase(DEFAULT_ITERATIONS_LIMIT, EPS<Scalar>)
+            IterativeSolverBase() : IterativeSolverBase(DEFAULT_ITERATIONS_LIMIT, EPS<Value>)
             {}
 
-            IterativeSolverBase(int iterationsLimit, Scalar eps = EPS<Scalar>)
+            IterativeSolverBase(int iterationsLimit, Value eps = EPS<Value>)
                 : m_iterationsLimit(iterationsLimit)
                 , m_eps(eps)
             {}
@@ -53,12 +49,12 @@ namespace Num
                 return m_iterationsLimit;
             }
 
-            Scalar& eps()
+			Value& eps()
             {
                 return m_eps;
             }
 
-            const Scalar& eps() const
+            const Value& eps() const
             {
                 return m_eps;
             }
@@ -66,7 +62,7 @@ namespace Num
 
         private:
             int m_iterationsLimit;
-            Scalar m_eps;
+			Value m_eps;
         };
     }
 }

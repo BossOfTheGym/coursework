@@ -53,7 +53,7 @@ void main()
 	float d = min(min(geoGomo[0], geoGomo[1]), geoGomo[2]);
 	if(d < 0.02)
 	{
-		tex = vec4(vec3(0.0), 1.0);
+		//tex = vec4(vec3(0.0), 1.0);
 	}
 
 

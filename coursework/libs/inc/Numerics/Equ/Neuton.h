@@ -8,12 +8,12 @@
 #include "Common.h"
 
 
-//TODO : add different jacobians as functors
+
 namespace Num
 {
     namespace Equ
     {
-        template<class Argument, class Value = Argument>
+        template<class Value>
         class NeutonScalar : public IterativeSolverBase<Value>
         {
         public:
@@ -22,17 +22,16 @@ namespace Num
             using Base::limit;
             using Base::eps;
 
-            //using FunctionType = Utils::OneArgument<Argument, Value>;
 
 			template<class Function, class Derivative>
-            Root<Argument> solve(
+            Root<Value> solve(
                   Function&& func
                 , Derivative&& deriv
-                , const Argument& start
+                , const Value& start
             )
             {
-                Argument xPrev;
-                Argument xNext;
+				Value xPrev;
+				Value xNext;
 
                 int iterations = 0;
 
@@ -51,6 +50,29 @@ namespace Num
         };
 
 
+		template<class Value, class Function>
+		class DiffDerivative : public Function
+		{
+		public:
+			DiffDerivative(Function&& function, Value eps) 
+				: Function(std::forward<Function>(function))
+				, mEps(eps)
+			{}
+
+			DiffDerivative(const DiffDerivative& deriv) = default;
+			DiffDerivative(DiffDerivative&& deriv)      = default;
+
+
+		public:
+			Value operator()(const Value& arg)
+			{
+				return (Function::operator()(arg + mEps) - Function::operator()(arg - mEps)) / (2 * mEps);
+			}
+
+		private:
+			Value mEps;
+		};
+		
 
 
         template<
@@ -82,8 +104,9 @@ namespace Num
             {}
 
             NeutonSystem(const NeutonSystem& ns) = default;
+            NeutonSystem(NeutonSystem&& ns)      = default;
 
-            NeutonSystem(NeutonSystem&& ns) = default;
+
 
 			template<class Function, class Jacobian>
             Root<Vector> solve(
@@ -119,7 +142,6 @@ namespace Num
                 return {xNext, iterations};
             }
 
-
 			Norm& getNorm()
 			{
 				return m_norm;
@@ -132,59 +154,47 @@ namespace Num
         };
 
 
-		//Jacobians
 		template< 
-			  class ScalarType
-			, int N
-			, template<class Scalar = ScalarType, int ROWS = N, int COLS = N> class MatrixType = Arg::MatNxM
-			, template<class Scalar = ScalarType, int SIZE = N> class VectorType = Arg::VecN
+			  class Vector
+			, class Matrix
+			, class Function
 		>
-		class DiffJacobian
+		class DiffJacobian : public Function
 		{
-		public:
-			using Scalar = ScalarType;
-			using Vector = VectorType<Scalar, N>;
-			using Matrix = MatrixType<Scalar, N, N>;
-
-			using FunctionType = Utils::OneArgument<Vector, Matrix>;
-
+			static_assert(Vector::SIZE == Matrix::COLS && Vector::SIZE == Matrix::ROWS, "Non-matching sizes");
 
 		public:
-			DiffJacobian(const FunctionType& function, Scalar eps) 
-				: m_func(function)
-				, m_eps(eps)
+			using Scalar = typename Vector::Scalar;
+
+		public:
+			DiffJacobian(Function&& function, Scalar&& eps) 
+				: Function(std::forward<Function>(function))
+				, mEps(eps)
 			{}
 
 			DiffJacobian(const DiffJacobian& dj) = default;
-
-			DiffJacobian(DiffJacobian&& dj) = default;
-
-			DiffJacobian& operator = (const DiffJacobian& dj) = default;
-
-			DiffJacobian& operator = (DiffJacobian&& dj) = default;
-
+			DiffJacobian(DiffJacobian&& dj)      = default;
 
 
 			Matrix operator() (const Vector& arg)
 			{
+				const int N = Vector::SIZE;
+
 				Matrix mat;
 
 				for(int i = 0; i < N; i++)
 				{
-					Vector rightArg = arg;
-					Vector  leftArg = arg;
-					Vector right;
-					Vector left;
+					Vector rightArg(arg);
+					Vector  leftArg(arg);
+					rightArg[i] += mEps;
+					leftArg [i] -= mEps;
+					
 
-					rightArg[i] += m_eps;
-					right = m_func(rightArg);
-
-					leftArg[i] -= m_eps;
-					left = m_func(leftArg);
-
+					Vector right = Function::operator()(rightArg);
+					Vector left  = Function::operator()(leftArg);
 					for (int j = 0; j < N; j++)
 					{
-						mat[i][j] = (right[j] - left[j]) / (2 * m_eps);
+						mat[j][i] = (right[j] - left[j]) / (2 * mEps);
 					}
 				}
 
@@ -193,8 +203,7 @@ namespace Num
 
 
 		private:
-			FunctionType m_func;
-			Scalar m_eps;
+			Scalar mEps;
 		};
     }
 }

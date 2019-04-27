@@ -25,6 +25,11 @@ namespace Num
             using Scalar = ScalarType;
 
 
+		public:
+			static const int SIZE = N;
+
+
+		public:
 			template<class ... Init>
 			VecN(const Init& ... initValues) : m_vec{initValues...}
 			{
@@ -230,7 +235,15 @@ namespace Num
             template<class Type, int SIZE>
             using VectorType = VecN<Type, SIZE>;
 
+			using Vector = VecN<Scalar, M>;
 
+
+		public:
+			static const int ROWS = N;
+			static const int COLS = M;
+
+
+		public:
             MatNxM() : m_mat()
             {}
 

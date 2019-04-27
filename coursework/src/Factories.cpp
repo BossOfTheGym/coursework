@@ -49,26 +49,6 @@ SatelliteShared createSatellite(
 }
 
 
-SatelliteShared createChaser(
-	const ModelShared& model
-	, double mass
-	, const Vec3& color
-	, const Mat4& mat
-	, const Vec3& pos
-	, const Vec3& vel
-	, const String& name
-	, const PhysicsComponentWeak& planet
-)
-{
-	SatelliteShared chaser = createSatellite(model, mass, color, mat, pos, vel, name, planet);
-
-	chaser->mRendezvous = RendezvousComponentShared(
-		new RendezvousComponent(chaser.get(), SatelliteShared(nullptr))
-	);
-
-	return chaser;
-}
-
 
 PlanetShared createPlanet(
 	const ModelShared& model

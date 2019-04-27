@@ -20,17 +20,6 @@ SatelliteShared createSatellite(
 	, const PhysicsComponentWeak& planet = PhysicsComponentShared(nullptr)
 );
 
-SatelliteShared createChaser(
-	const ModelShared& model
-	, double mass
-	, const Vec3& color = Vec3(1.0f)
-	, const Mat4& mat = Mat4(1.0f)
-	, const Vec3& pos = Vec3()
-	, const Vec3& vel = Vec3()
-	, const String& name = ""
-	, const PhysicsComponentWeak& planet = PhysicsComponentShared(nullptr)
-);
-
 
 PlanetShared createPlanet(
 	const ModelShared& model

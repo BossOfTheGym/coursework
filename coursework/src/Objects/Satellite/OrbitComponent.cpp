@@ -1,6 +1,5 @@
 #include "OrbitComponent.h"
 
-#include "LambertSolver.h"
 #include <limits>
 
 #include <Numerics/Equ/Neuton.h>
@@ -40,77 +39,17 @@ const IComponent::Type& OrbitComponent::componentType() const
 	return type;
 }
 
-//TEST
+//TODO
 OrbitComponent::R_V OrbitComponent::orbitStateAngle(double theta) const
 {
 	//TODO
-	return {Vec3(0.0), Vec3(0.0)};
+
+	return {};
 }
 
 OrbitComponent::R_V OrbitComponent::orbitStateTime(const Time& dt) const
 {
-	/*using glm::dot;
-	using glm::length;
-
-	using namespace Stumpff;
-
-	using Solver = Num::Equ::NeutonScalar<double>;
-
-
-	auto planet    = mPlanetPhys.lock();
-	auto satellite = mSatellitePhys.lock();
-	if (!planet || !satellite)
-	{
-		return {Vec3{0.0}, Vec3{0.0}};
-	}
-
-	Vec3& rv = satellite->mPosition;
-	Vec3& vv = satellite->mVelocity;
-
-	double tau    = dt.asFloat();
-	double r0     = length(rv);
-	double dotrv  = dot(rv, vv);
-
-	double mu = mMu;
-	double h  = mH;
-
-	auto universalKeplerEqu = [&] (double s) -> double
-	{
-		auto s2 = s * s;
-		auto s3 = s2 * s;
-		auto x = -h * s2;
-
-		return r0 * s * c1(x) + dotrv * s2 * c2(x) + mu * s3 * c3(x) - tau;
-	};
-
-	auto universalKeplerEquDeriv = [&] (double s) -> double
-	{
-		auto s2 = s * s;
-		auto x = -h * s2;
-
-		return r0 * c0(x) + dotrv * s * c1(x) + mu * s2 * c2(x);
-	};
-
-	auto[s, iter] = Solver(10, 1e-15).solve(
-		  universalKeplerEqu
-		, universalKeplerEquDeriv
-		, abs(h) * tau / mu
-	);
-
-	double s2 = s * s;
-	double s3 = s2 * s;
-	double x = -h * s2;
-	double c0Val = c0(x);
-	double c1Val = c1(x);
-	double c2Val = c2(x);
-	double c3Val = c3(x);
-
-	double r = r0 * c0Val + dotrv * s * c1Val + mu * s2 * c2Val;
-
-	double  f = 1.0 - mu * s2 * c2Val / r0; double  g = tau - mu * s3 * c3Val;
-	double df = -mu * s * c1Val / (r * r0); double dg = 1.0 - mu * s2 * c2Val / r;
-
-	return {f * rv + g * vv, df * rv + dg * vv};*/
+	//TODO
 
 	return {};
 }

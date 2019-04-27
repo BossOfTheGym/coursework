@@ -8,7 +8,6 @@ Satellite::Satellite(
 	, const SatelliteComponentShared&  satellite
 	, const OrbitComponentShared&      orbit
 	, const NameComponentShared&       name
-	, const RendezvousComponentShared& rendezvous
 )
 	: IObject(parent)
 	, mGraphics(graphics)
@@ -16,7 +15,6 @@ Satellite::Satellite(
 	, mSatellite(satellite)
 	, mOrbit(orbit)
 	, mName(name)
-	, mRendezvous(rendezvous)
 {}
 
 
@@ -25,11 +23,6 @@ void Satellite::update(const Time& t, const Time& dt)
 	if (mOrbit)
 	{
 		mOrbit->updateOrbit();		
-	}
-
-	if (mRendezvous)
-	{
-		mRendezvous->update(t, dt);
 	}
 }
 

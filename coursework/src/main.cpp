@@ -2,9 +2,6 @@
 
 #include <Resources.h>
 #include <Factories.h>
-//#include <Integrators/Integrator.h>
-#include <Objects/Satellite/LambertSolver.h>
-
 #include <Numerics/Ivp/RungeKutta.h>
 
 #include <imgui.h>

@@ -4,20 +4,11 @@
 #include "../IObject.h"
 #include "SatelliteComponent.h"
 #include "OrbitComponent.h"
-#include "Rendezvous/RendezvousComponent.h"
 
 #include <Physics/PhysicsComponent.h>
 #include <Graphics/GraphicsComponent.h>
 #include <Objects/NameComponent.h>
 
-
-struct RendezvousComponent;
-using RendezvousComponentShared = std::shared_ptr<RendezvousComponent>;
-using RendezvousComponentWeak   = std::weak_ptr<RendezvousComponent>;
-
-struct Satellite;
-using SatelliteShared = std::shared_ptr<Satellite>;
-using SatelliteWeak   = std::weak_ptr<Satellite>;
 
 
 struct Satellite : public IObject
@@ -30,7 +21,6 @@ public:
 		, const SatelliteComponentShared&  satellite  = nullptr
 		, const OrbitComponentShared&      orbit      = nullptr
 		, const NameComponentShared&       name       = nullptr
-		, const RendezvousComponentShared& rendezvous = nullptr 
 	);
 
 	Satellite(const Satellite& sat) = default;
@@ -55,7 +45,6 @@ public:
 	SatelliteComponentShared  mSatellite;
 	OrbitComponentShared      mOrbit;
 	NameComponentShared       mName;
-	RendezvousComponentShared mRendezvous;
 };
 
 

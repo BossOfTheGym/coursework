@@ -17,7 +17,7 @@ void main()
 	float d = min(min(geoGomo[0], geoGomo[1]), geoGomo[2]);
 	if(d < 0.015)
 	{
-		frag.xyz = vec3(0.0);
+		frag.xyz *= vec3(0.4);
 	}
 
     fColor = frag;

@@ -45,11 +45,96 @@ public:
 	void updateOrbit();
 
 
+	//get
+	double angularMomentum() const
+	{
+		return mC;
+	}
+
+	double inclination() const
+	{
+		return mI;
+	}
+
+	double rightAscension() const
+	{
+		return mRA;
+	}
+
+	double eccentricity() const
+	{
+		return mE;
+	}
+
+	double argumentOfPeriapsis() const
+	{
+		return mAP;
+	}
+
+	double trueAnomaly() const
+	{
+		return mTA;
+	}
+
+
+	Vec3 angularMomentumV() const
+	{
+		return mCv;
+	}
+
+	Vec3 apsisLineV() const
+	{
+		return mEv;
+	}
+
+	Vec3 nodeLineV() const
+	{
+		return mNv;
+	}
+
+
+	double energy() const
+	{
+		return mH;
+	}
+
+	double semi_latusRectum() const
+	{
+		return mP;
+	}
+
+	double mu() const
+	{
+		return mMu;
+	}
+
+			
+	double period() const
+	{
+		return mOP;
+	}
+
+	double apoapsis() const
+	{
+		return mA;
+	}
+
+	double eccentricAnomaly() const
+	{
+		return mEA;
+	}
+
+	double time() const
+	{
+		return mT;
+	}
+
+
 private:
 	void updateSpecificParams();
 
-	
-public:
+
+private:
 	PhysicsComponentWeak mSatellitePhys;
 	PhysicsComponentWeak mPlanetPhys;
 

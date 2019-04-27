@@ -49,7 +49,7 @@ OrbitComponent::R_V OrbitComponent::orbitStateAngle(double theta) const
 
 OrbitComponent::R_V OrbitComponent::orbitStateTime(const Time& dt) const
 {
-	using glm::dot;
+	/*using glm::dot;
 	using glm::length;
 
 	using namespace Stumpff;
@@ -110,7 +110,9 @@ OrbitComponent::R_V OrbitComponent::orbitStateTime(const Time& dt) const
 	double  f = 1.0 - mu * s2 * c2Val / r0; double  g = tau - mu * s3 * c3Val;
 	double df = -mu * s * c1Val / (r * r0); double dg = 1.0 - mu * s2 * c2Val / r;
 
-	return {f * rv + g * vv, df * rv + dg * vv};
+	return {f * rv + g * vv, df * rv + dg * vv};*/
+
+	return {};
 }
 
 
@@ -143,7 +145,7 @@ void OrbitComponent::updateOrbit()
 	//2.
 	Vec3  vv = v0;
 	double v = length(v0);
-	mH = dot(vv, vv) - 2 * mMu / r;
+	mH = dot(vv, vv) - 2.0 * mMu / r;
 
 	//3.
 	double vr = dot(rv / r, vv);
@@ -159,10 +161,10 @@ void OrbitComponent::updateOrbit()
 	//7, 8
 	mNv = cross(Vec3(0.0, 0.0, 1.0), mCv);
 	double N = length(mNv);
-
+	
 	//9.
 	mRA = acos(mNv.x / N);
-	if(mNv.y < 0.0f)
+	if(mNv.y <= std::numeric_limits<double>::epsilon())
 	{
 		mRA = PI_2 - mRA;
 	}	
@@ -173,14 +175,14 @@ void OrbitComponent::updateOrbit()
 
 	//12.
 	mAP = acos(dot(mNv / N, mEv / mE));
-	if (mEv.z < 0.0f)
+	if (mEv.z <= std::numeric_limits<double>::epsilon())
 	{
 		mAP = PI_2 - mAP;
 	}
 
 	//13.
-	mTA = acos(dot(mEv / mE, rv / r));
-	if(vr < 0.0f)
+	mTA = acos(dot(rv / r, mEv / mE));
+	if(vr <= std::numeric_limits<double>::epsilon())
 	{
 		mTA = PI_2 - mTA;
 	}	
@@ -193,7 +195,7 @@ void OrbitComponent::updateSpecificParams()
 	if (mE < 1.0) //elliptic
 	{
 		mA  = mP / (1.0 - mE * mE);
-		mEA = 2 * atan(sqrt((1.0 - mE) / (1.0 + mE)) * tan(mTA / 2));
+		mEA = 2.0 * atan(sqrt((1.0 - mE) / (1.0 + mE)) * tan(mTA / 2.0));
 		if (mTA > PI)
 		{
 			mEA = PI_2 + mEA;

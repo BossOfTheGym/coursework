@@ -2,7 +2,7 @@
 
 #include <Resources.h>
 #include <Factories.h>
-#include <Integrators/Integrator.h>
+//#include <Integrators/Integrator.h>
 #include <Objects/Satellite/LambertSolver.h>
 
 #include <Numerics/Ivp/RungeKutta.h>
@@ -199,7 +199,7 @@ void initGlobals()
 		, earth->mPhysics
 	);
 
-	satellites["satellite 0"] = createChaser(
+	satellites["satellite 0"] = createSatellite(
 		models["satellite"]
 		, 1.0
 		, Vec3(1.0, 0.0, 1.0)
@@ -224,7 +224,7 @@ void initGlobals()
 
 	//loop states
 	fill    = false;
-	stopped = false;
+	stopped = true;
 	menuOpened = false;
 
 	prevX = WIDTH / 2;
@@ -237,7 +237,7 @@ void initGlobals()
 	t1 = Time();
 	dt = Time();
 	dt0 = Time(40, 40 / divisor);
-	maxUpdates = 5;	
+	maxUpdates = 2;	
 
 	warp    = 1;
 	warpMin = 1;
@@ -260,6 +260,7 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, 
 	using glm::length;
 
 	using StateVec = Num::Arg::VecN<double, 6>;
+	using Matrix   = Num::Arg::MatNxM<double, 6, 6>;
 	using Methods  = Num::Ivp::Methods<double>;
 	using Solver   = Num::Ivp::RungeKuttaExplicit<6, double, StateVec>;
 
@@ -273,7 +274,10 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, 
 	auto dr = r - r0;
 	 
 
-	Solver solver(Methods::classic4());
+
+	static auto tableau = Num::Ivp::Methods<double>::gaussLegendre6();
+	auto solver = Num::Ivp::RungeKuttaImplicit<6, double, StateVec, decltype(tableau)>(std::move(tableau), 1e-15, 10);
+
 	auto force = [&] (double t, const StateVec& vec) -> StateVec
 	{
 		Vec3 rv = Vec3(vec[0], vec[1], vec[2]);
@@ -285,10 +289,10 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, 
 
 		return StateVec{vv[0], vv[1], vv[2], newV[0], newV[1], newV[2]};
 	};
-
 	StateVec curr{dr[0], dr[1], dr[2], v[0], v[1], v[2]};
 	StateVec next = solver.solve(
-		  force
+		  std::move(force)
+		, Num::Ivp::DiffJacobian<StateVec, Matrix, decltype(force)>(std::move(force), 1e-8)
 		, t.asFloat()
 		, curr
 		, dt.asFloat()
@@ -443,19 +447,19 @@ void showSatelliteParameters(SatelliteShared& sat)
 		auto& orbit = *(sat->mOrbit);
 
 		ImGui::Text("Main");
-		ImGui::Text("Specific ang. momentum : %f", orbit.mC);
-		ImGui::Text("Right ascension        : %f", orbit.mRA);
-		ImGui::Text("Argument of perigee    : %f", orbit.mAP);
-		ImGui::Text("Inclination            : %f", orbit.mI);
-		ImGui::Text("Eccentricity           : %f", orbit.mE);
-		ImGui::Text("True anomaly           : %f", orbit.mTA);
+		ImGui::Text("Specific ang. momentum : %f", orbit.angularMomentum());
+		ImGui::Text("Right ascension        : %f", orbit.rightAscension());
+		ImGui::Text("Argument of perigee    : %f", orbit.argumentOfPeriapsis());
+		ImGui::Text("Inclination            : %f", orbit.inclination());
+		ImGui::Text("Eccentricity           : %f", orbit.eccentricity());
+		ImGui::Text("True anomaly           : %f", orbit.trueAnomaly());
 		ImGui::Text("");	
 
 		ImGui::Text("Spec ");
-		ImGui::Text("Eccentric anomaly : %f", orbit.mEA);
-		ImGui::Text("Apoapsis          : %f", orbit.mA);
-		ImGui::Text("Orbit period      : %f", orbit.mOP);
-		ImGui::Text("Time              : %f", orbit.mT);
+		ImGui::Text("Eccentric anomaly : %f", orbit.eccentricAnomaly());
+		ImGui::Text("Apoapsis          : %f", orbit.apoapsis());
+		ImGui::Text("Orbit period      : %f", orbit.period());
+		ImGui::Text("Time              : %f", orbit.time());
 		ImGui::Text("");
 	}
 }
@@ -482,8 +486,8 @@ void satellitesOptions()
 				if (ImGui::Selectable(name.c_str(), selected))
 				{
 					currentWeak = sat;
-					timeTrack0 = sat->mOrbit->mT;
-					timeTrack1 = sat->mOrbit->mT;
+					timeTrack0 = sat->mOrbit->time();
+					timeTrack1 = sat->mOrbit->time();
 				}
 			}
 
@@ -500,7 +504,7 @@ void satellitesOptions()
 			//show tracked time
 			ImGui::Separator();
 			timeTrack0 = timeTrack1;
-			timeTrack1 = current->mOrbit->mT;
+			timeTrack1 = current->mOrbit->time();
 			ImGui::Text("Tracked delta: %f", timeTrack1 - timeTrack0);
 		}
 		else

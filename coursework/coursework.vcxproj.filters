@@ -102,10 +102,22 @@
     <ClInclude Include="src\Entity\Time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Integrators\Integrator.h">
+    <ClInclude Include="src\Objects\Satellite\Rendezvous\ActionVariant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Objects\Satellite\Rendezvous\ActionVariant.h">
+    <ClInclude Include="src\Integrators\Integrators.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Integrator\Integrator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Integrator\Integrators.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Integrator\RungeKutta4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Integrator\RungeKutta6.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -209,10 +221,16 @@
     <ClCompile Include="src\Resources.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Integrators\Integrator.cpp">
+    <ClCompile Include="src\Entity\Time.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Entity\Time.cpp">
+    <ClCompile Include="src\Integrator\Integrator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Integrator\RungeKutta4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Integrator\RungeKutta6.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

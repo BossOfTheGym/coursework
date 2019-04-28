@@ -20,12 +20,15 @@ const int HEIGHT = 900;
 //context
 GLFWwindow* window;
 
-//objects
+//data
 std::map<String, ShaderShared>        shaders;
 std::map<String, ModelShared>         models;
 std::map<String, ShaderProgramShared> programs;
 std::map<String, IRendererShared>     renderers;
 std::map<String, SatelliteShared>     satellites;
+std::map<String, IntegratorShared>    integrators;
+
+//Planet
 PlanetShared earth;
 
 //view
@@ -51,8 +54,6 @@ Time t0;
 Time t1;
 Time dt;
 Time dt0;
-
-uint64_t maxUpdates;
 
 uint64_t warp;
 uint64_t warpMin;
@@ -84,25 +85,25 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         case (GLFW_KEY_W):
         {
 
-            view.travelView(0.1f, View::Z);
+            view.travelView(0.01 * R, View::Z);
 
             break;
         }
         case (GLFW_KEY_S):
         {
-            view.travelView(-0.1f, View::Z);
+            view.travelView(-0.01 * R, View::Z);
 
             break;
         }
 		case (GLFW_KEY_A):
 		{
-			view.travelView(0.1f, View::X);
+			view.travelView(0.01 * R, View::X);
 
 			break;
 		}
 		case (GLFW_KEY_D):
 		{
-			view.travelView(-0.1f, View::X);
+			view.travelView(-0.01 * R, View::X);
 
 			break;
 		}
@@ -163,12 +164,12 @@ void initGlobals()
 	std::cout << std::endl;
 
 	//view
-	Vec3 pos  = Vec3(0.0f, 30.0f, 0.0f);
-	Vec3 look = Vec3(0.0f);
-	Vec3 up   = Vec3(0.0f, 0.0f, 1.0f);
+	Vec3 pos  = Vec3(0.0, 1.5 * R, 0.0);
+	Vec3 look = Vec3(0.0);
+	Vec3 up   = Vec3(0.0, 0.0, 1.0);
 	view = View(
 		  glm::lookAt(pos, look, up)
-		, glm::perspective(glm::radians(45.0f), 1.0f * WIDTH / HEIGHT, 0.1f, 500.0f)
+		, glm::perspective(glm::radians(45.0), 1.0 * WIDTH / HEIGHT, 0.1, 2.0 * R)
 		, pos
 		, 0.5
 	);
@@ -176,8 +177,8 @@ void initGlobals()
 	//planet
 	earth = createPlanet(
 		models["earth"]
-		, 3000.0
-		, glm::scale(Mat4(1.0), Vec3(4.0))
+		, M
+		, glm::scale(Mat4(1.0), Vec3(R))
 		, Vec3(0.0)
 		, Vec3(0.0)
 		, Vec3(0.0)
@@ -185,24 +186,24 @@ void initGlobals()
 	);
 
 	//satellites
-	satellites["satellite 1"] = createSatellite(
+	satellites["satellite 0"] = createSatellite(
 		models["satellite"]
 		, 1.0
 		, Vec3(1.0, 0.0, 0.0)
-		, glm::scale(Mat4(1.0), Vec3(0.5))
-		, Vec3(-5.0, 0.0, 0.0)
-		, Vec3(0.0, 0.0, sqrt(3000.0 / 5))
+		, glm::scale(Mat4(1.0), Vec3(10.0))
+		, Vec3(-R - 4e+5, 0.0, 0.0)
+		, Vec3(0.0, 0.0, sqrt(G * M / (R + 4e+5)))
 		, "target"
 		, earth->mPhysics
 	);
 
-	satellites["satellite 0"] = createSatellite(
+	satellites["satellite 1"] = createSatellite(
 		models["satellite"]
 		, 1.0
 		, Vec3(1.0, 0.0, 1.0)
-		, glm::scale(Mat4(1.0), Vec3(0.5))
-		, Vec3(5.0, 0.0, 0.0)
-		, Vec3(0.0, 0.0, -sqrt(3000.0 / 5) + 0.11)
+		, glm::scale(Mat4(1.0), Vec3(0.1))
+		, Vec3(R + 4e+5, 0.0, 0.0)
+		, Vec3(0.0, 0.0, -sqrt(G * M / (R + 4e+5)))
 		, "chaser"
 		, earth->mPhysics
 	);
@@ -233,12 +234,11 @@ void initGlobals()
 	t0 = Time();
 	t1 = Time();
 	dt = Time();
-	dt0 = Time(40, 40 / divisor);
-	maxUpdates = 2;	
+	dt0 = Time(50, 50 / divisor);
 
 	warp    = 1;
 	warpMin = 1;
-	warpMax = 1000;
+	warpMax = 75;
 }
 
 void destroyGlobals()
@@ -314,7 +314,7 @@ void updateObjects()
 
 void updatePhysics()
 {
-	while (dt > dt0 * warp)
+	while (dt >= dt0 * warp)
 	{
 		dt -= dt0 * warp;
 
@@ -333,9 +333,9 @@ void updateTime()
 	uint64_t delta = raw - t0.asU64();
 	dt += Time(delta * warp);
 
-	if (dt > dt0 * (maxUpdates * warp))
+	if (dt > dt0 * (warp))
 	{
-		dt = dt0 * (maxUpdates * warp);
+		dt = dt0 * (warp);
 	}
 
 	uint64_t time = t.asU64() + dt.asU64();
@@ -480,7 +480,7 @@ void satellitesOptions()
 				auto& name = sat->mName->mName;
 
 				selected = (current == sat);
-				if (ImGui::Selectable(name.c_str(), selected))
+				if (ImGui::Selectable(key.c_str(), selected))
 				{
 					currentWeak = sat;
 					timeTrack0 = sat->mOrbit->time();
@@ -614,6 +614,8 @@ void featureTest()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glfwPollEvents();
+
+		view.update(t, dt);
 
 		if (!stopped)
 		{

@@ -19,14 +19,20 @@ View::View(
 	, const Mat4& proj
 	, const Vec3& pos
 	, double sensitivity
+	, const PhysicsComponentWeak& track
 ) 
-	: mView(axes)
+	: IObject(nullptr)
+	, mView(axes)
 	, mAxes(axes)
 	, mProj(proj)
 	, mPos(pos)
+	, mLastPos(pos)
 	, mPitch(0.0)
 	, mRoll(0.0)
 	, mSensivity(sensitivity)
+	, mTrack(track)
+	, lastTrackNull(track.expired())
+	, shouldUpdateAxes(false)
 {
 	updateAxes();
 }
@@ -108,14 +114,12 @@ void View::rotateAxes(double angle, Axis axis)
 
 	rotateMat(mAxes, angle, axis);
 
-	updateAxes();
+	shouldUpdateAxes = true;
 }
 
 void View::rotateView(double angle, Axis axis)
 {
 	rotateMat(mView, angle, axis);
-
-	updateView();
 }
 
 
@@ -124,8 +128,6 @@ void View::travelView(double distance, Axis axis)
 	mPos[0] -= mView[0][axis] * distance;
 	mPos[1] -= mView[1][axis] * distance;
 	mPos[2] -= mView[2][axis] * distance;
-
-	updateView();
 }
 
 
@@ -140,11 +142,12 @@ void View::setProj(const Mat4& mat)
 	mProj = mat;
 }
 
+
 void View::setPos(const Vec3& pos)
 {
 	mPos = pos;
 
-	updateView();
+	//updateView();
 }
 
 
@@ -163,9 +166,15 @@ const Mat4& View::proj() const
 	return mProj;
 }
 
+
 const Vec3& View::pos() const
 {
-	return mPos;
+	return mLastPos;
+}
+
+const Vec3& View::lastPos() const
+{
+	return mLastPos;
 }
 
 
@@ -183,10 +192,10 @@ const double& View::sensivity() const
 void View::updateView()
 {
 	mView[3] = Vec4();
-	mView[3] -= mView[0] * mPos[0];
-	mView[3] -= mView[1] * mPos[1];
-	mView[3] -= mView[2] * mPos[2];
-	mView[3][3] = 1.0f;
+	mView[3] -= mView[0] * mLastPos[0];
+	mView[3] -= mView[1] * mLastPos[1];
+	mView[3] -= mView[2] * mLastPos[2];
+	mView[3][3] = 1.0;
 }
 
 void View::updateAxes()
@@ -197,4 +206,42 @@ void View::updateAxes()
 	mView = mAxes;
 
 	updateView();
+}
+
+
+void View::update(const Time& t, const Time& dt)
+{
+	if (auto track = mTrack.lock())
+	{
+		lastTrackNull = false;
+
+		mLastPos = track->mPosition + mPos;
+	}
+	else
+	{
+		if (!lastTrackNull)
+		{
+			lastTrackNull = true;
+
+			mPos = mLastPos;
+		}
+
+		mLastPos = mPos;
+	}
+
+	if (shouldUpdateAxes)
+	{
+		shouldUpdateAxes = false;
+
+		updateAxes();
+	}
+	
+	updateView();
+}
+
+const IComponent::Type& View::componentType() const
+{
+	static Type type = "View";
+
+	return type;
 }

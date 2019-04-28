@@ -2,9 +2,12 @@
 
 #include <Common.h>
 
+#include "IObject.h"
 
-//TODO : should be object-like
-class View
+#include <Physics/PhysicsComponent.h>
+
+
+class View : public IObject
 {
 public:
 	static const double DEFAULT_SENSITIVITY;
@@ -32,10 +35,11 @@ public:
 	View(View&& view) = default;
 
 	View(
-		const Mat4& axes = Mat4(1.0f)
+		  const Mat4& axes = Mat4(1.0f)
 		, const Mat4& proj = Mat4(1.0f)
 		, const Vec3& pos = Vec3(0.0f)
 		, double sensitivity = DEFAULT_SENSITIVITY
+		, const PhysicsComponentWeak& track = PhysicsComponentShared(nullptr)
 	);
 
 
@@ -69,10 +73,18 @@ public:
 
 	const Vec3& pos() const;
 
+	const Vec3& lastPos() const;
+
 
 	double& sensivity();
 
 	const double& sensivity() const;
+
+
+public:
+	void update(const Time& t, const Time& dt) override;
+
+	const Type& componentType() const override;
 
 
 private:
@@ -85,11 +97,17 @@ private:
 	double mPitch; // y
 	double mRoll;  // x
 
+	double mSensivity;
+
 	Mat4 mAxes;
 	Mat4 mView;
 	Mat4 mProj;
 
 	Vec3 mPos;
+	Vec3 mLastPos;
 
-	double mSensivity;
+	PhysicsComponentWeak mTrack;
+
+	bool lastTrackNull;
+	bool shouldUpdateAxes;
 };

@@ -22,8 +22,8 @@ struct IObject : public IComponent, public ITimeVarying
 
 	IObject& operator = (const IObject& obj) = default;
 
-	IObject& operator = (IObject&& obj) = default;
+	IObject& operator = (IObject&& obj)     = default;
 };
 
 using IObjectShared = std::shared_ptr<IObject>;
-using IObjectWeak = std::weak_ptr<IObject>;
+using IObjectWeak   = std::weak_ptr<IObject>;

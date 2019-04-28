@@ -12,6 +12,8 @@
 
 #include <Render/Renderers.h>
 
+#include <Integrator/Integrators.h>
+
 
 void createContext(GLFWwindow*& win, int width, int height, const String& name);
 
@@ -42,3 +44,7 @@ void createRenderers(
 	std::map<String, IRendererShared>& renderersStorage
 	, std::map<String, ShaderProgramShared>& programsStorage
 );
+
+
+//create integrators
+void createIntegrators(std::map<String, IntegratorShared>& integrators);

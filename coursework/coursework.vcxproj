@@ -25,7 +25,11 @@
     <ClInclude Include="src\Entity\Time.h" />
     <ClInclude Include="src\Factories.h" />
     <ClInclude Include="src\Graphics\GraphicsComponent.h" />
-    <ClInclude Include="src\Integrators\Integrator.h" />
+    <ClInclude Include="src\Integrators\Integrators.h" />
+    <ClInclude Include="src\Integrator\Integrator.h" />
+    <ClInclude Include="src\Integrator\Integrators.h" />
+    <ClInclude Include="src\Integrator\RungeKutta4.h" />
+    <ClInclude Include="src\Integrator\RungeKutta6.h" />
     <ClInclude Include="src\Model\Builders\AssimpBuilder.h" />
     <ClInclude Include="src\Model\Builders\CustomBuilders.h" />
     <ClInclude Include="src\Model\Model.h" />
@@ -62,7 +66,9 @@
     <ClCompile Include="src\ImGui\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\ImGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\ImGui\imgui_widgets.cpp" />
-    <ClCompile Include="src\Integrators\Integrator.cpp" />
+    <ClCompile Include="src\Integrator\Integrator.cpp" />
+    <ClCompile Include="src\Integrator\RungeKutta4.cpp" />
+    <ClCompile Include="src\Integrator\RungeKutta6.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Model\Builders\AssimpBuilder.cpp" />
     <ClCompile Include="src\Model\Builders\CustomBuilders.cpp" />

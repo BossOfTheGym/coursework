@@ -159,3 +159,9 @@ void createRenderers(
 	renderersStorage["planet"]    = IRendererShared(new PlanetRenderer(programsStorage["planet"]));
 	renderersStorage["simple"]    = IRendererShared(new SimpleRenderer(programsStorage["simple"]));
 }
+
+
+void createIntegrators(std::map<String, IntegratorShared>& integrators)
+{
+
+}

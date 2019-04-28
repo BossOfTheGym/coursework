@@ -112,15 +112,17 @@ void OrbitComponent::updateOrbit()
 	mEv = cross(vv, mCv) / mMu - rv / r;
 	mE  = length(mEv);
 
+	Vec3 uev = (mE > std::numeric_limits<double>::epsilon() ? mEv / mE : Vec3(0.0));
+
 	//12.
-	mAP = acos(dot(mNv / N, mEv / mE));
+	mAP = acos(dot((mNv / N), uev));
 	if (mEv.z <= std::numeric_limits<double>::epsilon())
 	{
 		mAP = PI_2 - mAP;
 	}
 
 	//13.
-	mTA = acos(dot(rv / r, mEv / mE));
+	mTA = acos(dot(rv / r, uev));
 	if(vr <= std::numeric_limits<double>::epsilon())
 	{
 		mTA = PI_2 - mTA;

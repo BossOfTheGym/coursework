@@ -120,6 +120,15 @@
     <ClInclude Include="src\Integrator\RungeKutta6.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendezvous\Actions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendezvous\Method.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendezvous\RendezvousControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -231,6 +240,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Integrator\RungeKutta6.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendezvous\Actions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendezvous\Method.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendezvous\RendezvousControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -50,6 +50,9 @@
     <ClInclude Include="src\Render\Renderers.h" />
     <ClInclude Include="src\Render\SatelliteRenderer.h" />
     <ClInclude Include="src\Render\SimpleRenderer.h" />
+    <ClInclude Include="src\Rendezvous\Actions.h" />
+    <ClInclude Include="src\Rendezvous\Method.h" />
+    <ClInclude Include="src\Rendezvous\RendezvousControl.h" />
     <ClInclude Include="src\Resources.h" />
     <ClInclude Include="src\Shader\Shader.h" />
     <ClInclude Include="src\Shader\ShaderProgram.h" />
@@ -89,6 +92,9 @@
     <ClCompile Include="src\Render\PlanetRenderer.cpp" />
     <ClCompile Include="src\Render\SatelliteRenderer.cpp" />
     <ClCompile Include="src\Render\SimpleRenderer.cpp" />
+    <ClCompile Include="src\Rendezvous\Actions.cpp" />
+    <ClCompile Include="src\Rendezvous\Method.cpp" />
+    <ClCompile Include="src\Rendezvous\RendezvousControl.cpp" />
     <ClCompile Include="src\Resources.cpp" />
     <ClCompile Include="src\Shader\Shader.cpp" />
     <ClCompile Include="src\Shader\ShaderProgram.cpp" />

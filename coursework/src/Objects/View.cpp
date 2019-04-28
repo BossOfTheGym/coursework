@@ -131,6 +131,13 @@ void View::travelView(double distance, Axis axis)
 }
 
 
+void View::setTrack(const PhysicsComponentWeak& track, const Vec3& relativePos)
+{
+	mTrack = track;
+	mPos   = relativePos;
+
+	lastTrackNull = mTrack.expired();
+}
 
 void View::setView(const Mat4& mat)
 {
@@ -142,7 +149,6 @@ void View::setProj(const Mat4& mat)
 	mProj = mat;
 }
 
-
 void View::setPos(const Vec3& pos)
 {
 	mPos = pos;
@@ -150,6 +156,11 @@ void View::setPos(const Vec3& pos)
 	//updateView();
 }
 
+
+const PhysicsComponentWeak& View::track() const
+{
+	return mTrack;
+}
 
 const Mat4& View::axes() const
 {
@@ -165,7 +176,6 @@ const Mat4& View::proj() const
 {
 	return mProj;
 }
-
 
 const Vec3& View::pos() const
 {

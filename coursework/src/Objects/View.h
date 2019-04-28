@@ -31,8 +31,7 @@ public:
 
 public:
 	View(const View& view) = default;
-
-	View(View&& view) = default;
+	View(View&& view)      = default;
 
 	View(
 		  const Mat4& axes = Mat4(1.0f)
@@ -44,8 +43,10 @@ public:
 
 
 	View& operator = (const View& view) = default;
+	View& operator = (View&& view)      = default;
 
-	View& operator = (View&& view) = default;
+
+	virtual ~View() = default;
 
 
 	void lookAround(double pitch, double roll);
@@ -57,6 +58,7 @@ public:
 	void travelView(double distance, Axis axis);
 
 
+	void setTrack(const PhysicsComponentWeak& tracká, const Vec3& relativePos);
 
 	void setPos(const Vec3& pos);
 
@@ -64,6 +66,8 @@ public:
 
 	void setProj(const Mat4& mat);
 
+
+	const PhysicsComponentWeak& track() const;
 
 	const Mat4& axes() const;
 

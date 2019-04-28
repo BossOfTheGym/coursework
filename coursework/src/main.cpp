@@ -4,12 +4,7 @@
 #include <Factories.h>
 #include <Numerics/Ivp/RungeKutta.h>
 
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
-
-using namespace std::chrono;
+#include <GUI/GUI.h>
 
 
 const int WIDTH  = 1500;
@@ -25,11 +20,14 @@ std::map<String, ShaderShared>        shaders;
 std::map<String, ModelShared>         models;
 std::map<String, ShaderProgramShared> programs;
 std::map<String, IRendererShared>     renderers;
-std::map<String, SatelliteShared>     satellites;
 std::map<String, IntegratorShared>    integrators;
 
 //Planet
 PlanetShared earth;
+
+//Satellites
+SatelliteShared target;
+SatelliteShared chaser;
 
 //view
 View view;
@@ -41,8 +39,8 @@ double timeTrack1;
 
 //flags
 bool fill;          // wireframe mode
-bool stopped;       // enable / disable physics update
-bool menuOpened;    // if opened disable input
+bool stopped;       // enable / disable objects update
+bool scrollView;    // scroll view
 
 //screen pos
 double prevX;
@@ -65,11 +63,6 @@ double divisor;
 //callbacks(70)
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if(menuOpened)
-	{
-		return;
-	}
-
     switch (key)
     {
         case (GLFW_KEY_C):
@@ -84,7 +77,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         }
         case (GLFW_KEY_W):
         {
-
             view.travelView(0.01 * R, View::Z);
 
             break;
@@ -120,22 +112,32 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void posCallback(GLFWwindow* window, double xPos, double yPos)
 {
-	if (menuOpened)
+	if (scrollView)
 	{
-		return;
-	}
-
-	if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-	{
-		view.rotateAxes((xPos - prevX) / WIDTH, View::Z);
-	}
-	else
-	{
-		view.lookAround((xPos - prevX) / WIDTH, (yPos - prevY) / HEIGHT);
+		if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		{
+			view.rotateAxes((xPos - prevX) / WIDTH, View::Z);
+		}
+		else
+		{
+			view.lookAround(-(xPos - prevX) / WIDTH, -(yPos - prevY) / HEIGHT);
+		}
 	}
 
     prevX = xPos;
     prevY = yPos;
+}
+
+void mouseCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	{
+		scrollView = true;
+	}
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+	{
+		scrollView = false;
+	}
 }
 
 
@@ -148,6 +150,7 @@ void initGlobals()
 	createContext(window, WIDTH, HEIGHT, "Rendezvous");
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, posCallback);
+	glfwSetMouseButtonCallback(window, mouseCallback);
 	std::cout << "Context created" << std::endl;
 	std::cout << std::endl;
 
@@ -155,12 +158,18 @@ void initGlobals()
 	std::cout << "---Resources---" << std::endl;
 	std::cout << "Shaders..." << std::endl;
 	loadShaders(shaders);
+
 	std::cout << "Models..." << std::endl;
 	loadModels(models);
+
 	std::cout << "Programs..." << std::endl;
 	createShaderPrograms(programs, shaders);
+
 	std::cout << "Renderers..." << std::endl;
 	createRenderers(renderers, programs);
+
+	std::cout << "Integrators..." << std::endl;
+	createIntegrators(integrators);
 	std::cout << std::endl;
 
 	//view
@@ -169,7 +178,7 @@ void initGlobals()
 	Vec3 up   = Vec3(0.0, 0.0, 1.0);
 	view = View(
 		  glm::lookAt(pos, look, up)
-		, glm::perspective(glm::radians(45.0), 1.0 * WIDTH / HEIGHT, 0.1, 2.0 * R)
+		, glm::perspective(glm::radians(45.0), 1.0 * WIDTH / HEIGHT, 1.0, 2 * R)
 		, pos
 		, 0.5
 	);
@@ -185,23 +194,24 @@ void initGlobals()
 		, "Earth"
 	);
 
-	//satellites
-	satellites["satellite 0"] = createSatellite(
+	//target
+	target = createSatellite(
 		models["satellite"]
 		, 1.0
 		, Vec3(1.0, 0.0, 0.0)
-		, glm::scale(Mat4(1.0), Vec3(10.0))
-		, Vec3(-R - 4e+5, 0.0, 0.0)
+		, glm::scale(Mat4(1.0), Vec3(3.0))
+		, Vec3(R + 4e+5, 0.0, 500.0)
 		, Vec3(0.0, 0.0, sqrt(G * M / (R + 4e+5)))
 		, "target"
 		, earth->mPhysics
 	);
 
-	satellites["satellite 1"] = createSatellite(
+	//chaser
+	chaser = createSatellite(
 		models["satellite"]
 		, 1.0
 		, Vec3(1.0, 0.0, 1.0)
-		, glm::scale(Mat4(1.0), Vec3(0.1))
+		, glm::scale(Mat4(1.0), Vec3(3.0))
 		, Vec3(R + 4e+5, 0.0, 0.0)
 		, Vec3(0.0, 0.0, -sqrt(G * M / (R + 4e+5)))
 		, "chaser"
@@ -209,10 +219,8 @@ void initGlobals()
 	);
 
 	//render lists
-	for (auto&[name, sat] : satellites)
-	{
-		renderers["satellite"]->addToList(sat);
-	}
+	renderers["satellite"]->addToList(target);
+	renderers["satellite"]->addToList(chaser);
 	renderers["planet"]->addToList(earth);
 
 	//gui
@@ -223,7 +231,7 @@ void initGlobals()
 	//loop states
 	fill    = false;
 	stopped = true;
-	menuOpened = false;
+	scrollView = false;
 
 	prevX = WIDTH / 2;
 	prevY = HEIGHT / 2;
@@ -238,7 +246,7 @@ void initGlobals()
 
 	warp    = 1;
 	warpMin = 1;
-	warpMax = 75;
+	warpMax = 1000000;
 }
 
 void destroyGlobals()
@@ -250,79 +258,24 @@ void destroyGlobals()
 
 //main loop
 
-//integrator(100 lines)
+//integrator(3 lines)
 void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, const Time& dt)
-{
-	using glm::dot;
-	using glm::length;
-
-	using StateVec = Num::Arg::VecN<double, 6>;
-	using Matrix   = Num::Arg::MatNxM<double, 6, 6>;
-	using Methods  = Num::Ivp::Methods<double>;
-	using Solver   = Num::Ivp::RungeKuttaExplicit<6, double, StateVec>;
-
-	auto& mat = sat->mPhysics->mMat;
-	auto& r   = sat->mPhysics->mPosition;
-	auto& v   = sat->mPhysics->mVelocity;
-
-	auto& r0 = planet->mPhysics->mPosition;
-	auto  mu = G * planet->mPhysics->mMass;
-
-	auto dr = r - r0;
-	 
-
-
-	static auto tableau = Num::Ivp::Methods<double>::gaussLegendre6();
-	auto solver = Num::Ivp::RungeKuttaImplicit<6, double, StateVec, decltype(tableau)>(std::move(tableau), 1e-15, 10);
-
-	auto force = [&] (double t, const StateVec& vec) -> StateVec
-	{
-		Vec3 rv = Vec3(vec[0], vec[1], vec[2]);
-		Vec3 vv = Vec3(vec[3], vec[4], vec[5]);
-
-		auto r = length(rv);
-
-		Vec3 newV = -mu / (r * r) * (rv / r);
-
-		return StateVec{vv[0], vv[1], vv[2], newV[0], newV[1], newV[2]};
-	};
-	StateVec curr{dr[0], dr[1], dr[2], v[0], v[1], v[2]};
-	StateVec next = solver.solve(
-		  std::move(force)
-		, Num::Ivp::DiffJacobian<StateVec, Matrix, decltype(force)>(std::move(force), 1e-8)
-		, t.asFloat()
-		, curr
-		, dt.asFloat()
-	).second;
-
-
-	//update
-	r = Vec3(next[0] + r0[0], next[1] + r0[1], next[2] + r0[2]);
-	v = Vec3(next[3], next[4], next[5]);
-	mat[3] = Vec4(r, 1.0f);
+{	
+	integrators["gaussLegendre6"]->updatePhysics(planet, sat, t, dt);
 }
 
 void updateObjects()
 {
 	earth->update(t, dt);
 
-	for (auto&[key, sat] : satellites)
-	{
-		sat->update(t, dt);
-	}
+	target->update(t, dt);
+	chaser->update(t, dt);
 }
 
 void updatePhysics()
 {
-	while (dt >= dt0 * warp)
-	{
-		dt -= dt0 * warp;
-
-		for (auto&[key, sat] : satellites)
-		{
-			updateSatPlanet(sat, earth, t, dt0 * warp);
-		}
-	}
+	updateSatPlanet(target, earth, t, dt);
+	updateSatPlanet(chaser, earth, t, dt);
 }
 
 void updateTime()
@@ -349,8 +302,8 @@ void update()
 {
 	updateTime();
 
-	updateObjects();
 	updatePhysics();
+	updateObjects();
 }
 
 
@@ -401,7 +354,9 @@ void systemOptions()
 		}
 		ImGui::Text("");
 
-		//integrator(combo)
+		
+
+
 	}
 }
 
@@ -409,13 +364,7 @@ void planetOptions()
 {
 	if (ImGui::CollapsingHeader("Planet parameters"))
 	{
-		//rotation
-
-		//mass
-
-		//size
-
-		//pos
+		ImGui::Text("Not implemented yet");
 	}
 }
 
@@ -463,51 +412,21 @@ void showSatelliteParameters(SatelliteShared& sat)
 
 void satellitesOptions()
 {
-	if (ImGui::CollapsingHeader("Satellites parameters"))
+	if (ImGui::CollapsingHeader("Target"))
 	{
-		//flags : single flag
-		int flags = ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_HeightRegular;
+		showSatelliteParameters(target);
+	}
+	if (ImGui::CollapsingHeader("Chaser"))
+	{
+		showSatelliteParameters(chaser);
+	}
+}
 
-		//choose satellite
-		auto current = currentWeak.lock();
-		const char* init = (current ? current->mName->mName.c_str() : "none");
-		if (ImGui::BeginCombo("Satellites", init, flags))
-		{
-			bool selected = false;
-
-			for (auto&[key, sat] : satellites)
-			{
-				auto& name = sat->mName->mName;
-
-				selected = (current == sat);
-				if (ImGui::Selectable(key.c_str(), selected))
-				{
-					currentWeak = sat;
-					timeTrack0 = sat->mOrbit->time();
-					timeTrack1 = sat->mOrbit->time();
-				}
-			}
-
-			ImGui::EndCombo();
-		}
-
-		ImGui::Separator();
-
-		//show params
-		if (current)
-		{
-			showSatelliteParameters(current);
-
-			//show tracked time
-			ImGui::Separator();
-			timeTrack0 = timeTrack1;
-			timeTrack1 = current->mOrbit->time();
-			ImGui::Text("Tracked delta: %f", timeTrack1 - timeTrack0);
-		}
-		else
-		{
-			ImGui::Text("Nothing selected");
-		}
+void rendezvousOptions()
+{
+	if (ImGui::CollapsingHeader("Rendezvous"))
+	{
+		ImGui::Text("Not implemented yet");
 	}
 }
 
@@ -516,21 +435,15 @@ void myGui()
 	ImGui::SetNextWindowPos({10, 10}, ImGuiCond_Once);
 	ImGui::SetNextWindowSizeConstraints({200, 400}, {400, 800}, nullptr, nullptr);
 
-	ImGui::Begin(
-		"Options"
-		, nullptr
-		, ImGuiWindowFlags_MenuBar 
-		| ImGuiWindowFlags_NoMove 
-		| ImGuiWindowFlags_NoNav 
-		| ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_AlwaysAutoResize
-	);
+	ImGui::Begin("Options", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize| ImGuiWindowFlags_AlwaysAutoResize);
 	
 	systemOptions();
 
 	planetOptions();
 
 	satellitesOptions();
+
+	rendezvousOptions();
 
 	ImGui::End();
 }
@@ -556,7 +469,7 @@ void renderGui()
 	ImGui::NewFrame();
 
 
-	//testGui();
+	testGui();
 
 	myGui();
 
@@ -608,19 +521,19 @@ void featureTest()
     glfwSetCursorPos(window, prevX, prevY);
 	glfwSwapInterval(1);
 	
-
+	view.setTrack(target->mPhysics, Vec3(20.0, 0.0, 0.0));
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glfwPollEvents();
 
-		view.update(t, dt);
 
 		if (!stopped)
 		{
 			update();
 		}
+		view.update(t, dt);
 
 		render();
 		renderGui();

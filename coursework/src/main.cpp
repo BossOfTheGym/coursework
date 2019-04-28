@@ -130,6 +130,13 @@ void posCallback(GLFWwindow* window, double xPos, double yPos)
 
 void mouseCallback(GLFWwindow* window, int button, int action, int mods)
 {
+	if (ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow) || ImGui::IsWindowHovered(ImGuiFocusedFlags_AnyWindow))
+	{
+		scrollView = false;
+
+		return;
+	}
+
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
 		scrollView = true;

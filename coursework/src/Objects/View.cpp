@@ -9,8 +9,8 @@ const double View::DEFAULT_SENSITIVITY = 0.25;
 const double View::PITCH_MAX = 2.0 * PI;
 const double View::PITCH_MIN = 0.0;
 
-const double View::ROLL_MAX = +PI / 2.0;
-const double View::ROLL_MIN = -PI / 2.0;
+const double View::ROLL_MAX = 2.0 * PI;// +PI / 2.0;
+const double View::ROLL_MIN = 0.0;// -PI / 2.0;
 
 
 //constructor

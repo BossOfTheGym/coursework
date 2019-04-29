@@ -1,25 +1,9 @@
-#include "Actions.h"
-
-
-//Base
-ActionBase::ActionBase()
-	: mState(State::INITIALIZING)
-{}
-
-void ActionBase::update(const Time& t, const Time& dt)
-{
-	mState = State::FINISHED;
-}
-
-ActionBase::State ActionBase::state() const
-{
-	return mState;
-}
+#include "SimpleActions.h"
 
 
 //Impuls
 Impuls::Impuls(
-	Satellite* chaser
+	  const SatelliteWeak& chaser
 	, const Vec3& impuls
 )
 	: ActionBase()
@@ -30,9 +14,12 @@ Impuls::Impuls(
 
 void Impuls::update(const Time& t, const Time& dt)
 {
-	if (mState != State::FINISHED && mChaser != nullptr)
+	if (mState != State::FINISHED)
 	{
-		mChaser->mPhysics->mVelocity += mImpuls;
+		if (auto ptr = mChaser.lock())
+		{
+			ptr->mPhysics->mVelocity += mImpuls;
+		}
 	}
 
 	mState = State::FINISHED;

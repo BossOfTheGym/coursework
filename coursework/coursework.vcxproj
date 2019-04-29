@@ -40,7 +40,6 @@
     <ClInclude Include="src\Objects\Planet\Planet.h" />
     <ClInclude Include="src\Objects\Planet\PlanetComponent.h" />
     <ClInclude Include="src\Objects\Satellite\OrbitComponent.h" />
-    <ClInclude Include="src\Objects\Satellite\Rendezvous\ActionVariant.h" />
     <ClInclude Include="src\Objects\Satellite\Satellite.h" />
     <ClInclude Include="src\Objects\Satellite\SatelliteComponent.h" />
     <ClInclude Include="src\Objects\View.h" />
@@ -50,7 +49,10 @@
     <ClInclude Include="src\Render\Renderers.h" />
     <ClInclude Include="src\Render\SatelliteRenderer.h" />
     <ClInclude Include="src\Render\SimpleRenderer.h" />
-    <ClInclude Include="src\Rendezvous\Actions.h" />
+    <ClInclude Include="src\Rendezvous\Circular\Action.h" />
+    <ClInclude Include="src\Rendezvous\Circular\ActionVariant.h" />
+    <ClInclude Include="src\Rendezvous\Circular\Circular.h" />
+    <ClInclude Include="src\Rendezvous\Circular\SimpleActions.h" />
     <ClInclude Include="src\Rendezvous\Method.h" />
     <ClInclude Include="src\Rendezvous\RendezvousControl.h" />
     <ClInclude Include="src\Resources.h" />
@@ -92,7 +94,9 @@
     <ClCompile Include="src\Render\PlanetRenderer.cpp" />
     <ClCompile Include="src\Render\SatelliteRenderer.cpp" />
     <ClCompile Include="src\Render\SimpleRenderer.cpp" />
-    <ClCompile Include="src\Rendezvous\Actions.cpp" />
+    <ClCompile Include="src\Rendezvous\Circular\Action.cpp" />
+    <ClCompile Include="src\Rendezvous\Circular\Circular.cpp" />
+    <ClCompile Include="src\Rendezvous\Circular\SimpleActions.cpp" />
     <ClCompile Include="src\Rendezvous\Method.cpp" />
     <ClCompile Include="src\Rendezvous\RendezvousControl.cpp" />
     <ClCompile Include="src\Resources.cpp" />

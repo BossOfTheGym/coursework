@@ -6,6 +6,9 @@
 
 #include <GUI/GUI.h>
 
+#include <Rendezvous/Circular/Circular.h>
+#include <Rendezvous/RendezvousControl.h>
+
 
 const int WIDTH  = 1500;
 const int HEIGHT = 900;
@@ -31,6 +34,9 @@ SatelliteShared chaser;
 
 //view
 View view;
+
+//rendezvous control
+RendezvousControlShared rendezvousControl;
 
 //gui state
 SatelliteWeak currentWeak;
@@ -225,6 +231,13 @@ void initGlobals()
 		, earth->mPhysics
 	);
 
+	//rendezvous
+	rendezvousControl = RendezvousControlShared(
+		new RendezvousControl(
+			MethodUnique(new Circular())
+		)
+	);
+
 	//render lists
 	renderers["satellite"]->addToList(target);
 	renderers["satellite"]->addToList(chaser);
@@ -273,6 +286,8 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, 
 
 void updateObjects()
 {
+	rendezvousControl->update(t, dt);
+
 	earth->update(t, dt);
 
 	target->update(t, dt);
@@ -375,8 +390,10 @@ void planetOptions()
 	}
 }
 
-void showSatelliteParameters(SatelliteShared& sat)
+void showSatelliteParameters(SatelliteShared& sat, int id)
 {
+	ImGui::PushID(id);
+
 	if (sat->mName)
 	{
 		auto& name = *(sat->mName);
@@ -415,17 +432,24 @@ void showSatelliteParameters(SatelliteShared& sat)
 		ImGui::Text("Time              : %f", orbit.time());
 		ImGui::Text("");
 	}
+
+	if (ImGui::Button("Set view"))
+	{
+		view.setTrack(sat->mPhysics, Vec3(20.0, 0.0, 0.0));
+	}
+
+	ImGui::PopID();
 }
 
 void satellitesOptions()
 {
 	if (ImGui::CollapsingHeader("Target"))
 	{
-		showSatelliteParameters(target);
+		showSatelliteParameters(target, 0);
 	}
 	if (ImGui::CollapsingHeader("Chaser"))
 	{
-		showSatelliteParameters(chaser);
+		showSatelliteParameters(chaser, 1);
 	}
 }
 
@@ -433,7 +457,13 @@ void rendezvousOptions()
 {
 	if (ImGui::CollapsingHeader("Rendezvous"))
 	{
-		ImGui::Text("Not implemented yet");
+		if (ImGui::Button("Start"))
+		{
+			rendezvousControl->setChaser(chaser);
+			rendezvousControl->setTarget(target);
+			rendezvousControl->setTime(Time(divisor, 1.0));
+			rendezvousControl->start();
+		}
 	}
 }
 
@@ -528,7 +558,6 @@ void featureTest()
     glfwSetCursorPos(window, prevX, prevY);
 	glfwSwapInterval(1);
 	
-	view.setTrack(target->mPhysics, Vec3(20.0, 0.0, 0.0));
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

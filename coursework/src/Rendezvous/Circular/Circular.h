@@ -46,6 +46,8 @@ public:
 
 	virtual void stop() override;
 
+	virtual bool finished() const override;
+
 
 private:
 	State   mState;

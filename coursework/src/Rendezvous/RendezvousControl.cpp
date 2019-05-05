@@ -35,6 +35,16 @@ void RendezvousControl::stop()
 	}
 }
 
+bool RendezvousControl::finished() const
+{
+	if (mMethod)
+	{
+		return mMethod->finished();
+	}
+
+	return true;
+}
+
 
 void RendezvousControl::setTarget(const SatelliteWeak& target)
 {

@@ -6,8 +6,8 @@ void createContext(GLFWwindow*& win, int width, int height, const String& name)
 	auto glfwErr = glfwInit();
 
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-	glfwWindowHint(GLFW_DEPTH_BITS, 64);
-	glfwWindowHint(GLFW_STENCIL_BITS, 16);
+	glfwWindowHint(GLFW_DEPTH_BITS, 32);
+	glfwWindowHint(GLFW_STENCIL_BITS, 8);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
@@ -59,9 +59,9 @@ void loadModels(std::map<String, ModelShared>& modelsStorage)
 
 	modelsStorage["satellite"] = ModelShared(new Model(std::move(assimpBuilder.imported())));
 
-
+	
 	PlanetBuilder planetBuilder;
-	planetBuilder.build(4, "assets/textures/earth/earthmap.jpg", "Earth");
+	planetBuilder.build(6, "assets/textures/earth/earthmap.jpg", "Earth");
 
 	modelsStorage["earth"] = ModelShared(new Model(std::move(planetBuilder.model())));
 

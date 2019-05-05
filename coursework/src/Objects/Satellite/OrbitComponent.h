@@ -44,6 +44,8 @@ public:
 
 	void updateOrbit();
 
+	void setOrbit(double h, double e, double i, double Omega, double omega, double thetha);
+
 
 	//get
 	double angularMomentum() const
@@ -108,6 +110,12 @@ public:
 		return mMu;
 	}
 
+	double meanMotion() const
+	{
+		return mN;
+	}
+
+
 			
 	double period() const
 	{
@@ -156,6 +164,7 @@ private:
 	double mMu;  // mu param
 
 	//specific
+	double mN;   // mean motion
 	double mOP;  // Orbit Period
 	double mA;   // apoapsis
 	double mEA;  // Eccentric Anomaly

@@ -30,12 +30,13 @@ const double PI   = static_cast<double>(acos(-1.0));
 const double PI_2 = static_cast<double>(2 * PI);
 
 
-const double G = 6.6740831313131313e-11;
-const double M = 5.9722e+24;             // earth mass
-const double R = 6378000.0;                  // radius at equator
+
+const double G = 6.6740831313131313e-20;
+const double M = 5.9722e+24;
+const double R = 6378.0;
 
 const GLuint EMPTY  = 0;
-
+ 
 
 using UInt = unsigned int;
 

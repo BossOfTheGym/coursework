@@ -39,6 +39,66 @@ const IComponent::Type& OrbitComponent::componentType() const
 	return type;
 }
 
+
+void OrbitComponent::setOrbit(double h, double e, double i, double Omega, double omega, double theta)
+{
+	using glm::transpose;
+	using glm::cross;
+	using glm::length;
+
+
+	double cost = cos(theta);
+	double sint = sin(theta);
+
+	double coso = cos(omega);
+	double sino = sin(omega);
+	double cosO = cos(Omega);
+	double sinO = sin(Omega);
+	double cosi = cos(i);
+	double sini = sin(i);
+
+	auto planet = mPlanetPhys.lock();
+	auto sat = mSatellitePhys.lock();
+	if (!sat || !planet)
+	{
+		return;
+	}
+
+	double mu = G * planet->mMass;
+
+	Vec3 rx = h * h / mu / (1.0 + e * cost) * Vec3(cost, sint, 0.0);
+	Vec3 vx = mu / h * Vec3(-sint, e + cost, 0.0);
+
+	Mat3 Qxx = transpose(
+		Mat3(
+			  cosO * coso - sinO * sino * cosi, -cosO * sino - sinO * cosi * coso, sinO * sini
+			, sinO * coso + cosO * cosi * sino, -sinO * sino + cosO * cosi * coso, -cosO * sini
+			,        sini * sino              ,         sini * coso              ,      cosi
+		)
+	);
+
+	//setting parameters
+	sat->mPosition = Qxx * rx;
+	sat->mMat[3] = Vec4(sat->mPosition, 1.0);
+	sat->mVelocity = Qxx * vx;
+
+	mC = h;
+	mH = h;
+	mE = e;
+	mI = i;
+	mP = h * h / mu;
+	mAP = omega;
+	mRA = Omega;
+	mTA = theta;
+	mMu = mu;
+
+	mCv = cross(sat->mPosition, sat->mVelocity);
+	mNv = cross(Vec3(0.0, 0.0, 1.0), mCv);
+	mEv = cross(sat->mVelocity, mCv) / mMu - sat->mPosition / length(sat->mPosition);
+
+	updateSpecificParams();
+}
+
 //TODO
 OrbitComponent::R_V OrbitComponent::orbitStateAngle(double theta) const
 {
@@ -142,19 +202,19 @@ void OrbitComponent::updateSpecificParams()
 			mEA = PI_2 + mEA;
 		}
 
-		auto nInv = pow(mA, 1.5) / sqrt(mMu);
+		mN = sqrt(mMu) / pow(mA, 1.5);
 
-		mT  = nInv * (mEA - mE * sin(mEA));
-		mOP = nInv * PI_2;
+		mT  = 1.0 / mN * (mEA - mE * sin(mEA));
+		mOP = 1.0 / mN * PI_2;
 	}
 	else if (mE > 1.0) // hyperbolic
 	{
 		mA  = mP / (mE * mE - 1.0);
 		mEA = 2 * atanh(sqrt((mE - 1.0) / (mE + 1.0)) * tanh(mTA / 2));
 
-		auto nInv = pow(mA, 1.5) / sqrt(mMu);
+		mN = sqrt(mMu) / pow(mA, 1.5);
 
-		mT  = nInv * (mE * sinh(mEA) - mEA); //something strange happens here
+		mT  = 1.0 / mN * (mE * sinh(mEA) - mEA); //something strange happens here
 		mOP = std::numeric_limits<double>::infinity();
 	}
 	else

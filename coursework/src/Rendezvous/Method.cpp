@@ -15,6 +15,11 @@ void Method::stop()
 void Method::update(const Time& t, const Time& dt)
 {}
 
+bool Method::finished() const
+{
+	return true;
+}
+
 
 void Method::setTarget(const SatelliteWeak& target)
 {

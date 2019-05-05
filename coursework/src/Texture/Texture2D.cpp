@@ -146,11 +146,11 @@ int Texture2D::loadFromLocation(const String& location)
     GLubyte* textureData = FreeImage_GetBits(bitmap32);
     loadFromData(imageWidth, imageHeight, textureData);
 
-    FreeImage_Unload(bitmap32);
+    FreeImage_Unload(bitmap);
 
     if (bitsPerPixel != 32)
     {
-        FreeImage_Unload(bitmap);
+        FreeImage_Unload(bitmap32);
     }
 
     return true;

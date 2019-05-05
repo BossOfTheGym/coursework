@@ -181,7 +181,7 @@ const Mat4& View::proj() const
 
 const Vec3& View::pos() const
 {
-	return mLastPos;
+	return mPos;
 }
 
 const Vec3& View::lastPos() const

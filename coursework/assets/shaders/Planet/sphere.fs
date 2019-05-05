@@ -42,8 +42,8 @@ void main()
 	float z = normalized.z;
 	float r = sqrt(x * x + z * z);
 	
-    float latitude  = acosNV(y);
-    float longitude = acosNV(x / r);
+    float latitude  = acos(y);
+    float longitude = acos(x / r);
     if (z / r > 0.0)
     {
     	longitude = (2 * PI - longitude);

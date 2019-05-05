@@ -135,6 +135,9 @@
     <ClInclude Include="src\Rendezvous\Circular\SimpleActions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendezvous\Circular\ClohessyWitshire.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -262,6 +265,9 @@
     </ClCompile>
     <ClCompile Include="src\Rendezvous\Circular\SimpleActions.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendezvous\Circular\ClohessyWitshire.cpp">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

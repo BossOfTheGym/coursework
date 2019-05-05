@@ -32,6 +32,8 @@ public:
 
 	virtual void update(const Time& t, const Time& dt) override;
 
+	virtual bool finished() const;
+
 
 public:
 	void setTarget(const SatelliteWeak& target);

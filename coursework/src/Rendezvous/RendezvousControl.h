@@ -37,6 +37,7 @@ public:
 
 	void stop();
 
+	bool finished() const;
 
 public:
 	void setTarget(const SatelliteWeak& target);

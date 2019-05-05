@@ -39,7 +39,6 @@ View view;
 RendezvousControlShared rendezvousControl;
 
 //gui state
-SatelliteWeak currentWeak;
 double timeTrack0;
 double timeTrack1;
 
@@ -51,6 +50,9 @@ bool scrollView;    // scroll view
 //screen pos
 double prevX;
 double prevY;
+
+//speed
+double speed;
 
 //time stepping
 Time t;
@@ -83,25 +85,25 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         }
         case (GLFW_KEY_W):
         {
-            view.travelView(0.01 * R, View::Z);
+            view.travelView(speed, View::Z);
 
             break;
         }
         case (GLFW_KEY_S):
         {
-            view.travelView(-0.01 * R, View::Z);
+            view.travelView(-speed, View::Z);
 
             break;
         }
 		case (GLFW_KEY_A):
 		{
-			view.travelView(0.01 * R, View::X);
+			view.travelView(speed, View::X);
 
 			break;
 		}
 		case (GLFW_KEY_D):
 		{
-			view.travelView(-0.01 * R, View::X);
+			view.travelView(-speed, View::X);
 
 			break;
 		}
@@ -191,7 +193,7 @@ void initGlobals()
 	Vec3 up   = Vec3(0.0, 0.0, 1.0);
 	view = View(
 		  glm::lookAt(pos, look, up)
-		, glm::perspective(glm::radians(45.0), 1.0 * WIDTH / HEIGHT, 1.0, 2 * R)
+		, glm::perspective(glm::radians(45.0), 1.0 * WIDTH / HEIGHT, 0.001, 2 * R)
 		, pos
 		, 0.5
 	);
@@ -211,10 +213,10 @@ void initGlobals()
 	target = createSatellite(
 		models["satellite"]
 		, 1.0
-		, Vec3(1.0, 0.0, 0.0)
-		, glm::scale(Mat4(1.0), Vec3(3.0))
-		, Vec3(R + 4e+5, 0.0, 500.0)
-		, Vec3(0.0, 0.0, sqrt(G * M / (R + 4e+5)))
+		, Vec3(1.0, 1.0, 1.0)
+		, glm::scale(Mat4(1.0), Vec3(0.010))
+		, Vec3(R + 400.0, 0.0, 0.0)
+		, Vec3(0.0, 0.0, sqrt(G * M / (R + 400.0)))
 		, "target"
 		, earth->mPhysics
 	);
@@ -223,10 +225,10 @@ void initGlobals()
 	chaser = createSatellite(
 		models["satellite"]
 		, 1.0
-		, Vec3(1.0, 0.0, 1.0)
-		, glm::scale(Mat4(1.0), Vec3(3.0))
-		, Vec3(R + 4e+5, 0.0, 0.0)
-		, Vec3(0.0, 0.0, -sqrt(G * M / (R + 4e+5)))
+		, Vec3(0.0, 1.0, 0.0)
+		, glm::scale(Mat4(1.0), Vec3(0.010))
+		, Vec3(R + 400.0, 0.0, 0.0)
+		, Vec3(0.0, 0.0, sqrt(G * M / (R + 400.0)))
 		, "chaser"
 		, earth->mPhysics
 	);
@@ -244,7 +246,6 @@ void initGlobals()
 	renderers["planet"]->addToList(earth);
 
 	//gui
-	currentWeak = SatelliteShared(nullptr);
 	timeTrack0 = 0.0f;
 	timeTrack1 = 0.0f;
 
@@ -256,6 +257,8 @@ void initGlobals()
 	prevX = WIDTH / 2;
 	prevY = HEIGHT / 2;
 
+	speed = 0.001;
+
 	//time step
 	divisor = (double)glfwGetTimerFrequency();
 	t  = Time();
@@ -266,7 +269,7 @@ void initGlobals()
 
 	warp    = 1;
 	warpMin = 1;
-	warpMax = 1000000;
+	warpMax = 50000;
 }
 
 void destroyGlobals()
@@ -303,21 +306,21 @@ void updatePhysics()
 void updateTime()
 {
 	uint64_t raw = glfwGetTimerValue();
-	t1 = Time(raw, raw / divisor);
 
 	uint64_t delta = raw - t0.asU64();
-	dt += Time(delta * warp);
 
+	dt += Time(delta * warp, 0.0);
 	if (dt > dt0 * (warp))
 	{
 		dt = dt0 * (warp);
 	}
 
 	uint64_t time = t.asU64() + dt.asU64();
+
 	t  = Time(time, time / divisor);
 	dt = Time(dt.asU64(), dt.asU64() / divisor);
 
-	t0 = t1;
+	t0 = Time(raw, 0.0);
 }
 
 void update()
@@ -374,11 +377,10 @@ void systemOptions()
 		{
 			stopped ^= true;
 		}
+
 		ImGui::Text("");
-
-		
-
-
+		ImGui::Text("View position     : x:%f y:%f z:%f", view.pos().x, view.pos().y, view.pos().z);
+		ImGui::Text("View last position: x:%f y:%f z:%f", view.lastPos().x, view.lastPos().y, view.lastPos().z);
 	}
 }
 
@@ -390,10 +392,8 @@ void planetOptions()
 	}
 }
 
-void showSatelliteParameters(SatelliteShared& sat, int id)
+void showParameters(SatelliteShared& sat, int id)
 {
-	ImGui::PushID(id);
-
 	if (sat->mName)
 	{
 		auto& name = *(sat->mName);
@@ -423,7 +423,7 @@ void showSatelliteParameters(SatelliteShared& sat, int id)
 		ImGui::Text("Inclination            : %f", orbit.inclination());
 		ImGui::Text("Eccentricity           : %f", orbit.eccentricity());
 		ImGui::Text("True anomaly           : %f", orbit.trueAnomaly());
-		ImGui::Text("");	
+		ImGui::Text("");
 
 		ImGui::Text("Spec ");
 		ImGui::Text("Eccentric anomaly : %f", orbit.eccentricAnomaly());
@@ -432,10 +432,79 @@ void showSatelliteParameters(SatelliteShared& sat, int id)
 		ImGui::Text("Time              : %f", orbit.time());
 		ImGui::Text("");
 	}
+}
+
+void adjustParameters(SatelliteShared& sat, int id)
+{
+	if (sat->mPhysics)
+	{
+		auto& physics = *(sat->mPhysics);
+
+		ImGui::Text("State parameters");
+		ImGui::Text("Radius   x:%f y:%f z:%f", physics.mPosition.x, physics.mPosition.y, physics.mPosition.z);
+		ImGui::Text("Velocity x:%f y:%f z:%f", physics.mVelocity.x, physics.mVelocity.y, physics.mVelocity.z);
+		ImGui::Text("");
+	}
+
+	if (sat->mOrbit)
+	{
+		auto& orbit = *(sat->mOrbit);
+
+		
+		char am[64];
+		char  e[64];
+		double amVal = orbit.angularMomentum();
+		double  eVal = orbit.eccentricity();
+
+		sprintf_s(am, "%.15f", amVal);
+		sprintf_s( e, "%.15f", eVal);
+
+		ImGui::InputText("angular momentum(h)", am, 64, ImGuiInputTextFlags_CharsDecimal);
+		ImGui::InputText("eccentricity(e)" ,     e, 64, ImGuiInputTextFlags_CharsDecimal);
+
+		amVal = atof(am);
+		eVal  = atof(e);
+
+
+		using glm::radians;
+		using glm::degrees;
+
+		double DEGREE_0 = 0.0, DEGREE_360 = 360.0, DEGREE_180 = 180.0;
+
+		double ra = degrees(orbit.rightAscension());
+		double ap = degrees(orbit.argumentOfPeriapsis());
+		double i  = degrees(orbit.inclination());
+		double ta = degrees(orbit.trueAnomaly());
+
+		ImGui::SliderScalar("right ascension(Omega)"    , ImGuiDataType_Double, &ra, &DEGREE_0, &DEGREE_360, "%.15f", 1.0f);
+		ImGui::SliderScalar("argument of perigee(omega)", ImGuiDataType_Double, &ap, &DEGREE_0, &DEGREE_360, "%.15f", 1.0f);
+		ImGui::SliderScalar("inclination(i)"            , ImGuiDataType_Double,  &i, &DEGREE_0, &DEGREE_180, "%.15f", 1.0f);
+		ImGui::SliderScalar("true anomaly(theta)"       , ImGuiDataType_Double, &ta, &DEGREE_0, &DEGREE_360, "%.15f", 1.0f);
+		
+
+		orbit.setOrbit(amVal, eVal, radians(i), radians(ra), radians(ap), radians(ta));
+
+
+		ImGui::Text("");
+	}
+}
+
+void showSatelliteParameters(SatelliteShared& sat, int id)
+{
+	ImGui::PushID(id);
+
+	if (!stopped)
+	{
+		showParameters(sat, id);
+	}
+	else
+	{
+		adjustParameters(sat, id);
+	}
 
 	if (ImGui::Button("Set view"))
 	{
-		view.setTrack(sat->mPhysics, Vec3(20.0, 0.0, 0.0));
+		view.setTrack(sat->mPhysics, Vec3(0.030, 0.0, 0.0));
 	}
 
 	ImGui::PopID();
@@ -445,11 +514,11 @@ void satellitesOptions()
 {
 	if (ImGui::CollapsingHeader("Target"))
 	{
-		showSatelliteParameters(target, 0);
+		showSatelliteParameters(target, 12345678);
 	}
 	if (ImGui::CollapsingHeader("Chaser"))
 	{
-		showSatelliteParameters(chaser, 1);
+		showSatelliteParameters(chaser, 11111111111);
 	}
 }
 
@@ -457,12 +526,45 @@ void rendezvousOptions()
 {
 	if (ImGui::CollapsingHeader("Rendezvous"))
 	{
-		if (ImGui::Button("Start"))
+		static double transferVal = 3600.0;
+
+		char transfer[64];
+
+		sprintf_s(transfer, "%.15f", transferVal);
+
+		ImGui::InputText("time" , transfer, 64, ImGuiInputTextFlags_CharsDecimal);
+
+		transferVal = atof(transfer);
+
+		if (rendezvousControl->finished())
 		{
-			rendezvousControl->setChaser(chaser);
-			rendezvousControl->setTarget(target);
-			rendezvousControl->setTime(Time(divisor, 1.0));
-			rendezvousControl->start();
+			if (ImGui::Button("Start"))
+			{
+				rendezvousControl->setChaser(chaser);
+				rendezvousControl->setTarget(target);
+				rendezvousControl->setTime(Time(transferVal * divisor, transferVal));
+				rendezvousControl->start();
+			}
+		}
+		else
+		{
+			auto chaserObj = rendezvousControl->getChaser().lock();
+			auto targetObj = rendezvousControl->getTarget().lock();
+
+			Vec3 dr = targetObj->mPhysics->mPosition - chaserObj->mPhysics->mPosition;
+			Vec3 dv = targetObj->mPhysics->mVelocity - chaserObj->mPhysics->mVelocity;
+
+			ImGui::Text("delta-r:%f  x:%f y:%f z:%f", glm::length(dr), dr.x, dr.y, dr.z);
+			ImGui::Text("delta-v:%f  x:%f y:%f z:%f", glm::length(dv), dv.x, dv.y, dv.z);
+
+			if (ImGui::Button("Adjust"))
+			{
+				rendezvousControl->start();
+			}
+			if (ImGui::Button("Stop"))
+			{
+				rendezvousControl->stop();
+			}
 		}
 	}
 }
@@ -470,9 +572,9 @@ void rendezvousOptions()
 void myGui()
 {
 	ImGui::SetNextWindowPos({10, 10}, ImGuiCond_Once);
-	ImGui::SetNextWindowSizeConstraints({200, 400}, {400, 800}, nullptr, nullptr);
+	ImGui::SetNextWindowSizeConstraints({200, 400}, {500, 800}, nullptr, nullptr);
 
-	ImGui::Begin("Options", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize| ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::Begin("Options", nullptr,  ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav);
 	
 	systemOptions();
 
@@ -499,18 +601,22 @@ void initGui()
 
 }
 
-void renderGui()
+void beginGui()
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+}
 
-
+void constructGui()
+{
 	testGui();
 
 	myGui();
+}
 
-
+void endGui()
+{
 	ImGui::Render();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -561,18 +667,23 @@ void featureTest()
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		glfwPollEvents();
 
+
+		beginGui();
 
 		if (!stopped)
 		{
 			update();
 		}
+
+		constructGui();
 		view.update(t, dt);
 
 		render();
-		renderGui();
+
+		endGui();
+
 
 		glfwSwapBuffers(window);
     }

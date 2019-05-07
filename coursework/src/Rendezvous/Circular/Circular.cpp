@@ -109,15 +109,23 @@ void Circular::start()
 	Vec3 dvFirstBefore = (dvNew0 - dv0);
 	Vec3 dvFirst  = qi * dvFirstBefore;
 	
-
-	Vec3 dvSecond = qi * (-dvNew1);
+	Vec3 dvSecondBefore = (-dvNew1); 
+	Vec3 dvSecond = qi * dvSecondBefore;
 
 	std::cout << "First : x:" << dvFirst.x  << " y: " << dvFirst.y  << " z: " << dvFirst.z  << std::endl;
 	std::cout << "Second: x:" << dvSecond.x << " y: " << dvSecond.y << " z: " << dvSecond.z << std::endl;
 
-	mActions.push_back(Impuls(mChaser, -dvFirst));
-	mActions.push_back(Wait(mTime));
+	//THIS PIECE OF SHIT SHOULD BE REVERSED. REVEEEEEERSED!!!
+	//FUUUUUUUUCK
+	//I'M SO FUCKING DUMB AND BAD
+	//IT'S USED AS FUCKING STACK
+	//AAAAAAHGGG
+	//STAAAAAACK
+	//NOT FUCKING QUUUUEUEE
+	//OH MY GOOD
 	mActions.push_back(Impuls(mChaser, dvSecond));
+	mActions.push_back(Wait(mTime));
+	mActions.push_back(Impuls(mChaser, dvFirst));
 }
 
 void Circular::stop()

@@ -25,7 +25,6 @@
     <ClInclude Include="src\Entity\Time.h" />
     <ClInclude Include="src\Factories.h" />
     <ClInclude Include="src\Graphics\GraphicsComponent.h" />
-    <ClInclude Include="src\Integrators\Integrators.h" />
     <ClInclude Include="src\Integrator\Integrator.h" />
     <ClInclude Include="src\Integrator\Integrators.h" />
     <ClInclude Include="src\Integrator\RungeKutta4.h" />

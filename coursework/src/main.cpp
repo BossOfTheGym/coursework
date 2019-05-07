@@ -39,8 +39,8 @@ View view;
 RendezvousControlShared rendezvousControl;
 
 //gui state
-double timeTrack0;
-double timeTrack1;
+double transferVal;
+IntegratorShared selectedInt;
 
 //flags
 bool fill;          // wireframe mode
@@ -64,6 +64,10 @@ Time dt0;
 uint64_t warp;
 uint64_t warpMin;
 uint64_t warpMax;
+
+uint64_t updates;
+uint64_t updatesMax;
+uint64_t updatesMin;
 
 double divisor;
 
@@ -246,8 +250,8 @@ void initGlobals()
 	renderers["planet"]->addToList(earth);
 
 	//gui
-	timeTrack0 = 0.0f;
-	timeTrack1 = 0.0f;
+	selectedInt = integrators["classic4"];
+	transferVal = 3600.0;
 
 	//loop states
 	fill    = false;
@@ -265,11 +269,15 @@ void initGlobals()
 	t0 = Time();
 	t1 = Time();
 	dt = Time();
-	dt0 = Time(50, 50 / divisor);
+	dt0 = Time(100, 100 / divisor);
 
 	warp    = 1;
 	warpMin = 1;
-	warpMax = 50000;
+	warpMax = 10000;
+
+	updates = 1;
+	updatesMin = 1;
+	updatesMax = 10;
 }
 
 void destroyGlobals()
@@ -284,7 +292,7 @@ void destroyGlobals()
 //integrator(3 lines)
 void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, const Time& dt)
 {	
-	integrators["gaussLegendre6"]->updatePhysics(planet, sat, t, dt);
+	selectedInt->updatePhysics(planet, sat, t, dt);
 }
 
 void updateObjects()
@@ -317,7 +325,7 @@ void updateTime()
 
 	uint64_t time = t.asU64() + dt.asU64();
 
-	t  = Time(time, time / divisor);
+	t = Time(time, time / divisor);
 	dt = Time(dt.asU64(), dt.asU64() / divisor);
 
 	t0 = Time(raw, 0.0);
@@ -325,10 +333,13 @@ void updateTime()
 
 void update()
 {
-	updateTime();
+	for (int i = 0; i < updates; i++)
+	{
+		updateTime();
 
-	updatePhysics();
-	updateObjects();
+		updateObjects();
+		updatePhysics();
+	}
 }
 
 
@@ -364,13 +375,35 @@ void systemOptions()
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 		ImGui::Text("");
 
-		ImGui::Text("Time raw: %llu", t.asU64()  );
-		ImGui::Text("Time    : %f"  , t.asFloat());
-		ImGui::Text("Divisor : %f", divisor);
+		ImGui::Text("Time raw : %llu", t.asU64()   );
+		ImGui::Text("Time     : %f"  , t.asFloat() );
+		ImGui::Text("Delta raw: %llu", dt.asU64()  );
+		ImGui::Text("Delta    : %f"  , dt.asFloat());
+		ImGui::Text("Divisor: %f", divisor);
 
-		ImGui::SliderScalar("Time warp: ", ImGuiDataType_S64, &warp, &warpMin, &warpMax);
-		warp = std::min(warp, warpMax);
-		warp = std::max(warp, warpMin);
+
+		ImGui::SliderScalar("Time warp", ImGuiDataType_S64, &warp, &warpMin, &warpMax);
+		warp = glm::clamp(warp, warpMin, warpMax);
+
+		ImGui::SliderScalar("Updates", ImGuiDataType_S64, &updates, &updatesMin, &updatesMax);
+		updates = glm::clamp(updates, updatesMin, updatesMax);
+
+
+		if (ImGui::BeginCombo("Integrators", selectedInt->name().c_str(), ImGuiComboFlags_NoArrowButton))
+		{
+			for (auto&[key, integrator] : integrators)
+			{
+				bool selected = (integrator == selectedInt);
+
+				auto& name = integrator->name();
+				if (ImGui::Selectable(name.c_str(), &selected))
+				{
+					selectedInt = integrator;
+				}
+			}
+			ImGui::EndCombo();
+		}
+
 
 		static const char* options[] = {"pause simulation", "resume simulation"};
 		if (ImGui::Button(options[stopped]))
@@ -518,7 +551,7 @@ void satellitesOptions()
 	}
 	if (ImGui::CollapsingHeader("Chaser"))
 	{
-		showSatelliteParameters(chaser, 11111111111);
+		showSatelliteParameters(chaser, 11111111);
 	}
 }
 
@@ -526,18 +559,17 @@ void rendezvousOptions()
 {
 	if (ImGui::CollapsingHeader("Rendezvous"))
 	{
-		static double transferVal = 3600.0;
-
-		char transfer[64];
-
-		sprintf_s(transfer, "%.15f", transferVal);
-
-		ImGui::InputText("time" , transfer, 64, ImGuiInputTextFlags_CharsDecimal);
-
-		transferVal = atof(transfer);
-
 		if (rendezvousControl->finished())
 		{
+			char transfer[64];
+
+			sprintf_s(transfer, "%.15f", transferVal);
+
+			ImGui::InputText("time", transfer, 64, ImGuiInputTextFlags_CharsDecimal);
+
+			transferVal = atof(transfer);
+
+
 			if (ImGui::Button("Start"))
 			{
 				rendezvousControl->setChaser(chaser);
@@ -556,6 +588,7 @@ void rendezvousOptions()
 
 			ImGui::Text("delta-r:%f  x:%f y:%f z:%f", glm::length(dr), dr.x, dr.y, dr.z);
 			ImGui::Text("delta-v:%f  x:%f y:%f z:%f", glm::length(dv), dv.x, dv.y, dv.z);
+			ImGui::Text("Time remaining: %f", rendezvousControl->getTime().asFloat());
 
 			if (ImGui::Button("Adjust"))
 			{
@@ -610,7 +643,7 @@ void beginGui()
 
 void constructGui()
 {
-	testGui();
+	//testGui();
 
 	myGui();
 }

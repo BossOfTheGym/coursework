@@ -55,4 +55,4 @@ protected:
 
 //aliases
 using IntegratorShared = std::shared_ptr<IntegratorBase>;
-using IntegratowWeak   = std::weak_ptr<IntegratorBase>;
+using IntegratorWeak   = std::weak_ptr<IntegratorBase>;

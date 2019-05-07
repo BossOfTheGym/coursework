@@ -441,7 +441,7 @@ namespace Num
 				};
 
 
-				//dirty "hack" to reinterpet result as it was matrix 
+				//dirty "hack" to reinterpret result as it was matrix 
 				using JacobianResult = MatrixType<Argument, SYSTEM_ORDER, SYSTEM_ORDER>;
 
 				//adjusted jacobian

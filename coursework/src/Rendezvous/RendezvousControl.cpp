@@ -95,7 +95,7 @@ Time RendezvousControl::getTime() const
 {
 	if (mMethod)
 	{
-		mMethod->getTime();
+		return mMethod->getTime();
 	}
 
 	return Time();

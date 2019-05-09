@@ -14,17 +14,17 @@ private:
 
 
 public:
-	static int init();
+	static bool init(int width, int height, const String& name);
 
-	static Context* getContext() const;
+	static Context* getContext();
 
 	static void terminate();
 
 
 private:
-	static Context* context;
+	static Context* sContext;
 
 	
 public:
-	GLFWwindow* window;
+	GLFWwindow* mWindow;
 };

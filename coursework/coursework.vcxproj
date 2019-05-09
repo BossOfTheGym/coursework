@@ -19,8 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Clock.h" />
     <ClInclude Include="src\Common.h" />
     <ClInclude Include="src\Component\IComponent.h" />
+    <ClInclude Include="src\Context.h" />
     <ClInclude Include="src\Entity\ITimeVarying.h" />
     <ClInclude Include="src\Entity\Time.h" />
     <ClInclude Include="src\Factories.h" />
@@ -61,7 +63,9 @@
     <ClInclude Include="src\Texture\Texture2D.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Clock.cpp" />
     <ClCompile Include="src\Component\IComponent.cpp" />
+    <ClCompile Include="src\Context.cpp" />
     <ClCompile Include="src\Entity\Time.cpp" />
     <ClCompile Include="src\Factories.cpp" />
     <ClCompile Include="src\Graphics\GraphicsComponent.cpp" />

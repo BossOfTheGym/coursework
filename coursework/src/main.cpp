@@ -111,14 +111,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 			break;
 		}
-        case (GLFW_KEY_R):
-        {
-            prevX = WIDTH / 2;
-            prevY = HEIGHT / 2;
-            glfwSetCursorPos(window, prevX, prevY);
-
-            break;
-        }
     }
 }
 
@@ -295,7 +287,7 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, 
 	selectedInt->updatePhysics(planet, sat, t, dt);
 }
 
-void updateObjects()
+void updateObjects(const Time& t, const Time& dt)
 {
 	rendezvousControl->update(t, dt);
 
@@ -305,7 +297,7 @@ void updateObjects()
 	chaser->update(t, dt);
 }
 
-void updatePhysics()
+void updatePhysics(const Time& t, const Time& dt)
 {
 	updateSatPlanet(target, earth, t, dt);
 	updateSatPlanet(chaser, earth, t, dt);
@@ -333,12 +325,12 @@ void updateTime()
 
 void update()
 {
+	updateTime();
+
 	for (int i = 0; i < updates; i++)
 	{
-		updateTime();
-
-		updateObjects();
-		updatePhysics();
+		updateObjects(t, dt);
+		updatePhysics(t, dt);
 	}
 }
 
@@ -672,7 +664,7 @@ void render()
 }
 
 
-void featureTest()
+void mainloop()
 {
 	initGlobals();
 	initGui();
@@ -729,7 +721,7 @@ void featureTest()
 
 int main(int argc, char* argv[])
 {
-    featureTest();
+    mainloop();
 	
     return EXIT_SUCCESS;
 }

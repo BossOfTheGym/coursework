@@ -135,6 +135,12 @@
     <ClInclude Include="src\Rendezvous\Circular\ClohessyWitshire.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Clock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -264,7 +270,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Rendezvous\Circular\ClohessyWitshire.cpp">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Clock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Context.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -115,3 +115,8 @@ private:
 	bool lastTrackNull;
 	bool shouldUpdateAxes;
 };
+
+
+//aliases
+using ViewShared = std::shared_ptr<View>;
+using ViewWeak   = std::weak_ptr<View>;

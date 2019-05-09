@@ -1,103 +1,72 @@
-//#include "Clock.h"
-//
-//#include "Context.h"
-//
-//
-//uint64_t Clock::DEFAULT_DELTA = 100;
-//uint64_t Clock::DEFAULT_WARP = 1;
-//uint64_t Clock::DEFAULT_MIN_WARP = 1;
-//uint64_t Clock::DEFAULT_MAX_WARP = 1000;
-//
-//double Clock::DEFAULT_DIVISOR = 1e6;
-//
-//
-//Clock::Clock(
-//	  uint64_t delta   
-//	, uint64_t warp    
-//	, uint64_t minWarp 
-//	, uint64_t maxWarp 
-//	, double divisor   
-//)
-//	: mDelta0(delta, delta / divisor)
-//	, mDelta(delta * warp, delta * warp / divisor)
-//	, mCurrentTime(0, 0.0)
-//	, mAccumulated(0, 0.0)
-//	, mWarp(warp)
-//	, mMinWarp(minWarp)
-//	, mMaxWarp(maxWarp)
-//	, mDivisor(divisor)
-//{
-//	reset();
-//}
-//
-//
-//Time Clock::time() const
-//{
-//	return mCurrentTime;
-//}
-//
-//Time Clock::accumulated() const
-//{
-//	return mAccumulated;
-//}
-//
-//Time Clock::delta0() const
-//{
-//	return mDelta0;
-//}
-//
-//Time Clock::delta() const
-//{
-//	return mDelta;
-//}
-//
-//
-//double Clock::divisor() const
-//{
-//	return mDivisor;
-//}
-//
-//
-//uint64_t Clock::warp() const
-//{
-//	return mWarp;
-//}
-//
-//uint64_t Clock::minWarp() const
-//{
-//	return mMinWarp;
-//}
-//
-//uint64_t Clock::maxWarp() const
-//{
-//	return mMaxWarp;
-//}
-//
-//
-//void Clock::setWarp(uint64_t warp)
-//{
-//	mWarp  = std::max(std::min(warp, mMaxWarp), mMinWarp);
-//	mDelta = Time(mDelta0.asU64() * mWarp, mDelta0.asU64() * mWarp / divisor);
-//}
-//
-//void Clock::tick()
-//{
-//	mT1 = glfwGetTimerValue();
-//
-//
-//	uint64_t deltaRaw = (mT1 - mT0) * warp;
-//	uint64_t accum = mAccumulated.asU64() + deltaRaw;
-//	accum = std::min(accum, mAccumLimit);
-//	accum = std::min(accum, mDelta0.asU64() * warp)
-//
-//
-//
-//
-//	mT0 = mT1;
-//}
-//
-//void Clock::reset()
-//{
-//	mT0 = glfwGetTimerValue();
-//	mT1 = mT0;
-//}
+#include "Clock.h"
+
+#include <chrono>
+
+
+uint64_t Clock::DEFAULT_DELTA = 100;
+uint64_t Clock::DEFAULT_WARP = 1;
+uint64_t Clock::DEFAULT_MIN_WARP = 1;
+uint64_t Clock::DEFAULT_MAX_WARP = 20000;
+
+double Clock::DEFAULT_DIVISOR = 1e6;
+
+
+uint64_t now()
+{
+	return std::chrono::steady_clock::now().time_since_epoch().count();
+}
+
+Clock::Clock(
+	  uint64_t dt0
+	, uint64_t warp
+	, uint64_t minWarp
+	, uint64_t maxWarp
+	, double divisor
+)
+	: m_start(now())
+	, m_tRaw(m_start)
+	, m_dtRaw(0)
+
+	, m_dt0(dt0)
+
+	, m_t()
+	, m_dt()
+
+	, m_tWarped()
+	, m_dtWarped()
+
+	, m_warp(warp)
+	, m_warpMin(minWarp)
+	, m_warpMax(maxWarp)
+
+	, m_divisor(divisor)
+{
+}
+
+void Clock::updateDelta()
+{
+	m_dtRaw = std::min(now() - m_tRaw, m_dt0);
+
+	m_dt = Time(m_dtRaw, m_dtRaw / m_divisor);
+}
+
+void Clock::updateTime()
+{
+	m_tRaw += m_dtRaw;
+
+	m_t = Time(m_tRaw, m_tRaw / m_divisor);
+}
+
+void Clock::updateDeltaWarped()
+{
+	uint64_t delta = m_dtRaw * m_warp;
+
+	m_dtWarped = Time(delta, delta/ m_divisor);
+}
+
+void Clock::updateTimeWarped()
+{
+	uint64_t warped = m_tWarped.asU64() + m_dtWarped.asU64();
+
+	m_tWarped = Time(warped, warped / m_divisor);
+}

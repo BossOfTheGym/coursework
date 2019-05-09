@@ -10,6 +10,8 @@
 #include <Rendezvous/Circular/Circular.h>
 #include <Rendezvous/RendezvousControl.h>
 
+#include <Clock.h>
+
 
 const int WIDTH  = 1500;
 const int HEIGHT = 900;
@@ -114,6 +116,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		case (GLFW_KEY_D):
 		{
 			view.travelView(-speed, View::X);
+
+			break;
+		}
+		case (GLFW_KEY_Q):
+		{
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
 
 			break;
 		}

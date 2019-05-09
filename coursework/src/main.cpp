@@ -57,27 +57,13 @@ double prevY;
 //speed
 double speed;
 
-//time stepping
-uint64_t tRaw;
-uint64_t dtRaw;
+//tick
+Clock tick;
 
-uint64_t dt0;
-
-Time t;
-Time dt;
-
-Time tWarped;
-Time dtWarped;
-
-uint64_t warp;
-uint64_t warpMin;
-uint64_t warpMax;
-
+//updates
 uint64_t updates;
-uint64_t updatesMax;
 uint64_t updatesMin;
-
-double divisor;
+uint64_t updatesMax;
 
 
 //callbacks(70)
@@ -283,22 +269,7 @@ void initGlobals()
 	speed = 0.001;
 
 	//time step
-	divisor = (double)glfwGetTimerFrequency();
-
-	tRaw  = glfwGetTimerValue();
-	dtRaw = 0;
-
-	dt0 = 100;
-
-	t  = Time(tRaw, tRaw / divisor);
-	dt = Time();
-
-	tWarped   = Time();
-	dtWarped  = Time();
-
-	warp    = 1;
-	warpMin = 1;
-	warpMax = 10000;
+	tick = Clock(100, 1, 1, 20000, (double)glfwGetTimerFrequency());
 
 	updates = 1;
 	updatesMin = 1;
@@ -321,53 +292,18 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, 
 
 void updateObjects()
 {
-	rendezvousControl->update(tWarped, dtWarped);
+	rendezvousControl->update(tick.elapsedWarped(), tick.deltaWarped());
 
-	earth->update(tWarped, dtWarped);
+	earth->update(tick.elapsedWarped(), tick.deltaWarped());
 
-	target->update(tWarped, dtWarped);
-	chaser->update(tWarped, dtWarped);
+	target->update(tick.elapsedWarped(), tick.deltaWarped());
+	chaser->update(tick.elapsedWarped(), tick.deltaWarped());
 }
 
 void updatePhysics()
 {
-	updateSatPlanet(target, earth, tWarped, dtWarped);
-	updateSatPlanet(chaser, earth, tWarped, dtWarped);
-}
-
-void updateDeltaRaw()
-{
-	uint64_t t1 = glfwGetTimerValue();
-	dtRaw = t1 - tRaw;
-
-	dt = Time(dtRaw, dtRaw / divisor);
-}
-
-void updateTimeRaw()
-{
-	tRaw += dtRaw;
-	
-	t = Time(tRaw, tRaw / divisor);
-}
-
-void updateDeltaWarped()
-{
-	uint64_t delta = dtRaw * warp;
-	uint64_t accum = delta + dtWarped.asU64();
-
-	if (accum > dt0 * warp)
-	{
-		accum = dt0 * warp;
-	}
-
-	dtWarped = Time(accum, accum / divisor);
-}
-
-void updateTimeWarped()
-{
-	uint64_t tUInt64 = tWarped.asU64() + dtWarped.asU64();
-
-	tWarped = Time(tUInt64, tUInt64 / divisor);
+	updateSatPlanet(target, earth, tick.elapsedWarped(), tick.deltaWarped());
+	updateSatPlanet(chaser, earth, tick.elapsedWarped(), tick.deltaWarped());
 }
 
 
@@ -403,15 +339,17 @@ void systemOptions()
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 		ImGui::Text("");
 
-		ImGui::Text("Time raw : %llu", tWarped.asU64()   );
-		ImGui::Text("Time     : %f"  , tWarped.asFloat() );
-		ImGui::Text("Delta raw: %llu", dtWarped.asU64()  );
-		ImGui::Text("Delta    : %f"  , dtWarped.asFloat());
-		ImGui::Text("Divisor: %f", divisor);
+		ImGui::Text("Time raw : %llu", tick.elapsedWarped().asU64());
+		ImGui::Text("Time     : %f"  , tick.elapsedWarped().asFloat());
+		ImGui::Text("Delta raw: %llu", tick.deltaWarped().asU64());
+		ImGui::Text("Delta    : %f"  , tick.deltaWarped().asFloat());
+		ImGui::Text("Divisor: %f", tick.getDivisor());
 
-
+		uint64_t warp = tick.getWarp();
+		uint64_t warpMin = tick.getMinWarp();
+		uint64_t warpMax = tick.getMaxWarp();
 		ImGui::SliderScalar("Time warp", ImGuiDataType_S64, &warp, &warpMin, &warpMax);
-		warp = glm::clamp(warp, warpMin, warpMax);
+		tick.setWarp(glm::clamp(warp, warpMin, warpMax));
 
 		ImGui::SliderScalar("Updates", ImGuiDataType_S64, &updates, &updatesMin, &updatesMax);
 		updates = glm::clamp(updates, updatesMin, updatesMax);
@@ -602,7 +540,7 @@ void rendezvousOptions()
 			{
 				rendezvousControl->setChaser(chaser);
 				rendezvousControl->setTarget(target);
-				rendezvousControl->setTime(Time(transferVal * divisor, transferVal));
+				rendezvousControl->setTime(tick.fromFloat(transferVal));
 				rendezvousControl->start();
 			}
 		}
@@ -638,11 +576,8 @@ void myGui()
 	ImGui::Begin("Options", nullptr,  ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav);
 	
 	systemOptions();
-
 	planetOptions();
-
 	satellitesOptions();
-
 	rendezvousOptions();
 
 	ImGui::End();
@@ -724,23 +659,23 @@ void mainloop()
 
 		beginGui();
 
-		updateDeltaRaw();
+		//update section
+		tick.updateDelta();
+		tick.updateDeltaWarped();
 		if (!stopped)
 		{
-			updateDeltaWarped();
-
 			for (int i = 0; i < updates; i++)
 			{
 				updateObjects();
 				updatePhysics();
 
-				updateTimeWarped();
+				tick.updateTimeWarped();
 			}
 		}
-		view.update(t, dt);
+		view.update(tick.elapsed(), tick.delta());
 
-		updateTimeRaw();
-
+		tick.updateTime();
+		//end update section
 
 		constructGui();
 

@@ -19,11 +19,11 @@ public:
 
 public:
 	Clock(
-		uint64_t dt0 = DEFAULT_DELTA
-		, uint64_t warp = DEFAULT_WARP
+		  uint64_t dt0     = DEFAULT_DELTA
+		, uint64_t warp    = DEFAULT_WARP
 		, uint64_t minWarp = DEFAULT_MIN_WARP
 		, uint64_t maxWarp = DEFAULT_MAX_WARP
-		, double divisor = DEFAULT_DIVISOR
+		, double divisor   = DEFAULT_DIVISOR
 	);
 
 	Clock(const Clock& clock) = default;
@@ -43,22 +43,22 @@ public:
 	void updateTimeWarped();
 
 
-	Time elapsed() const
+	const Time& elapsed() const
 	{
 		return m_t;
 	}
 
-	Time delta() const
+	const Time& delta() const
 	{
 		return m_dt;
 	}
-
-	Time elapsedWarped() const
+	
+	const Time& elapsedWarped() const
 	{
 		return m_tWarped;
 	}
-
-	Time deltaWarped() const
+	
+	const Time& deltaWarped() const
 	{
 		return m_dtWarped;
 	}
@@ -107,6 +107,17 @@ public:
 	}
 
 
+	Time fromUInt64(uint64_t time) const
+	{
+		return Time(time, time / m_divisor);
+	}
+
+	Time fromFloat(double time)
+	{
+		return Time(static_cast<uint64_t>(time * m_divisor), time);
+	}
+
+
 private:
 	uint64_t m_start; // start point
 	uint64_t m_tRaw;  // current point(t0)
@@ -114,11 +125,11 @@ private:
 
 	uint64_t m_dt0;  // limit of delta
 
-	Time m_t;
-	Time m_dt;
+	Time m_t;  // elapsed pure time
+	Time m_dt; // pure delta
 
-	Time m_tWarped;
-	Time m_dtWarped;
+	Time m_tWarped;  // elapsed warped time
+	Time m_dtWarped; // warped delta
 
 	uint64_t m_warp;
 	uint64_t m_warpMin;

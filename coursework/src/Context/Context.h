@@ -9,10 +9,6 @@
 
 class Context
 {
-private:
-	Context();
-
-
 public:
 	static bool init(int width, int height, const String& name);
 
@@ -23,6 +19,14 @@ public:
 
 private:
 	static Context* sContext;
+
+
+private:
+	Context();
+
+
+public:
+	GLFWwindow* window() const;
 
 	
 public:

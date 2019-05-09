@@ -1,24 +1,8 @@
 #include "Resources.h"
 
 
-void createContext(GLFWwindow*& win, int width, int height, const String& name)
+void initContext(int width, int height, const String& name)
 {
-	auto glfwErr = glfwInit();
-
-	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-	glfwWindowHint(GLFW_DEPTH_BITS, 32);
-	glfwWindowHint(GLFW_STENCIL_BITS, 8);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	glfwWindowHint(GLFW_SAMPLES, 4);
-
-	win = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
-
-	glfwMakeContextCurrent(win);
-
-	auto glewErr = glewInit();
 }
 
 

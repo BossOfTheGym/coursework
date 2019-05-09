@@ -5,6 +5,10 @@ Context::Context()
 	: mWindow(nullptr)
 {}
 
+GLFWwindow* Context::window() const
+{
+	return mWindow;
+}
 
 //statics
 Context* Context::sContext = nullptr;

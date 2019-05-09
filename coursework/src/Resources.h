@@ -2,6 +2,8 @@
 
 #include <Common.h>
 
+#include <Context/Context.h>
+
 #include <Shader/Shader.h>
 #include <Shader/ShaderProgram.h>
 
@@ -15,7 +17,8 @@
 #include <Integrator/Integrators.h>
 
 
-void createContext(GLFWwindow*& win, int width, int height, const String& name);
+//init context
+void initContext(int width, int height, const String& name);
 
 
 //load shaders from assets

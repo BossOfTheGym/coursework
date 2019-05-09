@@ -138,7 +138,7 @@
     <ClInclude Include="src\Clock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Context.h">
+    <ClInclude Include="src\Context\Context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -275,7 +275,7 @@
     <ClCompile Include="src\Clock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Context.cpp">
+    <ClCompile Include="src\Context\Context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

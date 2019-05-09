@@ -2,6 +2,7 @@
 
 #include <Resources.h>
 #include <Factories.h>
+
 #include <Numerics/Ivp/RungeKutta.h>
 
 #include <GUI/GUI.h>
@@ -55,11 +56,16 @@ double prevY;
 double speed;
 
 //time stepping
+uint64_t tRaw;
+uint64_t dtRaw;
+
+uint64_t dt0;
+
 Time t;
-Time t0;
-Time t1;
 Time dt;
-Time dt0;
+
+Time tWarped;
+Time dtWarped;
 
 uint64_t warp;
 uint64_t warpMin;
@@ -158,12 +164,24 @@ void initGlobals()
 	//context
 	std::cout << "---Context---" << std::endl;
 	std::cout << "Creating context..." << std::endl;
-	createContext(window, WIDTH, HEIGHT, "Rendezvous");
+
+	Context::init(WIDTH, HEIGHT, "Rendezvous");
+	window = Context::getContext()->window();
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, posCallback);
 	glfwSetMouseButtonCallback(window, mouseCallback);
+
+	GLFWmonitor* primary = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(primary);
+	glfwSetWindowPos(window, mode->width / 2 - WIDTH / 2, mode->height / 2 - HEIGHT / 2);
+	glfwShowWindow(window);
+	glfwMakeContextCurrent(window);
+	glfwSetCursorPos(window, prevX, prevY);
+	glfwSwapInterval(1);
+
 	std::cout << "Context created" << std::endl;
 	std::cout << std::endl;
+
 
 	//resources
 	std::cout << "---Resources---" << std::endl;
@@ -183,13 +201,14 @@ void initGlobals()
 	createIntegrators(integrators);
 	std::cout << std::endl;
 
+
 	//view
 	Vec3 pos  = Vec3(0.0, 1.5 * R, 0.0);
 	Vec3 look = Vec3(0.0);
 	Vec3 up   = Vec3(0.0, 0.0, 1.0);
 	view = View(
 		  glm::lookAt(pos, look, up)
-		, glm::perspective(glm::radians(45.0), 1.0 * WIDTH / HEIGHT, 0.001, 2 * R)
+		, glm::perspective(glm::radians(60.0), 1.0 * WIDTH / HEIGHT, 0.001, 2 * R)
 		, pos
 		, 0.5
 	);
@@ -257,11 +276,17 @@ void initGlobals()
 
 	//time step
 	divisor = (double)glfwGetTimerFrequency();
-	t  = Time();
-	t0 = Time();
-	t1 = Time();
+
+	tRaw  = glfwGetTimerValue();
+	dtRaw = 0;
+
+	dt0 = 100;
+
+	t  = Time(tRaw, tRaw / divisor);
 	dt = Time();
-	dt0 = Time(100, 100 / divisor);
+
+	tWarped   = Time();
+	dtWarped  = Time();
 
 	warp    = 1;
 	warpMin = 1;
@@ -274,8 +299,7 @@ void initGlobals()
 
 void destroyGlobals()
 {
-	glfwDestroyWindow(window);
-	glfwTerminate();
+	Context::terminate();
 }
 
 
@@ -287,51 +311,55 @@ void updateSatPlanet(SatelliteShared& sat, PlanetShared& planet, const Time& t, 
 	selectedInt->updatePhysics(planet, sat, t, dt);
 }
 
-void updateObjects(const Time& t, const Time& dt)
+void updateObjects()
 {
-	rendezvousControl->update(t, dt);
+	rendezvousControl->update(tWarped, dtWarped);
 
-	earth->update(t, dt);
+	earth->update(tWarped, dtWarped);
 
-	target->update(t, dt);
-	chaser->update(t, dt);
+	target->update(tWarped, dtWarped);
+	chaser->update(tWarped, dtWarped);
 }
 
-void updatePhysics(const Time& t, const Time& dt)
+void updatePhysics()
 {
-	updateSatPlanet(target, earth, t, dt);
-	updateSatPlanet(chaser, earth, t, dt);
+	updateSatPlanet(target, earth, tWarped, dtWarped);
+	updateSatPlanet(chaser, earth, tWarped, dtWarped);
 }
 
-void updateTime()
+void updateDeltaRaw()
 {
-	uint64_t raw = glfwGetTimerValue();
+	uint64_t t1 = glfwGetTimerValue();
+	dtRaw = t1 - tRaw;
 
-	uint64_t delta = raw - t0.asU64();
+	dt = Time(dtRaw, dtRaw / divisor);
+}
 
-	dt += Time(delta * warp, 0.0);
-	if (dt > dt0 * (warp))
+void updateTimeRaw()
+{
+	tRaw += dtRaw;
+	
+	t = Time(tRaw, tRaw / divisor);
+}
+
+void updateDeltaWarped()
+{
+	uint64_t delta = dtRaw * warp;
+	uint64_t accum = delta + dtWarped.asU64();
+
+	if (accum > dt0 * warp)
 	{
-		dt = dt0 * (warp);
+		accum = dt0 * warp;
 	}
 
-	uint64_t time = t.asU64() + dt.asU64();
-
-	t = Time(time, time / divisor);
-	dt = Time(dt.asU64(), dt.asU64() / divisor);
-
-	t0 = Time(raw, 0.0);
+	dtWarped = Time(accum, accum / divisor);
 }
 
-void update()
+void updateTimeWarped()
 {
-	updateTime();
+	uint64_t tUInt64 = tWarped.asU64() + dtWarped.asU64();
 
-	for (int i = 0; i < updates; i++)
-	{
-		updateObjects(t, dt);
-		updatePhysics(t, dt);
-	}
+	tWarped = Time(tUInt64, tUInt64 / divisor);
 }
 
 
@@ -367,10 +395,10 @@ void systemOptions()
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 		ImGui::Text("");
 
-		ImGui::Text("Time raw : %llu", t.asU64()   );
-		ImGui::Text("Time     : %f"  , t.asFloat() );
-		ImGui::Text("Delta raw: %llu", dt.asU64()  );
-		ImGui::Text("Delta    : %f"  , dt.asFloat());
+		ImGui::Text("Time raw : %llu", tWarped.asU64()   );
+		ImGui::Text("Time     : %f"  , tWarped.asFloat() );
+		ImGui::Text("Delta raw: %llu", dtWarped.asU64()  );
+		ImGui::Text("Delta    : %f"  , dtWarped.asFloat());
 		ImGui::Text("Divisor: %f", divisor);
 
 
@@ -679,31 +707,35 @@ void mainloop()
     glViewport(0, 0, WIDTH, HEIGHT);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	
-
-	GLFWmonitor* primary = glfwGetPrimaryMonitor();
-	const GLFWvidmode* mode = glfwGetVideoMode(primary);
-	
-	glfwSetWindowPos(window, mode->width / 2 - WIDTH / 2, mode->height / 2 - HEIGHT / 2	);
-	glfwShowWindow(window);
-	glfwMakeContextCurrent(window);
-    glfwSetCursorPos(window, prevX, prevY);
-	glfwSwapInterval(1);
-	
     while (!glfwWindowShouldClose(window))
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();
 
 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		beginGui();
 
+		updateDeltaRaw();
 		if (!stopped)
 		{
-			update();
+			updateDeltaWarped();
+
+			for (int i = 0; i < updates; i++)
+			{
+				updateObjects();
+				updatePhysics();
+
+				updateTimeWarped();
+			}
 		}
+		view.update(t, dt);
+
+		updateTimeRaw();
+
 
 		constructGui();
-		view.update(t, dt);
+
 
 		render();
 

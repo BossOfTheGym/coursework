@@ -23,20 +23,12 @@ public:
 	);
 
 	GraphicsComponent(const GraphicsComponent& comp) = default;
+	GraphicsComponent(GraphicsComponent&& comp)      = default;
 
-	GraphicsComponent(GraphicsComponent&& comp) = default;
-
-
-	~GraphicsComponent() = default;
-
+	virtual ~GraphicsComponent() = default;
 
 	GraphicsComponent& operator = (const GraphicsComponent& comp) = default;
-
 	GraphicsComponent& operator = (GraphicsComponent&& comp) = default;
-
-
-public:
-	virtual const Type& componentType() const override;
 
 
 public:

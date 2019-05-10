@@ -88,8 +88,6 @@ public:
 public:
 	void update(const Time& t, const Time& dt) override;
 
-	const Type& componentType() const override;
-
 
 private:
 	void updateView();

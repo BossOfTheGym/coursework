@@ -5,12 +5,12 @@
 
 #include <Numerics/Ivp/RungeKutta.h>
 
-#include <GUI/GUI.h>
-
 #include <Rendezvous/Circular/Circular.h>
 #include <Rendezvous/RendezvousControl.h>
 
-#include <Clock.h>
+#include <GUI/GUI.h>
+
+#include <Clock/Clock.h>
 
 
 const int WIDTH  = 1500;
@@ -639,7 +639,6 @@ void mainloop()
 {
 	initGlobals();
 	initGui();
-
 
     //setups
 	glEnable(GL_MULTISAMPLE);

@@ -26,7 +26,7 @@ public:
 	Satellite(const Satellite& sat) = default;
 	Satellite(Satellite&& sat)      = default;
 
-	~Satellite() = default;
+	virtual ~Satellite() = default;
 
 	Satellite& operator = (const Satellite& sat) = default;
 	Satellite& operator = (Satellite&& sat)      = default;
@@ -35,10 +35,8 @@ public:
 
 public:
 	virtual void update(const Time& t, const Time& dt) override;
-	
-	virtual const Type& componentType() const override;
 
-	
+
 public:
 	GraphicsComponentShared   mGraphics;
 	PhysicsComponentShared    mPhysics;

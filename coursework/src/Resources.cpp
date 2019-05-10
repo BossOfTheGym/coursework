@@ -2,8 +2,7 @@
 
 
 void initContext(int width, int height, const String& name)
-{
-}
+{}
 
 
 //load shaders from assets

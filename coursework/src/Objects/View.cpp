@@ -250,10 +250,3 @@ void View::update(const Time& t, const Time& dt)
 	
 	updateView();
 }
-
-const IComponent::Type& View::componentType() const
-{
-	static Type type = "View";
-
-	return type;
-}

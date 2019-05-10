@@ -1,4 +1,4 @@
-#include "Model.h"
+#include "Material.h"
 
 
 //constructors & destructor

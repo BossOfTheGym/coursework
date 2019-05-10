@@ -2,7 +2,7 @@
 
 #include <Common.h>
 
-#include <Shader/Shader.h>
+#include <glWrap/Shader/Shader.h>
 
 
 class ShaderProgram

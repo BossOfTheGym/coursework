@@ -25,10 +25,3 @@ void Satellite::update(const Time& t, const Time& dt)
 		mOrbit->updateOrbit();		
 	}
 }
-
-const IComponent::Type& Satellite::componentType() const
-{
-	static const Type type = "Satellite";
-
-	return type;
-}

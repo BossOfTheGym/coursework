@@ -12,24 +12,15 @@ public:
 	);
 
 	SatelliteComponent(const SatelliteComponent& comp) = default;
+	SatelliteComponent(SatelliteComponent&& comp)      = default;
 
-	SatelliteComponent(SatelliteComponent&& comp) = default;
-
-
-	~SatelliteComponent() = default;
-
+	virtual ~SatelliteComponent() = default;
 
 	SatelliteComponent& operator = (const SatelliteComponent& comp) = default;
-
-	SatelliteComponent& operator = (SatelliteComponent&& comp) = default;
-
-
-public:
-	virtual const Type& componentType() const override;
+	SatelliteComponent& operator = (SatelliteComponent&& comp)      = default;
 
 
 public:
-	//misc
 	Vec3 mColor;
 };
 

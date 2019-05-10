@@ -4,13 +4,14 @@
 
 #include <Context/Context.h>
 
-#include <Shader/Shader.h>
-#include <Shader/ShaderProgram.h>
+#include <glWrap/Shader/Shader.h>
+#include <glWrap/Shader/ShaderProgram.h>
+#include <glWrap/Buffer/VertexArrayBuffer.h>
 
 #include <Model/Model.h>
-#include <Model/VertexArrayBuffer.h>
-#include <Model/Builders/AssimpBuilder.h>
-#include <Model/Builders/CustomBuilders.h>
+
+#include <ModelBuilders/AssimpBuilder.h>
+#include <ModelBuilders/CustomBuilders.h>
 
 #include <Render/Renderers.h>
 

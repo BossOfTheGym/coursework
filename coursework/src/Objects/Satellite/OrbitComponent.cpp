@@ -32,13 +32,6 @@ OrbitComponent::OrbitComponent(
 	updateOrbit();
 }
 
-const IComponent::Type& OrbitComponent::componentType() const
-{
-	static const Type type = "Orbit";
-
-	return type;
-}
-
 
 void OrbitComponent::setOrbit(double h, double e, double i, double Omega, double omega, double theta)
 {

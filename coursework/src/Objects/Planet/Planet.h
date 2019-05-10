@@ -29,8 +29,6 @@ public:
 public:
 	virtual void update(const Time& t, const Time& dt) override;
 
-	virtual const Type& componentType() const override;
-
 
 public:
 	GraphicsComponentShared mGraphics;

@@ -16,23 +16,16 @@ public:
 		, const Vec3& position = Vec3()
 		, const Vec3& velocity = Vec3()
 		, const Vec3& angularMomentum = Vec3()
-		, double mass = 0.0f
+		, double mass = 1.0f
 	);
 
 	PhysicsComponent(const PhysicsComponent& comp) = default;
+	PhysicsComponent(PhysicsComponent&& comp)      = default;
 
-	PhysicsComponent(PhysicsComponent&& comp) = default;
-
-
-	~PhysicsComponent() = default;
-
+	virtual ~PhysicsComponent() = default;
 
 	PhysicsComponent& operator = (const PhysicsComponent& comp) = default;
-
-	PhysicsComponent& operator = (PhysicsComponent&& comp) = default;
-
-
-	virtual const Type& componentType() const override;
+	PhysicsComponent& operator = (PhysicsComponent&& comp)      = default;
 
 
 public:

@@ -15,20 +15,12 @@ public:
 	);
 
 	NameComponent(const NameComponent& comp) = default;
+	NameComponent(NameComponent&& comp)      = default;
 
-	NameComponent(NameComponent&& comp) = default;
-
-
-	~NameComponent() = default;
-
+	virtual ~NameComponent() = default;
 
 	NameComponent& operator = (const NameComponent& comp) = default;
-
-	NameComponent& operator = (NameComponent&& comp) = default;
-
-
-public:
-	virtual const Type& componentType() const override;
+	NameComponent& operator = (NameComponent&& comp)      = default;
 
 
 public:

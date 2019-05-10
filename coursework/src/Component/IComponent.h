@@ -33,9 +33,6 @@ public:
 	const IComponent* owner() const;
 
 
-	virtual const Type& componentType() const = 0;
-
-
 public:
 	IComponent* mParent;
 };

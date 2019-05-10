@@ -3,7 +3,7 @@
 
 #include <Model/Model.h>
 
-#include <Shader/ShaderProgram.h>
+#include <glWrap/Shader/ShaderProgram.h>
 
 #include <Objects/View.h>
 #include <Objects/IObject.h>

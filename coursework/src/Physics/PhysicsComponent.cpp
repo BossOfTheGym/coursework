@@ -18,11 +18,3 @@ PhysicsComponent::PhysicsComponent(
 {
 	mMat[3] = Vec4(mPosition, 1.0f);
 }
-
-
-const IComponent::Type& PhysicsComponent::componentType() const
-{
-	static const IComponent::Type type = "Physics";
-
-	return type;
-}

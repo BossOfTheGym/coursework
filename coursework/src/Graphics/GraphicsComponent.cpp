@@ -11,11 +11,3 @@ GraphicsComponent::GraphicsComponent(
 	, mPhysicsPtr(physicsComp)
 {
 }
-
-
-const IComponent::Type& GraphicsComponent::componentType() const
-{
-	static const IComponent::Type type = "Graphics";
-
-	return type;
-}

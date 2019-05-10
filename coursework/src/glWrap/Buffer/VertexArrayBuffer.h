@@ -7,38 +7,21 @@
 class VertexArrayBuffer
 {
 public:
-	enum Attributes : GLuint
-	{
-		INVALID   = GLuint(-1)
-		, VERTEX    = GLuint(0)
-		, COLOR     = GLuint(1)
-		, NORMAL    = GLuint(2)
-		, TANGENT   = GLuint(3)
-		, BITANGENT = GLuint(4)
-		, TEXTURE   = GLuint(5)
-	};
-
-
-public:
 	VertexArrayBuffer();
 
     VertexArrayBuffer(GLsizei elements, GLsizei size, const double* data);
 
     VertexArrayBuffer(const VertexArrayBuffer& vertexBuffer) = delete;
-
     VertexArrayBuffer(VertexArrayBuffer&& vertexBuffer);
-
 
     ~VertexArrayBuffer();
 
-
     VertexArrayBuffer& operator = (const VertexArrayBuffer& vertexBuffer) = delete;
-
     VertexArrayBuffer& operator = (VertexArrayBuffer&& vertexBuffer);
 
 
 
-    void bindArray() const;
+    void bind() const;
 
 	void subData(GLintptr offset, GLsizeiptr size, const GLvoid * data);
 
@@ -50,11 +33,9 @@ public:
 
 
 
-    GLuint arrayId() const;
+    GLuint id() const;
 
-	GLuint bufferId() const;
-
-    GLsizei elements() const;
+    GLsizei primitivesCount() const;
 
 
     void deleteArrayBuffer();
@@ -67,8 +48,13 @@ private:
 
 
 private:
-    GLuint mArrayId;
-    GLuint mBufferId;
+    GLuint m_vertexArrayId;
+    GLuint m_arrayBufferId;
+	GLuint m_elementsBufferId;
 
-    GLsizei mElements;
+	//TODO
+	GLenum m_mode;
+
+    GLsizei m_count;
+	GLsizei m_elements;
 };

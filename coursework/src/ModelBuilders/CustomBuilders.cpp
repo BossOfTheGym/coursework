@@ -1,5 +1,7 @@
 #include "CustomBuilders.h"
 
+#include "Attributes.h"
+
 
 //PlanetBuilder
 PlanetBuilder::PlanetBuilder()
@@ -88,7 +90,7 @@ namespace
 		const int N = PENTAGON_SIDES;
 
 
-		//init icosahedron verteces
+		//init icosahedron vertices
 		glm::vec3 top    = glm::vec3(0.0f, +1.0f, 0.0f);
 		glm::vec3 bottom = glm::vec3(0.0f, -1.0f, 0.0f);
 
@@ -132,7 +134,7 @@ namespace
 
 	auto buildSphereMesh(UInt split, const String& name)
 	{
-		using VAB = Mesh::VAB;
+		using VAB = VertexArrayBuffer;
 
 
 		auto[elements, data] = std::move(sphere(split));
@@ -144,8 +146,8 @@ namespace
 				, data.data()
 			)
 		);
-		buffer.bindArray();
-		buffer.setAttribPointer(VAB::VERTEX, 3, GL_DOUBLE, 3 * sizeof(double), 0);
+		buffer.bind();
+		buffer.setAttribPointer(static_cast<GLuint>(Attributes::VERTEX), 3, GL_DOUBLE, 3 * sizeof(double), 0);
 
 		UInt materialIndex = 0;
 			
@@ -304,14 +306,14 @@ namespace
 		);
 
 		int offset = 0;
-		vertexBuffer.bindArray();
+		vertexBuffer.bind();
 
-		vertexBuffer.setAttribPointer(VAB::VERTEX, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
+		vertexBuffer.setAttribPointer(static_cast<GLuint>(Attributes::VERTEX), 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 		vertexBuffer.subData(offset, data.size() * sizeof(double), data.data());
 
 		offset += data.size() * sizeof(double);
 
-		vertexBuffer.setAttribPointer(VAB::NORMAL, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
+		vertexBuffer.setAttribPointer(static_cast<GLuint>(Attributes::NORMAL), 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 		vertexBuffer.subData(offset, normals.size() * sizeof(double), normals.data());
 		
 

@@ -102,8 +102,8 @@ void PlanetRenderer::renderMesh(const Model& model, UInt index)
 	Texture2D::active(GL_TEXTURE0);
 	diffuse.bind();
 
-	vab.bindArray();
-	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
+	vab.bind();
+	glDrawArrays(GL_TRIANGLES, 0, vab.primitivesCount());
 }
 
 void PlanetRenderer::restoreStates()

@@ -3,21 +3,21 @@
 
 //constructors & destructor
 VertexArrayBuffer::VertexArrayBuffer()
-	: mArrayId(EMPTY)
-	, mBufferId(EMPTY)
-	, mElements(0)
+	: m_vertexArrayId(EMPTY)
+	, m_arrayBufferId(EMPTY)
+	, m_count(0)
 {}
 
-VertexArrayBuffer::VertexArrayBuffer(GLsizei elements, GLsizei size, const double* data)
-    : mArrayId(EMPTY)
-    , mBufferId(EMPTY)
-    , mElements(elements)
+VertexArrayBuffer::VertexArrayBuffer(GLsizei count, GLsizei size, const double* data)
+    : m_vertexArrayId(EMPTY)
+    , m_arrayBufferId(EMPTY)
+    , m_count(count)
 {
     if (size > 0)
     {
-        glGenVertexArrays(1, &mArrayId);
+        glGenVertexArrays(1, &m_vertexArrayId);
 
-        if (mArrayId != EMPTY)
+        if (m_vertexArrayId != EMPTY)
         {
             loadData(size, data);
         }
@@ -26,9 +26,9 @@ VertexArrayBuffer::VertexArrayBuffer(GLsizei elements, GLsizei size, const doubl
 
 
 VertexArrayBuffer::VertexArrayBuffer(VertexArrayBuffer&& vertexBuffer)
-    : mArrayId(EMPTY)
-    , mBufferId(EMPTY)
-    , mElements(0)
+    : m_vertexArrayId(EMPTY)
+    , m_arrayBufferId(EMPTY)
+    , m_count(0)
 {
 	*this = std::move(vertexBuffer);
 }
@@ -45,9 +45,9 @@ VertexArrayBuffer& VertexArrayBuffer::operator = (VertexArrayBuffer&& vertexBuff
 {
 	if (this != &vertexBuffer)
 	{
-		std::swap(mArrayId, vertexBuffer.mArrayId);
-		std::swap(mBufferId, vertexBuffer.mBufferId);
-		std::swap(mElements, vertexBuffer.mElements);
+		std::swap(m_vertexArrayId, vertexBuffer.m_vertexArrayId);
+		std::swap(m_arrayBufferId, vertexBuffer.m_arrayBufferId);
+		std::swap(m_count, vertexBuffer.m_count);
 	}
 
     return *this;
@@ -55,27 +55,22 @@ VertexArrayBuffer& VertexArrayBuffer::operator = (VertexArrayBuffer&& vertexBuff
 
 
 //get;
-GLuint VertexArrayBuffer::arrayId() const
+GLuint VertexArrayBuffer::id() const
 {
-    return mArrayId;
+    return m_vertexArrayId;
 }
 
-GLuint VertexArrayBuffer::bufferId() const
+GLsizei VertexArrayBuffer::primitivesCount() const
 {
-	return mBufferId;
-}
-
-GLsizei VertexArrayBuffer::elements() const
-{
-    return mElements;
+    return m_count;
 }
 
 
 //delete & reset
 void VertexArrayBuffer::deleteArrayBuffer()
 {
-    glDeleteBuffers(1, &mBufferId);
-    glDeleteVertexArrays(1, &mArrayId);
+    glDeleteBuffers(1, &m_arrayBufferId);
+    glDeleteVertexArrays(1, &m_vertexArrayId);
 
     resetArrayBuffer();
 }
@@ -83,10 +78,10 @@ void VertexArrayBuffer::deleteArrayBuffer()
 
 void VertexArrayBuffer::resetArrayBuffer()
 {
-    mArrayId  = EMPTY;
-    mBufferId = EMPTY;
+    m_vertexArrayId  = EMPTY;
+    m_arrayBufferId = EMPTY;
 
-    mElements = static_cast<GLsizei>(0);
+    m_count = static_cast<GLsizei>(0);
 }
 
 
@@ -96,18 +91,18 @@ bool VertexArrayBuffer::loadData(GLsizei size, const double* data)
     GLint prevArray;
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prevArray);
 
-    glBindVertexArray(mArrayId);
+    glBindVertexArray(m_vertexArrayId);
 
-	glGenBuffers(1, &mBufferId);
-    if (mBufferId == EMPTY)
+	glGenBuffers(1, &m_arrayBufferId);
+    if (m_arrayBufferId == EMPTY)
     {
-        glDeleteBuffers(1, &mBufferId);
+        glDeleteBuffers(1, &m_arrayBufferId);
 
         glBindVertexArray(prevArray);
         return false;
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, mBufferId);
+    glBindBuffer(GL_ARRAY_BUFFER, m_arrayBufferId);
     glBufferData(GL_ARRAY_BUFFER, size * sizeof(double), data, GL_STATIC_DRAW);
 
     glBindVertexArray(prevArray);
@@ -115,10 +110,10 @@ bool VertexArrayBuffer::loadData(GLsizei size, const double* data)
 }
 
 
-void VertexArrayBuffer::bindArray() const
+void VertexArrayBuffer::bind() const
 {
-    glBindVertexArray(mArrayId);
-	glBindBuffer(GL_ARRAY_BUFFER, mBufferId);
+    glBindVertexArray(m_vertexArrayId);
+	glBindBuffer(GL_ARRAY_BUFFER, m_arrayBufferId);
 }
 
 

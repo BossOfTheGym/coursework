@@ -1,5 +1,6 @@
 #include "AssimpBuilder.h"
 
+#include "Attributes.h"
 
 AssimpBuilder::AssimpBuilder()
 	: mImported()
@@ -274,11 +275,11 @@ namespace
 
 		//init buffer
 		VertexArrayBuffer vab(elements, size, nullptr);
-		vab.bindArray();
+		vab.bind();
 		if (mesh->HasPositions())
 		{
 			vab.subData(offset, vertices.size() * sizeof(double), vertices.data());
-			vab.setAttribPointer(Mesh::VAB::VERTEX, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
+			vab.setAttribPointer(static_cast<GLuint>(Attributes::VERTEX), 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 
 			offset += static_cast<int>(vertices.size() * sizeof(double));
 		}
@@ -286,7 +287,7 @@ namespace
 		if (mesh->HasVertexColors(0))
 		{
 			vab.subData(offset, colors.size() * sizeof(double), colors.data());
-			vab.setAttribPointer(Mesh::VAB::COLOR, 4, GL_DOUBLE, 4 * sizeof(double), (const void*)offset);
+			vab.setAttribPointer(static_cast<GLuint>(Attributes::COLOR), 4, GL_DOUBLE, 4 * sizeof(double), (const void*)offset);
 
 			offset += static_cast<int>(colors.size() * sizeof(double));
 		}
@@ -294,7 +295,7 @@ namespace
 		if (mesh->HasNormals())
 		{
 			vab.subData(offset, normals.size() * sizeof(double), normals.data());
-			vab.setAttribPointer(Mesh::VAB::NORMAL, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
+			vab.setAttribPointer(static_cast<GLuint>(Attributes::NORMAL), 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 
 			offset += static_cast<int>(normals.size() * sizeof(double));
 		}
@@ -302,13 +303,13 @@ namespace
 		if (mesh->HasTangentsAndBitangents())
 		{
 			vab.subData(offset, tangents.size() * sizeof(double), tangents.data());
-			vab.setAttribPointer(Mesh::VAB::TANGENT, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
+			vab.setAttribPointer(static_cast<GLuint>(Attributes::TANGENT), 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 
 			offset += static_cast<int>(tangents.size() * sizeof(double));
 
 
 			vab.subData(offset, bitangents.size() * sizeof(double), bitangents.data());
-			vab.setAttribPointer(Mesh::VAB::BITANGENT, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
+			vab.setAttribPointer(static_cast<GLuint>(Attributes::BITANGENT), 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 
 			offset += static_cast<int>(bitangents.size() * sizeof(double));
 		}
@@ -316,7 +317,7 @@ namespace
 		if (mesh->HasTextureCoords(0))
 		{
 			vab.subData(offset, textureCoords.size() * sizeof(double), textureCoords.data());
-			vab.setAttribPointer(Mesh::VAB::TEXTURE, 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
+			vab.setAttribPointer(static_cast<GLuint>(Attributes::TEXTURE), 3, GL_DOUBLE, 3 * sizeof(double), (const void*)offset);
 
 			offset += static_cast<int>(textureCoords.size() * sizeof(double));
 		}
@@ -326,7 +327,7 @@ namespace
 
 	auto loadMesh(const aiMesh* mesh)
 	{
-		using VAB = Mesh::VAB;
+		using VAB = VertexArrayBuffer;
 
 		String name;
 		VAB vertexBuffer;

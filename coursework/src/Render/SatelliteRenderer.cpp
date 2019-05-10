@@ -94,8 +94,8 @@ void SatelliteRenderer::renderMesh(const Model& model, UInt index)
 	const auto& mesh = model.meshes()[index];
 	const auto& vab = mesh.vab();
 
-	vab.bindArray();
-	glDrawArrays(GL_TRIANGLES, 0, vab.elements());
+	vab.bind();
+	glDrawArrays(GL_TRIANGLES, 0, vab.primitivesCount());
 }
 
 void SatelliteRenderer::restoreStates()

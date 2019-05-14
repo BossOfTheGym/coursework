@@ -147,5 +147,6 @@ void createRenderers(
 void createIntegrators(std::map<String, IntegratorShared>& integrators)
 {
 	integrators["classic4"]       = IntegratorShared(new RungeKuttaExplicit4());
-	integrators["gaussLegendre6"] = IntegratorShared(new RungeKuttaImplicit6());
+
+	integrators["gaussLegendre6"] = IntegratorShared(new RungeKuttaImplicit6(1e-15, 30));
 }

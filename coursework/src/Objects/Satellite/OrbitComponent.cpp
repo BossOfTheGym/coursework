@@ -57,7 +57,8 @@ void OrbitComponent::setOrbit(double h, double e, double i, double Omega, double
 		return;
 	}
 
-	double mu = G * planet->mMass;
+	//hardcode - result of bad strtucture
+	double mu = MU;
 
 	Vec3 rx = h * h / mu / (1.0 + e * cost) * Vec3(cost, sint, 0.0);
 	Vec3 vx = mu / h * Vec3(-sint, e + cost, 0.0);
@@ -123,7 +124,7 @@ void OrbitComponent::updateOrbit()
 	}
 
 	//algorithm
-	mMu = G * planet->mMass;
+	mMu = MU;//G * planet->mMass;
 
 	//1.
 	Vec3& r0 = satellite->mPosition;

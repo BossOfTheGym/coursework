@@ -34,6 +34,7 @@ const double PI_2 = static_cast<double>(2 * PI);
 const double G = 6.6740831313131313e-20;
 const double M = 5.9722e+24;
 const double R = 6378.0;
+const double MU = 398600;
 
 const GLuint EMPTY  = 0;
  

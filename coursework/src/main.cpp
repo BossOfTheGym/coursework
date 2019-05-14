@@ -202,7 +202,7 @@ void initGlobals()
 	Vec3 up   = Vec3(0.0, 0.0, 1.0);
 	view = View(
 		  glm::lookAt(pos, look, up)
-		, glm::perspective(glm::radians(60.0), 1.0 * WIDTH / HEIGHT, 0.001, 2 * R)
+		, glm::perspective(glm::radians(60.0), 1.0 * WIDTH / HEIGHT, 0.001, 10 * R)
 		, pos
 		, 0.5
 	);
@@ -225,7 +225,7 @@ void initGlobals()
 		, Vec3(1.0, 1.0, 1.0)
 		, glm::scale(Mat4(1.0), Vec3(0.010))
 		, Vec3(R + 400.0, 0.0, 0.0)
-		, Vec3(0.0, 0.0, sqrt(G * M / (R + 400.0)))
+		, Vec3(0.0, 0.0, sqrt(MU / (R + 400.0)))
 		, "target"
 		, earth->mPhysics
 	);
@@ -237,7 +237,7 @@ void initGlobals()
 		, Vec3(0.0, 1.0, 0.0)
 		, glm::scale(Mat4(1.0), Vec3(0.010))
 		, Vec3(R + 400.0, 0.0, 0.0)
-		, Vec3(0.0, 0.0, sqrt(G * M / (R + 400.0)))
+		, Vec3(0.0, 0.0, sqrt(MU / (R + 400.0)))
 		, "chaser"
 		, earth->mPhysics
 	);
@@ -269,11 +269,11 @@ void initGlobals()
 	speed = 0.001;
 
 	//time step
-	tick = Clock(100, 1, 1, 20000, (double)glfwGetTimerFrequency());
+	tick = Clock(100, 1, 1, 2000, (double)glfwGetTimerFrequency());
 
 	updates = 1;
 	updatesMin = 1;
-	updatesMax = 10;
+	updatesMax = 7500;
 }
 
 void destroyGlobals()

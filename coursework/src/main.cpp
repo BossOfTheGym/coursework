@@ -56,6 +56,8 @@ double prevY;
 
 //speed
 double speed;
+double speedMin;
+double speedMax;
 
 //tick
 Clock tick;
@@ -223,8 +225,8 @@ void initGlobals()
 		models["satellite"]
 		, 1.0
 		, Vec3(1.0, 1.0, 1.0)
-		, glm::scale(Mat4(1.0), Vec3(0.010))
-		, Vec3(R + 400.0, 0.0, 0.0)
+		, glm::scale(Mat4(1.0), Vec3(1.0))
+		, Vec3(R + 420.0, 0.0, 0.0)
 		, Vec3(0.0, 0.0, sqrt(MU / (R + 400.0)))
 		, "target"
 		, earth->mPhysics
@@ -235,8 +237,8 @@ void initGlobals()
 		models["satellite"]
 		, 1.0
 		, Vec3(0.0, 1.0, 0.0)
-		, glm::scale(Mat4(1.0), Vec3(0.010))
-		, Vec3(R + 400.0, 0.0, 0.0)
+		, glm::scale(Mat4(1.0), Vec3(1.0))
+		, Vec3(R + 420.0, 0.0, 0.0)
 		, Vec3(0.0, 0.0, sqrt(MU / (R + 400.0)))
 		, "chaser"
 		, earth->mPhysics
@@ -267,6 +269,8 @@ void initGlobals()
 	prevY = HEIGHT / 2;
 
 	speed = 0.001;
+	speedMin = 0.001;
+	speedMax = 1000.0;
 
 	//time step
 	tick = Clock(100, 1, 1, 2000, (double)glfwGetTimerFrequency());
@@ -378,6 +382,7 @@ void systemOptions()
 		}
 
 		ImGui::Text("");
+		ImGui::SliderScalar("Speed", ImGuiDataType_Double, &speed, &speedMin, &speedMax, "%.6f", 1.0f);
 		ImGui::Text("View position     : x:%f y:%f z:%f", view.pos().x, view.pos().y, view.pos().z);
 		ImGui::Text("View last position: x:%f y:%f z:%f", view.lastPos().x, view.lastPos().y, view.lastPos().z);
 	}
@@ -525,6 +530,17 @@ void rendezvousOptions()
 {
 	if (ImGui::CollapsingHeader("Rendezvous"))
 	{
+		auto chaserObj = rendezvousControl->getChaser().lock();
+		auto targetObj = rendezvousControl->getTarget().lock();
+		if (chaserObj && targetObj)
+		{
+			Vec3 dr = targetObj->mPhysics->mPosition - chaserObj->mPhysics->mPosition;
+			Vec3 dv = targetObj->mPhysics->mVelocity - chaserObj->mPhysics->mVelocity;
+
+			ImGui::Text("delta-r:%f  x:%f y:%f z:%f", glm::length(dr), dr.x, dr.y, dr.z);
+			ImGui::Text("delta-v:%f  x:%f y:%f z:%f", glm::length(dv), dv.x, dv.y, dv.z);
+		}
+
 		if (rendezvousControl->finished())
 		{
 			char transfer[64];
@@ -546,14 +562,6 @@ void rendezvousOptions()
 		}
 		else
 		{
-			auto chaserObj = rendezvousControl->getChaser().lock();
-			auto targetObj = rendezvousControl->getTarget().lock();
-
-			Vec3 dr = targetObj->mPhysics->mPosition - chaserObj->mPhysics->mPosition;
-			Vec3 dv = targetObj->mPhysics->mVelocity - chaserObj->mPhysics->mVelocity;
-
-			ImGui::Text("delta-r:%f  x:%f y:%f z:%f", glm::length(dr), dr.x, dr.y, dr.z);
-			ImGui::Text("delta-v:%f  x:%f y:%f z:%f", glm::length(dv), dv.x, dv.y, dv.z);
 			ImGui::Text("Time remaining: %f", rendezvousControl->getTime().asFloat());
 
 			if (ImGui::Button("Adjust"))

@@ -46,7 +46,7 @@ public:
 	//get
 	double angularMomentum() const
 	{
-		return mC;
+		return mH;
 	}
 
 	double inclination() const
@@ -77,7 +77,7 @@ public:
 
 	Vec3 angularMomentumV() const
 	{
-		return mCv;
+		return mHv;
 	}
 
 	Vec3 apsisLineV() const
@@ -93,7 +93,7 @@ public:
 
 	double energy() const
 	{
-		return mH;
+		return mEn;
 	}
 
 	double semi_latusRectum() const
@@ -143,19 +143,19 @@ private:
 	PhysicsComponentWeak mPlanetPhys;
 
 	//main
-	double mC;   // specific Angular Momentum(length)
+	double mH;   // specific Angular Momentum(length)
 	double mI;   // Inclination
 	double mRA;  // right ascension of the Ascending Node
 	double mE;   // Eccentricity
 	double mAP;  // Argument of Periapsis
 	double mTA;  // True Anomaly
 
-				 //misc
-	Vec3 mCv;   // specific Angular Momentum
+				//misc
+	Vec3 mHv;   // specific Angular Momentum
 	Vec3 mEv;   // apsis line
 	Vec3 mNv;   // node line
 
-	double mH;   // energy integral
+	double mEn;  // energy
 	double mP;   // semi-latus rectum
 	double mMu;  // mu param
 

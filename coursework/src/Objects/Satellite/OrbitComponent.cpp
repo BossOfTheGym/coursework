@@ -15,7 +15,7 @@ OrbitComponent::OrbitComponent(
 	, mPlanetPhys(planet)
 	, mSatellitePhys(satellite)
 
-	, mC(0.0f)
+	, mH(0.0f)
 	, mI(0.0f)
 	, mRA(0.0f)
 	, mE(0.0f)
@@ -57,7 +57,7 @@ void OrbitComponent::setOrbit(double h, double e, double i, double Omega, double
 		return;
 	}
 
-	//hardcode - result of bad strtucture
+	//hardcode - result of bad structure
 	double mu = MU;
 
 	Vec3 rx = h * h / mu / (1.0 + e * cost) * Vec3(cost, sint, 0.0);
@@ -65,19 +65,21 @@ void OrbitComponent::setOrbit(double h, double e, double i, double Omega, double
 
 	Mat3 Qxx = transpose(
 		Mat3(
-			cosO * coso - sinO * sino * cosi, -cosO * sino - sinO * cosi * coso, sinO * sini
+			  cosO * coso - sinO * sino * cosi, -cosO * sino - sinO * cosi * coso, sinO * sini
 			, sinO * coso + cosO * cosi * sino, -sinO * sino + cosO * cosi * coso, -cosO * sini
 			, sini * sino, sini * coso, cosi
 		)
 	);
 
 	//setting parameters
-	sat->mPosition = Qxx * rx;
+	auto rv = Qxx * rx;
+	auto vv = Qxx * vx;
+	sat->mPosition = rv;
 	sat->mMat[3] = Vec4(sat->mPosition, 1.0);
-	sat->mVelocity = Qxx * vx;
+	sat->mVelocity = vv;
 
-	mC = h;
 	mH = h;
+	mEn = dot(vv, vv) - 2.0 * mu / length(rv);
 	mE = e;
 	mI = i;
 	mP = h * h / mu;
@@ -86,9 +88,9 @@ void OrbitComponent::setOrbit(double h, double e, double i, double Omega, double
 	mTA = theta;
 	mMu = mu;
 
-	mCv = cross(sat->mPosition, sat->mVelocity);
-	mNv = cross(Vec3(0.0, 0.0, 1.0), mCv);
-	mEv = cross(sat->mVelocity, mCv) / mMu - sat->mPosition / length(sat->mPosition);
+	mHv = cross(sat->mPosition, sat->mVelocity);
+	mNv = cross(Vec3(0.0, 0.0, 1.0), mHv);
+	mEv = cross(sat->mVelocity, mHv) / mMu - sat->mPosition / length(sat->mPosition);
 
 	updateSpecificParams();
 }
@@ -138,21 +140,21 @@ void OrbitComponent::updateOrbit()
 	//2.
 	Vec3  vv = v0;
 	double v = length(v0);
-	mH = dot(vv, vv) - 2.0 * mMu / r;
+	mEn = dot(vv, vv) - 2.0 * mMu / r;
 
 	//3.
 	double vr = dot(rv / r, vv);
 
 	//4, 5
-	mCv = cross(rv, vv);//
-	mC = length(mCv);
-	mP = mC * mC / mMu;
+	mHv = cross(rv, vv);//
+	mH = length(mHv);
+	mP = mH * mH / mMu;
 
 	//6.
-	mI = acos(mCv.z / mC);
+	mI = acos(mHv.z / mH);
 
 	//7, 8
-	mNv = cross(Vec3(0.0, 0.0, 1.0), mCv);
+	mNv = cross(Vec3(0.0, 0.0, 1.0), mHv);
 	double N = length(mNv);
 
 	//9.
@@ -163,7 +165,7 @@ void OrbitComponent::updateOrbit()
 	}
 
 	//10, 11
-	mEv = cross(vv, mCv) / mMu - rv / r;
+	mEv = cross(vv, mHv) / mMu - rv / r;
 	mE = length(mEv);
 
 	Vec3 uev = (mE > std::numeric_limits<double>::epsilon() ? mEv / mE : Vec3(0.0));
